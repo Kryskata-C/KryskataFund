@@ -1,0 +1,1889 @@
+﻿@{
+    ViewData["Title"] = "KryskataFund – Home";
+}
+
+<style>
+    :root {
+        --bg-main: #050509;
+        --bg-elevated: #0f1017;
+        --bg-elevated-soft: #141522;
+        --bg-chip: #1c1d2b;
+        --accent: #46e6a4;
+        --accent-soft: rgba(70, 230, 164, 0.18);
+        --accent-strong: #27c385;
+        --accent-danger: #ff4976;
+        --accent-warning: #ffb547;
+        --accent-info: #4da8ff;
+        --text-main: #f7f7ff;
+        --text-muted: #a0a3c4;
+        --text-softer: #6d6f8c;
+        --border-subtle: #222437;
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+        --radius-pill: 999px;
+        --shadow-soft: 0 28px 80px rgba(0, 0, 0, 0.7);
+        --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.7);
+        --blur-heavy: blur(52px);
+        --transition-fast: 0.2s ease-out;
+        --transition-med: 0.35s ease-out;
+    }
+
+    /* Reset-ish */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: radial-gradient(circle at top, #181826 0, #050509 45%) fixed;
+        color: var(--text-main);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .page-root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(94, 234, 212, 0.15) 0, transparent 55%),
+            radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.16) 0, transparent 55%),
+            radial-gradient(circle at 0% 100%, rgba(244, 114, 182, 0.14) 0, transparent 55%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Animated background blobs */
+    .page-root::before,
+    .page-root::after {
+        content: "";
+        position: fixed;
+        inset: -200px;
+        background:
+            radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.06) 0, transparent 40%),
+            radial-gradient(circle at 80% 10%, rgba(94, 234, 212, 0.03) 0, transparent 45%),
+            radial-gradient(circle at 20% 90%, rgba(248, 113, 113, 0.04) 0, transparent 45%);
+        opacity: 0.7;
+        filter: blur(2px);
+        z-index: -2;
+        animation: bgFloat 28s ease-in-out infinite alternate;
+    }
+
+    .page-root::after {
+        animation-duration: 36s;
+        animation-delay: -6s;
+        opacity: 0.55;
+    }
+
+    @@keyframes bgFloat {
+        0% {
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+        50% {
+            transform: translate3d(0, -25px, 0) scale(1.04);
+        }
+        100% {
+            transform: translate3d(0, 18px, 0) scale(1.02);
+        }
+    }
+
+    .page-shell {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 28px 20px 64px;
+    }
+
+    /* Top nav */
+    .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        padding: 10px 18px;
+        border-radius: var(--radius-pill);
+        backdrop-filter: blur(16px);
+        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.12), transparent 60%),
+        rgba(5, 5, 13, 0.92);
+        border: 1px solid rgba(120, 122, 165, 0.35);
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.85);
+    }
+
+    .nav-left,
+    .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .brand-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: var(--radius-pill);
+        border: 1px solid rgba(120, 122, 165, 0.55);
+        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.18), transparent 60%),
+        rgba(9, 10, 20, 0.95);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+    }
+
+    .brand-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 10px;
+        background: conic-gradient(from 140deg, #46e6a4, #4da8ff, #ffb547, #ff4976, #46e6a4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .brand-icon::after {
+        content: "K";
+        font-size: 16px;
+        font-weight: 800;
+        color: #050509;
+        text-shadow: 0 0 12px rgba(5, 5, 9, 0.9);
+    }
+
+    .brand-text-main {
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        font-size: 15px;
+        text-transform: uppercase;
+    }
+
+    .brand-text-sub {
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .nav-link {
+        padding: 6px 10px;
+        border-radius: var(--radius-pill);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: background var(--transition-fast), color 0.15s ease-out, transform 0.15s ease-out;
+    }
+
+    .nav-link:hover {
+        color: var(--text-main);
+        background: rgba(36, 38, 70, 0.9);
+        transform: translateY(-1px);
+    }
+
+    .nav-link--active {
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.2), rgba(77, 168, 255, 0.18));
+        color: var(--text-main);
+        border: 1px solid rgba(70, 230, 164, 0.7);
+        box-shadow: 0 0 16px rgba(70, 230, 164, 0.4);
+    }
+
+    .nav-tag {
+        font-size: 11px;
+        color: var(--accent);
+        background: rgba(70, 230, 164, 0.12);
+        padding: 3px 7px;
+        border-radius: 999px;
+    }
+
+    .nav-cta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .nav-pill {
+        padding: 6px 11px;
+        border-radius: var(--radius-pill);
+        background: rgba(12, 13, 24, 0.96);
+        border: 1px solid rgba(68, 70, 110, 0.8);
+        font-size: 12px;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .nav-pill-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+
+    .btn-primary,
+    .btn-ghost {
+        border-radius: var(--radius-pill);
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast), border var(--transition-fast);
+        white-space: nowrap;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-strong), #4da8ff);
+        color: #050509;
+        box-shadow: 0 14px 30px rgba(70, 230, 164, 0.55);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.4) 0, transparent 45%);
+        opacity: 0;
+        transition: opacity 0.2s ease-out;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px) scale(1.01);
+        box-shadow: 0 18px 40px rgba(70, 230, 164, 0.7);
+    }
+
+    .btn-primary:hover::before {
+        opacity: 1;
+    }
+
+    .btn-ghost {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid rgba(68, 70, 110, 0.85);
+    }
+
+    .btn-ghost:hover {
+        background: rgba(24, 26, 45, 0.96);
+        color: var(--text-main);
+        transform: translateY(-1px);
+    }
+
+    /* Layout: hero + sidebar */
+    .main-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.2fr);
+        gap: 26px;
+        margin-top: 12px;
+    }
+
+    @@media (max-width: 1024px) {
+        .nav {
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .nav-links {
+            display: none;
+        }
+
+        .main-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .page-shell {
+            padding-inline: 14px;
+        }
+
+        .nav {
+            padding-inline: 12px;
+        }
+    }
+
+    /* Hero card */
+    .hero-card {
+        border-radius: 32px;
+        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.2) 0, rgba(10, 10, 20, 0.98) 55%);
+        padding: 26px 26px 26px;
+        border: 1px solid rgba(92, 228, 179, 0.42);
+        box-shadow: var(--shadow-soft);
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+        min-height: 320px;
+    }
+
+    .hero-card::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(74, 222, 128, 0.12) 0, transparent 55%),
+            radial-gradient(circle at 90% 10%, rgba(56, 189, 248, 0.16) 0, transparent 55%),
+            radial-gradient(circle at 20% 100%, rgba(244, 114, 182, 0.18) 0, transparent 60%);
+        filter: blur(10px);
+        opacity: 0.9;
+        z-index: -2;
+        animation: heroGlow 16s ease-in-out infinite alternate;
+    }
+
+    @@keyframes heroGlow {
+        0% {
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+        100% {
+            transform: translate3d(-20px, 6px, 0) scale(1.05);
+        }
+    }
+
+    .hero-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 20px;
+    }
+
+    .hero-tagline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 10px;
+        border-radius: var(--radius-pill);
+        background: rgba(5, 5, 12, 0.8);
+        border: 1px solid rgba(70, 230, 164, 0.6);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--accent);
+    }
+
+    .hero-tag-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 14px rgba(70, 230, 164, 0.8);
+    }
+
+    .hero-tag-pill {
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: rgba(70, 230, 164, 0.16);
+        color: #bfffe3;
+    }
+
+    .hero-mood-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: var(--radius-pill);
+        background: rgba(6, 8, 18, 0.8);
+        border: 1px solid rgba(120, 122, 165, 0.6);
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .hero-mood-pill span {
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgba(24, 26, 48, 0.95);
+        color: var(--accent);
+    }
+
+    .hero-body {
+        max-width: 540px;
+    }
+
+    .hero-title {
+        font-size: clamp(28px, 3vw + 8px, 40px);
+        line-height: 1.05;
+        margin-bottom: 14px;
+        letter-spacing: -0.04em;
+    }
+
+    .hero-highlight {
+        background: linear-gradient(120deg, #ffffff, #46e6a4, #4da8ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+
+    .hero-subtitle-strong {
+        color: var(--accent);
+        font-weight: 500;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        font-size: 11px;
+        color: var(--text-softer);
+    }
+
+    .hero-meta-block {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: var(--radius-pill);
+        border: 1px solid rgba(51, 54, 95, 0.85);
+        background: rgba(4, 5, 12, 0.9);
+    }
+
+    .meta-label {
+        color: var(--text-softer);
+    }
+
+    .meta-value {
+        color: var(--text-main);
+        font-weight: 500;
+    }
+
+    .meta-pill-badge {
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgba(34, 197, 94, 0.15);
+        color: #bbf7d0;
+        font-size: 10px;
+    }
+
+    .hero-visual {
+        position: relative;
+        min-width: 220px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .hero-card-mini {
+        width: 210px;
+        border-radius: 22px;
+        padding: 14px 14px 14px;
+        background: radial-gradient(circle at top, rgba(15, 23, 42, 1) 0, #020617 55%);
+        border: 1px solid rgba(71, 85, 105, 0.9);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.9);
+        position: relative;
+        overflow: hidden;
+        animation: floatSoft 9s ease-in-out infinite alternate;
+    }
+
+    .hero-card-mini::before {
+        content: "";
+        position: absolute;
+        inset: -30%;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(34, 197, 94, 0.22) 0, transparent 50%),
+            radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.2) 0, transparent 60%);
+        opacity: 0.8;
+        z-index: -1;
+    }
+
+    @@keyframes floatSoft {
+        0% {
+            transform: translate3d(0, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, -10px, 0);
+        }
+    }
+
+    .mini-title {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .mini-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        color: #e0f2fe;
+        padding: 4px 7px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        margin-bottom: 10px;
+    }
+
+    .mini-badge-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #4ade80;
+        box-shadow: 0 0 10px rgba(74, 222, 128, 0.9);
+    }
+
+    .mini-progress-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #cbd5f5;
+        margin-bottom: 6px;
+    }
+
+    .mini-progress-bar {
+        position: relative;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        overflow: hidden;
+    }
+
+    .mini-progress-fill {
+        position: absolute;
+        inset: 0;
+        width: var(--progress, 72%);
+        background: linear-gradient(90deg, #22c55e, #4ade80, #facc15);
+        border-radius: inherit;
+        box-shadow: 0 0 12px rgba(74, 222, 128, 0.85);
+        animation: progressGrow 1.4s cubic-bezier(0.16, 0.9, 0.36, 1) forwards;
+        transform-origin: left center;
+    }
+
+    @@keyframes progressGrow {
+        0% {
+            transform: scaleX(0);
+        }
+        100% {
+            transform: scaleX(1);
+        }
+    }
+
+    .mini-progress-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+        font-size: 10px;
+        color: #cbd5f5;
+    }
+
+    .mini-avatar-row {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .mini-avatars {
+        display: inline-flex;
+    }
+
+    .mini-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 999px;
+        border: 2px solid rgba(15, 23, 42, 1);
+        background: linear-gradient(135deg, #f97316, #fb7185);
+        display: inline-block;
+        box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
+        margin-left: -6px;
+    }
+
+    .mini-avatar:nth-child(2) {
+        background: linear-gradient(135deg, #4f46e5, #22d3ee);
+    }
+
+    .mini-avatar:nth-child(3) {
+        background: linear-gradient(135deg, #22c55e, #a3e635);
+    }
+
+    .mini-avatar:first-child {
+        margin-left: 0;
+    }
+
+    .mini-avatar-count {
+        font-size: 10px;
+        color: #e5e7eb;
+        margin-left: 8px;
+    }
+
+    .mini-footer-chip {
+        margin-left: auto;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        color: #e2e8f0;
+    }
+
+    .hero-scroll-indicator {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 11px;
+        color: var(--text-softer);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        opacity: 0.8;
+    }
+
+    .scroll-dot {
+        width: 14px;
+        height: 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.8);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scroll-dot-inner {
+        width: 4px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.9);
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: scrollDot 1.4s ease-in-out infinite;
+    }
+
+    @@keyframes scrollDot {
+        0% {
+            top: 4px;
+            opacity: 0;
+        }
+        40% {
+            top: 6px;
+            opacity: 1;
+        }
+        100% {
+            top: 14px;
+            opacity: 0;
+        }
+    }
+
+    /* Sidebar: stats + mini feed */
+    .sidebar-card {
+        border-radius: 26px;
+        background: rgba(5, 6, 14, 0.96);
+        padding: 16px 18px 18px;
+        border: 1px solid rgba(36, 38, 70, 0.9);
+        box-shadow: var(--shadow-card);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sidebar-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(70, 230, 164, 0.08) 0, transparent 60%);
+        opacity: 0.8;
+        pointer-events: none;
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .sidebar-title-block h2 {
+        font-size: 15px;
+        letter-spacing: -0.02em;
+        margin-bottom: 3px;
+    }
+
+    .sidebar-title-block span {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .sidebar-pill {
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: rgba(24, 26, 45, 0.95);
+        border: 1px solid rgba(74, 222, 128, 0.45);
+        color: #bbf7d0;
+    }
+
+    .sidebar-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .sidebar-stat-card {
+        border-radius: 18px;
+        padding: 10px 10px 10px;
+        background: radial-gradient(circle at top left, rgba(30, 64, 175, 0.35) 0, rgba(15, 23, 42, 1) 55%);
+        border: 1px solid rgba(129, 140, 248, 0.9);
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.9);
+    }
+
+    .sidebar-stat-card--green {
+        background: radial-gradient(circle at top left, rgba(22, 163, 74, 0.4) 0, rgba(6, 95, 70, 1) 40%, rgba(6, 78, 59, 1) 65%);
+        border-color: rgba(34, 197, 94, 0.9);
+    }
+
+    .sidebar-stat-label {
+        color: #e2e8f0;
+    }
+
+    .sidebar-stat-value {
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .sidebar-stat-sub {
+        font-size: 10px;
+        color: #cbd5f5;
+    }
+
+    .sidebar-pill-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        font-size: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .chip {
+        padding: 5px 9px;
+        border-radius: 999px;
+        border: 1px solid rgba(55, 65, 81, 0.85);
+        background: rgba(15, 23, 42, 0.92);
+        color: var(--text-softer);
+    }
+
+    .chip--accent {
+        border-color: rgba(56, 189, 248, 0.9);
+        color: #e0f2fe;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 1), rgba(30, 64, 175, 1));
+    }
+
+    .chip-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #38bdf8;
+        display: inline-block;
+        margin-right: 4px;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+    }
+
+    .sidebar-feed {
+        border-radius: 16px;
+        padding: 10px;
+        background: rgba(10, 12, 24, 0.98);
+        border: 1px dashed rgba(63, 66, 110, 0.9);
+        position: relative;
+        z-index: 1;
+        max-height: 180px;
+        overflow: hidden;
+    }
+
+    .sidebar-feed-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .sidebar-feed-body {
+        margin-top: 4px;
+    }
+
+    .feed-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        color: #e5e7eb;
+        padding: 4px 4px;
+        border-radius: 999px;
+        background: rgba(17, 24, 39, 0.98);
+        margin-bottom: 4px;
+        transform: translateX(0);
+        animation: feedSlide 18s linear infinite;
+    }
+
+    .feed-row:nth-child(2) {
+        animation-delay: -4s;
+    }
+
+    .feed-row:nth-child(3) {
+        animation-delay: -8s;
+    }
+
+    @@keyframes feedSlide {
+        0% {
+            transform: translateX(0);
+            opacity: 0.7;
+        }
+        10% {
+            opacity: 1;
+        }
+        30% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        40% {
+            transform: translateX(8px);
+            opacity: 1;
+        }
+        45% {
+            opacity: 0;
+        }
+        100% {
+            transform: translateX(-10px);
+            opacity: 0;
+        }
+    }
+
+    .feed-pill {
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: rgba(30, 64, 175, 0.9);
+        font-size: 10px;
+    }
+
+    .feed-amount {
+        color: var(--accent);
+        font-weight: 500;
+    }
+
+    .feed-time {
+        color: var(--text-softer);
+        font-size: 10px;
+        margin-left: auto;
+    }
+
+    /* Categories + main list */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 32px 0 10px;
+        gap: 12px;
+    }
+
+    .section-title-block h2 {
+        font-size: 17px;
+        letter-spacing: -0.02em;
+    }
+
+    .section-title-block span {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .category-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .category-pill {
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: rgba(11, 15, 30, 0.96);
+        border: 1px solid rgba(38, 40, 78, 0.9);
+        color: var(--text-softer);
+        cursor: pointer;
+        transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow 0.25s ease-out;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .category-pill span {
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: rgba(24, 27, 56, 1);
+        color: var(--text-muted);
+    }
+
+    .category-pill--active {
+        border-color: rgba(70, 230, 164, 0.85);
+        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.24) 0, rgba(11, 15, 30, 0.98) 55%);
+        color: var(--accent);
+        box-shadow: 0 12px 28px rgba(70, 230, 164, 0.5);
+    }
+
+    .category-pill--active span {
+        background: rgba(15, 118, 110, 1);
+        color: #bbf7d0;
+    }
+
+    .funds-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-top: 12px;
+    }
+
+    @@media (max-width: 1024px) {
+        .funds-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (max-width: 720px) {
+        .funds-grid {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .fund-card {
+        border-radius: var(--radius-lg);
+        background: radial-gradient(circle at top, rgba(24, 24, 45, 0.96) 0, rgba(6, 8, 18, 0.98) 60%);
+        border: 1px solid rgba(38, 40, 78, 0.9);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        cursor: pointer;
+        position: relative;
+        transition: transform var(--transition-med), box-shadow var(--transition-med), border var(--transition-med), background var(--transition-med);
+    }
+
+    .fund-card:hover {
+        transform: translateY(-6px) translateZ(0) scale(1.01);
+        box-shadow: 0 26px 60px rgba(15, 23, 42, 0.96);
+        border-color: rgba(70, 230, 164, 0.55);
+        background: radial-gradient(circle at top, rgba(70, 230, 164, 0.25) 0, rgba(6, 8, 18, 0.98) 55%);
+    }
+
+    .fund-media {
+        position: relative;
+        height: 160px;
+        background: radial-gradient(circle at center, #1f2937 0, #020617 60%);
+        overflow: hidden;
+    }
+
+    .fund-media-gradient {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(135deg, rgba(46, 213, 115, 0.3), rgba(56, 189, 248, 0.28)),
+            repeating-linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0, rgba(15, 23, 42, 0.85) 2px, rgba(15, 23, 42, 0.6) 2px, rgba(15, 23, 42, 0.6) 4px);
+        mix-blend-mode: screen;
+        opacity: 0.85;
+        transform: scale(1.02);
+        transition: transform var(--transition-med), opacity var(--transition-med);
+    }
+
+    .fund-card:hover .fund-media-gradient {
+        transform: scale(1.06);
+        opacity: 1;
+    }
+
+    .fund-media-tag {
+        position: absolute;
+        left: 12px;
+        top: 10px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid rgba(148, 163, 184, 0.9);
+        color: #e5e7eb;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .fund-media-tag-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #4ade80;
+        box-shadow: 0 0 10px rgba(74, 222, 128, 0.9);
+    }
+
+    .fund-media-meter {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid rgba(70, 230, 164, 0.8);
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #bbf7d0;
+    }
+
+    .fund-body {
+        padding: 12px 12px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .fund-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+    }
+
+    .fund-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .fund-progress {
+        margin-top: 4px;
+    }
+
+    .fund-progress-bar {
+        position: relative;
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(24, 31, 52, 0.9);
+        overflow: hidden;
+    }
+
+    .fund-progress-fill {
+        position: absolute;
+        inset: 0;
+        width: var(--progress, 52%);
+        background: linear-gradient(90deg, #22c55e, #a3e635, #fbbf24);
+        border-radius: inherit;
+        box-shadow: 0 0 20px rgba(74, 222, 128, 0.9);
+        animation: progressGrow 1.4s cubic-bezier(0.16, 0.9, 0.36, 1) forwards;
+        transform-origin: left center;
+    }
+
+    .fund-progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+        font-size: 11px;
+        color: #cbd5f5;
+    }
+
+    .fund-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        color: var(--text-softer);
+        margin-top: 2px;
+    }
+
+    .fund-footer-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .fund-footer-pill {
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: rgba(17, 24, 39, 1);
+        border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .fund-footer-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .fund-avatar {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #22c55e, #4ade80);
+    }
+
+    /* How it works section */
+    .how-section {
+        margin-top: 40px;
+        border-radius: 26px;
+        padding: 18px 18px 18px;
+        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.18) 0, rgba(9, 9, 19, 0.98) 55%);
+        border: 1px solid rgba(70, 230, 164, 0.45);
+        box-shadow: 0 18px 46px rgba(0, 0, 0, 0.9);
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    @@media (max-width: 900px) {
+        .how-section {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .how-text h2 {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .how-text p {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        line-height: 1.6;
+    }
+
+    .how-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    @@media (max-width: 720px) {
+        .how-list {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    .how-item {
+        border-radius: 16px;
+        padding: 10px 10px 10px;
+        background: rgba(10, 12, 24, 0.98);
+        border: 1px solid rgba(38, 40, 78, 0.9);
+        font-size: 12px;
+    }
+
+    .how-item-label {
+        font-size: 11px;
+        color: var(--text-softer);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+    }
+
+    .how-item-title {
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+
+    .how-item p {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    .how-side {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .how-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .badge-soft {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 10px;
+        background: rgba(17, 24, 39, 1);
+        border: 1px solid rgba(55, 65, 81, 0.9);
+        color: var(--text-muted);
+    }
+
+    .testimony-card {
+        border-radius: 18px;
+        padding: 10px 11px 11px;
+        background: rgba(6, 8, 18, 0.98);
+        border: 1px solid rgba(70, 230, 164, 0.4);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .testimony-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--text-soft);
+    }
+
+    .testimony-avatar {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #22c55e, #4ade80);
+    }
+
+    .testimony-meta span {
+        display: block;
+    }
+
+    .testimony-meta span:first-child {
+        font-weight: 500;
+        color: var(--text-main);
+    }
+
+    .testimony-meta span:last-child {
+        color: var(--text-muted);
+    }
+
+    /* Footer CTA */
+    .footer-cta {
+        margin-top: 40px;
+        padding: 18px 18px 20px;
+        border-radius: 24px;
+        border: 1px solid rgba(31, 41, 55, 1);
+        background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.16) 0, rgba(10, 10, 22, 0.98) 60%);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        font-size: 13px;
+    }
+
+    @@media (max-width: 720px) {
+        .footer-cta {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
+    .footer-cta-main h3 {
+        margin-bottom: 4px;
+        font-size: 16px;
+    }
+
+    .footer-cta-main p {
+        color: var(--text-muted);
+    }
+
+    .footer-cta-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .footer-legal {
+        font-size: 11px;
+        color: var(--text-softer);
+        margin-top: 12px;
+    }
+</style>
+
+<div class="page-root">
+    <div class="page-shell">
+        <!-- NAVBAR -->
+        <header class="nav">
+            <div class="nav-left">
+                <div class="brand-badge">
+                    <div class="brand-icon"></div>
+                    <div>
+                        <div class="brand-text-main">KryskataFund</div>
+                        <div class="brand-text-sub">fake help. real vibes.</div>
+                    </div>
+                </div>
+
+                <nav class="nav-links">
+                    <div class="nav-link nav-link--active">
+                        Discover
+                        <span class="nav-tag">Live</span>
+                    </div>
+                    <div class="nav-link">Categories</div>
+                    <div class="nav-link">Success wall</div>
+                    <div class="nav-link">How it works</div>
+                </nav>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-cta">
+                    <div class="nav-pill">
+                        <span class="nav-pill-dot"></span>
+                        192 people browsing campaigns
+                    </div>
+                    <button class="btn-ghost">Sign in</button>
+                    <button class="btn-primary">Make my fund</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT GRID -->
+        <div class="main-grid">
+            <!-- HERO -->
+            <section class="hero-card">
+                <div class="hero-top">
+                    <div class="hero-body">
+                        <div class="hero-tagline">
+                            <span class="hero-tag-dot"></span>
+                            <span>Launch your idea in minutes</span>
+                            <span class="hero-tag-pill">final project edition</span>
+                        </div>
+
+                        <h1 class="hero-title">
+                            A <span class="hero-highlight">GoFundMe-style</span> playground built
+                            just for your project.
+                        </h1>
+
+                        <p class="hero-subtitle">
+                            Spin up fake campaigns, test layouts and show off your ASP.NET MVC skills.
+                            No real money. Just <span class="hero-subtitle-strong">clean animations</span>,
+                            smooth progress bars and satisfying green numbers.
+                        </p>
+
+                        <div class="hero-actions">
+                            <button class="btn-primary">
+                                Make my fund
+                            </button>
+                            <button class="btn-ghost">
+                                Explore trending campaigns
+                            </button>
+                        </div>
+
+                        <div class="hero-meta">
+                            <div class="hero-meta-block">
+                                <span class="meta-label">Total fake raised</span>
+                                <span class="meta-value">€184,230</span>
+                                <span class="meta-pill-badge">demo only</span>
+                            </div>
+                            <div class="hero-meta-block">
+                                <span class="meta-label">Live campaigns</span>
+                                <span class="meta-value">127</span>
+                            </div>
+                            <div class="hero-meta-block">
+                                <span class="meta-label">Avg. time to create</span>
+                                <span class="meta-value">2 min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-visual">
+                        <div class="hero-mood-pill">
+                            Project mode:
+                            <span>Show-off</span>
+                        </div>
+
+                        <div class="hero-card-mini" style="--progress: 82%;">
+                            <div class="mini-title">Help Chris finish his final project</div>
+                            <div class="mini-badge">
+                                <span class="mini-badge-dot"></span>
+                                203 supporters
+                            </div>
+
+                            <div class="mini-progress-labels">
+                                <span>€820 of €1,000 goal</span>
+                                <span>82%</span>
+                            </div>
+                            <div class="mini-progress-bar">
+                                <div class="mini-progress-fill"></div>
+                            </div>
+
+                            <div class="mini-progress-meta">
+                                <span>Last donation 31s ago</span>
+                                <span>🔥 Trending</span>
+                            </div>
+
+                            <div class="mini-avatar-row">
+                                <div class="mini-avatars">
+                                    <div class="mini-avatar"></div>
+                                    <div class="mini-avatar"></div>
+                                    <div class="mini-avatar"></div>
+                                </div>
+                                <span class="mini-avatar-count">+17 friends backed this</span>
+                                <span class="mini-footer-chip">Fake data only</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-scroll-indicator">
+                    <div class="scroll-dot">
+                        <div class="scroll-dot-inner"></div>
+                    </div>
+                    Scroll to see more campaigns
+                </div>
+            </section>
+
+            <!-- SIDEBAR -->
+            <aside class="sidebar-card">
+                <div class="sidebar-header">
+                    <div class="sidebar-title-block">
+                        <h2>Live stats</h2>
+                        <span>Everything here is just for vibes.</span>
+                    </div>
+                    <div class="sidebar-pill">
+                        Demo mode: On
+                    </div>
+                </div>
+
+                <div class="sidebar-grid">
+                    <div class="sidebar-stat-card sidebar-stat-card--green">
+                        <div class="sidebar-stat-label">Today’s fake impact</div>
+                        <div class="sidebar-stat-value">€7,420</div>
+                        <div class="sidebar-stat-sub">Simulated donations across all funds</div>
+                    </div>
+                    <div class="sidebar-stat-card">
+                        <div class="sidebar-stat-label">Avg. support</div>
+                        <div class="sidebar-stat-value">€26</div>
+                        <div class="sidebar-stat-sub">Per fictional donor</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-pill-row">
+                    <span class="chip chip--accent">
+                        <span class="chip-dot"></span>
+                        Top category: Education
+                    </span>
+                    <span class="chip">Health & medical</span>
+                    <span class="chip">Creative chaos</span>
+                </div>
+
+                <div class="sidebar-feed">
+                    <div class="sidebar-feed-header">
+                        <span>Activity feed</span>
+                        <span>Auto-generated for demo</span>
+                    </div>
+                    <div class="sidebar-feed-body">
+                        <div class="feed-row">
+                            <span class="feed-pill">New fund</span>
+                            <span>Maria launched “Laptop for uni”.</span>
+                            <span class="feed-time">• 2 min ago</span>
+                        </div>
+                        <div class="feed-row">
+                            <span class="feed-pill">Donation</span>
+                            <span><span class="feed-amount">€50</span> to “Help stray dogs in Sofia”.</span>
+                            <span class="feed-time">• 6 min ago</span>
+                        </div>
+                        <div class="feed-row">
+                            <span class="feed-pill">Milestone</span>
+                            <span>“Fix my gaming PC” hit 120% of goal.</span>
+                            <span class="feed-time">• 12 min ago</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- CATEGORIES + MAIN FUNDS -->
+        <section>
+            <div class="section-header">
+                <div class="section-title-block">
+                    <h2>Trending funds</h2>
+                    <span>Just examples to show off the layout, progress bars and cards.</span>
+                </div>
+                <div class="category-row">
+                    <button class="category-pill category-pill--active">
+                        All
+                        <span>127</span>
+                    </button>
+                    <button class="category-pill">
+                        Education
+                        <span>34</span>
+                    </button>
+                    <button class="category-pill">
+                        Health
+                        <span>19</span>
+                    </button>
+                    <button class="category-pill">
+                        Animals
+                        <span>22</span>
+                    </button>
+                    <button class="category-pill">
+                        Dreams & projects
+                        <span>52</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="funds-grid">
+                <!-- CARD 1 -->
+                <article class="fund-card" style="--progress: 68%;">
+                    <div class="fund-media">
+                        <div class="fund-media-gradient"></div>
+                        <div class="fund-media-tag">
+                            <span class="fund-media-tag-dot"></span>
+                            Education
+                        </div>
+                        <div class="fund-media-meter">
+                            68% funded
+                        </div>
+                    </div>
+                    <div class="fund-body">
+                        <h3 class="fund-title">Send Alex to their first year of Computer Science</h3>
+                        <p class="fund-desc">
+                            Help Alex cover tuition, dorm and a second-hand laptop so they can finally
+                            start building the apps they’ve always dreamed of.
+                        </p>
+
+                        <div class="fund-progress">
+                            <div class="fund-progress-bar">
+                                <div class="fund-progress-fill"></div>
+                            </div>
+                            <div class="fund-progress-labels">
+                                <span>€6,800 raised</span>
+                                <span>Goal €10,000</span>
+                            </div>
+                        </div>
+
+                        <div class="fund-footer">
+                            <div class="fund-footer-left">
+                                <span class="fund-footer-pill">182 supporters</span>
+                                <span>• 4 days left</span>
+                            </div>
+                            <div class="fund-footer-right">
+                                <div class="fund-avatar"></div>
+                                <span>by @@alex.codes</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CARD 2 -->
+                <article class="fund-card" style="--progress: 92%;">
+                    <div class="fund-media">
+                        <div class="fund-media-gradient"></div>
+                        <div class="fund-media-tag">
+                            <span class="fund-media-tag-dot" style="background: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.9);"></span>
+                            Health
+                        </div>
+                        <div class="fund-media-meter">
+                            Almost there
+                        </div>
+                    </div>
+                    <div class="fund-body">
+                        <h3 class="fund-title">Support Sofia’s recovery after surgery</h3>
+                        <p class="fund-desc">
+                            Sofia is recovering from a major surgery and needs help with physiotherapy and
+                            bills for the next few months.
+                        </p>
+
+                        <div class="fund-progress">
+                            <div class="fund-progress-bar">
+                                <div class="fund-progress-fill"></div>
+                            </div>
+                            <div class="fund-progress-labels">
+                                <span>€9,200 raised</span>
+                                <span>Goal €10,000</span>
+                            </div>
+                        </div>
+
+                        <div class="fund-footer">
+                            <div class="fund-footer-left">
+                                <span class="fund-footer-pill">402 supporters</span>
+                                <span>• 1 day left</span>
+                            </div>
+                            <div class="fund-footer-right">
+                                <div class="fund-avatar" style="background: linear-gradient(135deg, #f97316, #fb7185);"></div>
+                                <span>by @@friendsOfSofia</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CARD 3 -->
+                <article class="fund-card" style="--progress: 43%;">
+                    <div class="fund-media">
+                        <div class="fund-media-gradient"></div>
+                        <div class="fund-media-tag">
+                            <span class="fund-media-tag-dot" style="background: #22d3ee; box-shadow: 0 0 10px rgba(34, 211, 238, 0.9);"></span>
+                            Animals
+                        </div>
+                        <div class="fund-media-meter">
+                            Boost needed
+                        </div>
+                    </div>
+                    <div class="fund-body">
+                        <h3 class="fund-title">Build a warm shelter for stray dogs in Sofia</h3>
+                        <p class="fund-desc">
+                            Local volunteers are transforming an empty space into a safe, heated shelter
+                            for stray dogs before winter hits.
+                        </p>
+
+                        <div class="fund-progress">
+                            <div class="fund-progress-bar">
+                                <div class="fund-progress-fill"></div>
+                            </div>
+                            <div class="fund-progress-labels">
+                                <span>€4,300 raised</span>
+                                <span>Goal €10,000</span>
+                            </div>
+                        </div>
+
+                        <div class="fund-footer">
+                            <div class="fund-footer-left">
+                                <span class="fund-footer-pill">93 supporters</span>
+                                <span>• 10 days left</span>
+                            </div>
+                            <div class="fund-footer-right">
+                                <div class="fund-avatar" style="background: linear-gradient(135deg, #22d3ee, #4f46e5);"></div>
+                                <span>by @@streetPawsBG</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CARD 4 -->
+                <article class="fund-card" style="--progress: 120%;">
+                    <div class="fund-media">
+                        <div class="fund-media-gradient"></div>
+                        <div class="fund-media-tag">
+                            <span class="fund-media-tag-dot" style="background: #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.9);"></span>
+                            Creative
+                        </div>
+                        <div class="fund-media-meter">
+                            120% funded
+                        </div>
+                    </div>
+                    <div class="fund-body">
+                        <h3 class="fund-title">Short film: “404 – Dream Not Found”</h3>
+                        <p class="fund-desc">
+                            A student-made sci-fi short about life, latency and trying to connect
+                            when everything keeps buffering.
+                        </p>
+
+                        <div class="fund-progress">
+                            <div class="fund-progress-bar">
+                                <div class="fund-progress-fill"></div>
+                            </div>
+                            <div class="fund-progress-labels">
+                                <span>€12,000 raised</span>
+                                <span>Goal €10,000</span>
+                            </div>
+                        </div>
+
+                        <div class="fund-footer">
+                            <div class="fund-footer-left">
+                                <span class="fund-footer-pill">321 supporters</span>
+                                <span>• ended</span>
+                            </div>
+                            <div class="fund-footer-right">
+                                <div class="fund-avatar" style="background: linear-gradient(135deg, #a855f7, #ec4899);"></div>
+                                <span>by @@filmCrew</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CARD 5 -->
+                <article class="fund-card" style="--progress: 35%;">
+                    <div class="fund-media">
+                        <div class="fund-media-gradient"></div>
+                        <div class="fund-media-tag">
+                            <span class="fund-media-tag-dot" style="background: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.9);"></span>
+                            Dreams
+                        </div>
+                        <div class="fund-media-meter">
+                            Fresh start
+                        </div>
+                    </div>
+                    <div class="fund-body">
+                        <h3 class="fund-title">From bedroom beats to first studio session</h3>
+                        <p class="fund-desc">
+                            Help this bedroom producer book time in a real studio and release their
+                            first EP on streaming platforms.
+                        </p>
+
+                        <div class="fund-progress">
+                            <div class="fund-progress-bar">
+                                <div class="fund-progress-fill"></div>
+                            </div>
+                            <div class="fund-progress-labels">
+                                <span>€1,750 raised</span>
+                                <span>Goal €5,000</span>
+                            </div>
+                        </div>
+
+                        <div class="fund-footer">
+                            <div class="fund-footer-left">
+                                <span class="fund-footer-pill">64 supporters</span>
+                                <span>• 21 days left</span>
+                            </div>
+                            <div class="fund-footer-right">
+                                <div class="fund-avatar" style="background: linear-gradient(135deg, #facc15, #fb923c);"></div>
+                                <span>by @@lofiRoom</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- CARD 6 -->
+                <article class="fund-card" style="--progress: 15%;">
+                    <div class="fund-media">
+                        <div class="fund-media-gradient"></div>
+                        <div class="fund-media-tag">
+                            <span class="fund-media-tag-dot" style="background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.9);"></span>
+                            Just for fun
+                        </div>
+                        <div class="fund-media-meter">
+                            It’s a meme
+                        </div>
+                    </div>
+                    <div class="fund-body">
+                        <h3 class="fund-title">Help me finally buy that RGB keyboard</h3>
+                        <p class="fund-desc">
+                            Is it necessary? No. Is it responsible? Also no. Is it extremely on brand
+                            for this fake fundraising page? Absolutely.
+                        </p>
+
+                        <div class="fund-progress">
+                            <div class="fund-progress-bar">
+                                <div class="fund-progress-fill"></div>
+                            </div>
+                            <div class="fund-progress-labels">
+                                <span>€150 raised</span>
+                                <span>Goal €1,000</span>
+                            </div>
+                        </div>
+
+                        <div class="fund-footer">
+                            <div class="fund-footer-left">
+                                <span class="fund-footer-pill">23 supporters</span>
+                                <span>• 30 days left</span>
+                            </div>
+                            <div class="fund-footer-right">
+                                <div class="fund-avatar" style="background: linear-gradient(135deg, #ef4444, #f97316);"></div>
+                                <span>by @@rgbEnjoyer</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS -->
+        <section class="how-section">
+            <div class="how-text">
+                <h2>How KryskataFund works (for your project)</h2>
+                <p>
+                    This page is not a real fundraising platform. It’s a <strong>showcase UI</strong>
+                    you can fully control in your MVC project. Replace the static data with a database later,
+                    or leave it purely cosmetic if that fits the assignment.
+                </p>
+                <p>
+                    The flow below is exactly what you’d expect from a GoFundMe clone, just
+                    dressed in dark-mode, animated and tuned for presentation.
+                </p>
+
+                <div class="how-list">
+                    <div class="how-item">
+                        <div class="how-item-label">Step 1</div>
+                        <div class="how-item-title">Create your campaign</div>
+                        <p>
+                            Click <strong>Make my fund</strong>, fill in a title, goal, description and image.
+                            In your implementation this can open a modal / separate MVC view.
+                        </p>
+                    </div>
+                    <div class="how-item">
+                        <div class="how-item-label">Step 2</div>
+                        <div class="how-item-title">Share the link</div>
+                        <p>
+                            Generate a campaign URL that you can theoretically share. Here, it’s all simulated,
+                            so feel free to keep it “for demo only”.
+                        </p>
+                    </div>
+                    <div class="how-item">
+                        <div class="how-item-label">Step 3</div>
+                        <div class="how-item-title">Watch progress climb</div>
+                        <p>
+                            Donations (fake or real) push the progress bar forward. You can hook this
+                            into your own logic, seeded data or even random generators.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="how-side">
+                <div class="how-badge-row">
+                    <span class="badge-soft">No real payments</span>
+                    <span class="badge-soft">MVC friendly</span>
+                    <span class="badge-soft">Animation-focused</span>
+                    <span class="badge-soft">Perfect for demos</span>
+                </div>
+
+                <div class="testimony-card">
+                    “Honestly, I just wanted a fundraising page that feels like a mix between
+                    GoFundMe and a crypto dashboard — dark theme, glowing progress bars and all.”
+
+                    <div class="testimony-row">
+                        <div class="testimony-avatar"></div>
+                        <div class="testimony-meta">
+                            <span>Someone like you</span>
+                            <span>Final project enjoyer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER CTA -->
+        <footer class="footer-cta">
+            <div class="footer-cta-main">
+                <h3>Ready to spin up your own fund?</h3>
+                <p>
+                    Use this button in your MVC project to route to a <strong>CreateFund</strong> page,
+                    open a modal, or anything else you feel like building.
+                </p>
+            </div>
+            <div class="footer-cta-actions">
+                <button class="btn-primary">
+                    Make my fund
+                </button>
+                <button class="btn-ghost">
+                    View all campaigns
+                </button>
+            </div>
+        </footer>
+
+        <div class="footer-legal">
+            All numbers and stories on this page are made up. This is a visual demo for a final project,
+            not a real fundraising service.
+        </div>
+    </div>
+</div>
