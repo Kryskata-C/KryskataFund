@@ -10,25 +10,38 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">KryskataFund</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+        <header class="nav">
+            <div class="nav-left">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-badge">
+                    <div class="brand-icon"></div>
+                    <div>
+                        <div class="brand-text-main">KryskataFund</div>
+                        <div class="brand-text-sub">crowdfunding made simple.</div>
+                    </div>
+                </a>
+
+                <nav class="nav-links">
+                    <div class="nav-link nav-link--active">
+                        Discover
+                        <span class="nav-tag">Live</span>
+                    </div>
+                    <div class="nav-link">Categories</div>
+                    <div class="nav-link">Success wall</div>
+                    <div class="nav-link">How it works</div>
+                </nav>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-cta">
+                    <div class="nav-pill">
+                        <span class="nav-pill-dot"></span>
+                        192 people browsing campaigns
+                    </div>
+                    <button class="btn-ghost">Sign in</button>
+                    <button class="btn-primary">Make my fund</button>
                 </div>
             </div>
-        </nav>
+        </header>
     </header>
     <div class="container">
         <main role="main" class="pb-3">
