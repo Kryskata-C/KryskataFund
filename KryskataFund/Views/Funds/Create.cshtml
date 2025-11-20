@@ -186,3 +186,126 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const titleInput = document.getElementById('Title');
+            const goalInput = document.getElementById('GoalAmount');
+            const categorySelect = document.getElementById('Category');
+            const descriptionInput = document.getElementById('Description');
+
+            const previewTitle = document.getElementById('PreviewTitle');
+            const previewMeta = document.getElementById('PreviewMeta');
+            const previewRaisedText = document.getElementById('PreviewRaisedText');
+            const previewGoalText = document.getElementById('PreviewGoalText');
+            const previewProgressFill = document.getElementById('PreviewProgressFill');
+            const previewDescriptionHint = document.getElementById('PreviewDescriptionHint');
+
+            // Small helper to add a micro "pulse" animation
+            function pulse(el) {
+                if (!el) return;
+                el.classList.remove('preview-pulse');
+                // Force reflow so animation can restart
+                void el.offsetWidth;
+                el.classList.add('preview-pulse');
+            }
+
+            // Live update title
+            function updateTitle() {
+                if (!previewTitle) return;
+
+                const value = titleInput.value.trim();
+                previewTitle.textContent = value || 'Your campaign title will appear here';
+                pulse(previewTitle);
+            }
+
+            // Live update goal + meta + progress bar
+            function updateGoalAndMeta() {
+                const rawGoal = goalInput.value.trim();
+                const goal = parseFloat(rawGoal.replace(',', '.')) || 0;
+
+                const raised = 0; // For now always 0 in preview
+                const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+
+                if (previewRaisedText) {
+                    previewRaisedText.textContent = `€${raised} raised`;
+                }
+
+                if (previewGoalText) {
+                    previewGoalText.textContent = goal > 0 ? `Goal €${goal}` : 'Goal €0';
+                }
+
+                if (previewMeta) {
+                    previewMeta.textContent =
+                        `€${raised} raised • 0 supporters • ${percent}% of goal`;
+                }
+
+                if (previewProgressFill) {
+                    previewProgressFill.style.width = percent + '%';
+                }
+
+                pulse(previewMeta);
+            }
+
+            // Live update description-ish hint
+            function updateDescription() {
+                if (!previewDescriptionHint) return;
+
+                const value = descriptionInput.value.trim();
+
+                if (!value) {
+                    previewDescriptionHint.textContent = 'Campaign goes here once it’s created';
+                } else {
+                    // Show a shortened preview
+                    const short = value.length > 80 ? value.substring(0, 80) + '…' : value;
+                    previewDescriptionHint.textContent = short;
+                }
+
+                pulse(previewDescriptionHint);
+            }
+
+            // Optional: show category in meta if selected
+            function updateCategory() {
+                const category = categorySelect.value;
+                const rawGoal = goalInput.value.trim();
+                const goal = parseFloat(rawGoal.replace(',', '.')) || 0;
+                const raised = 0;
+                const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+
+                if (previewMeta) {
+                    let base = `€${raised} raised • 0 supporters • ${percent}% of goal`;
+                    if (category) {
+                        base += ` • ${category}`;
+                    }
+                    previewMeta.textContent = base;
+                }
+
+                pulse(previewMeta);
+            }
+
+            if (titleInput) {
+                titleInput.addEventListener('input', updateTitle);
+                updateTitle();
+            }
+
+            if (goalInput) {
+                goalInput.addEventListener('input', function () {
+                    updateGoalAndMeta();
+                    updateCategory(); // keep meta in sync
+                });
+                updateGoalAndMeta();
+            }
+
+            if (descriptionInput) {
+                descriptionInput.addEventListener('input', updateDescription);
+                updateDescription();
+            }
+
+            if (categorySelect) {
+                categorySelect.addEventListener('change', updateCategory);
+                updateCategory();
+            }
+        });
+    </script>
+}

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace KryskataFUnd.Controllers
+namespace KryskataFund.Controllers
 {
     public class FundsController : Controller
     {
