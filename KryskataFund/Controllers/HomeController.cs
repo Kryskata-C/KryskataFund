@@ -16,11 +16,28 @@ namespace KryskataFund.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? category = null)
         {
-            var funds = _context.Funds
-                .OrderByDescending(f => f.CreatedAt)
-                .ToList();
+            var allFunds = _context.Funds.ToList();
+
+            // Get category counts
+            var categoryCounts = allFunds
+                .GroupBy(f => f.Category)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            ViewBag.CategoryCounts = categoryCounts;
+            ViewBag.TotalCount = allFunds.Count;
+            ViewBag.SelectedCategory = category;
+
+            // Calculate total raised and live campaigns
+            ViewBag.TotalRaised = allFunds.Sum(f => f.RaisedAmount);
+            ViewBag.LiveCampaigns = allFunds.Count(f => f.DaysLeft > 0);
+
+            // Filter funds if category is selected
+            var funds = string.IsNullOrEmpty(category)
+                ? allFunds.OrderByDescending(f => f.CreatedAt).ToList()
+                : allFunds.Where(f => f.Category == category).OrderByDescending(f => f.CreatedAt).ToList();
+
             return View(funds);
         }
 
