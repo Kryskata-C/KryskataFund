@@ -54,6 +54,10 @@
                                         <div class="buddy-blush left"></div>
                                         <div class="buddy-blush right"></div>
                                     </div>
+                                    <!-- Customization layers -->
+                                    <div class="buddy-accessory buddy-glasses" id="navGlasses"></div>
+                                    <div class="buddy-accessory buddy-hat" id="navHat"></div>
+                                    <div class="buddy-accessory buddy-mask" id="navMask"></div>
                                 </div>
                                 <div class="buddy-glow"></div>
                             </div>
@@ -68,6 +72,21 @@
                             <div class="buddy-particles" id="buddyParticles"></div>
                         </div>
                         <script>
+                            // Load and apply customization
+                            (async function() {
+                                try {
+                                    const response = await fetch('/Account/GetBuddyCustomization');
+                                    const data = await response.json();
+                                    const navGlasses = document.getElementById('navGlasses');
+                                    const navHat = document.getElementById('navHat');
+                                    const navMask = document.getElementById('navMask');
+
+                                    if (data.glasses) navGlasses.classList.add('glasses-' + data.glasses);
+                                    if (data.hat) navHat.classList.add('hat-' + data.hat);
+                                    if (data.mask) navMask.classList.add('mask-' + data.mask);
+                                } catch (e) { }
+                            })();
+
                             document.getElementById('profileBuddy').addEventListener('click', function(e) {
                                 e.stopPropagation();
                                 const container = document.getElementById('buddyContainer');
