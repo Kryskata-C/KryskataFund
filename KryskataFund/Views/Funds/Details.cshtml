@@ -1,4 +1,15 @@
 @model KryskataFund.Models.Fund
+@functions {
+    string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.UtcNow - dateTime;
+        if (timeSpan.TotalMinutes < 1) return "just now";
+        if (timeSpan.TotalMinutes < 60) return $"{(int)timeSpan.TotalMinutes} min ago";
+        if (timeSpan.TotalHours < 24) return $"{(int)timeSpan.TotalHours} hours ago";
+        if (timeSpan.TotalDays < 7) return $"{(int)timeSpan.TotalDays} days ago";
+        return dateTime.ToString("MMM d");
+    }
+}
 @{
     ViewData["Title"] = Model.Title;
     var progressPercent = Model.ProgressPercent;
@@ -20,7 +31,7 @@
             <!-- Main content -->
             <section class="fund-detail-main">
                 <!-- Hero image area -->
-                <div class="fund-detail-hero">
+                <div class="fund-detail-hero" style="@(Model.ImageUrl != null ? $"background: url('{Model.ImageUrl}') center/cover;" : "")">
                     <div class="fund-detail-hero-gradient"></div>
                     <div class="fund-detail-category-tag" style="--cat-color: @Model.CategoryColor;">
                         <span class="fund-detail-tag-dot" style="background: @Model.CategoryColor; box-shadow: 0 0 10px @Model.CategoryColor;"></span>
@@ -121,33 +132,58 @@
                     <!-- Recent supporters -->
                     <div class="fund-detail-supporters">
                         <h3>Recent supporters</h3>
-                        <div class="fund-detail-supporter-list">
-                            <div class="fund-detail-supporter">
-                                <div class="fund-detail-supporter-avatar" style="background: linear-gradient(135deg, #22c55e, #4ade80);"></div>
-                                <div class="fund-detail-supporter-info">
-                                    <span class="fund-detail-supporter-name">Anonymous</span>
-                                    <span class="fund-detail-supporter-amount">€50</span>
+                        <div class="fund-detail-supporter-list" id="supportersList">
+                            @{
+                                var donations = ViewBag.RecentDonations as List<KryskataFund.Models.Donation> ?? new List<KryskataFund.Models.Donation>();
+                                var colors = new[] {
+                                    "linear-gradient(135deg, #22c55e, #4ade80)",
+                                    "linear-gradient(135deg, #4f46e5, #22d3ee)",
+                                    "linear-gradient(135deg, #f97316, #fb7185)",
+                                    "linear-gradient(135deg, #a855f7, #ec4899)",
+                                    "linear-gradient(135deg, #facc15, #fb923c)"
+                                };
+                                var initialShow = 3;
+                            }
+                            @if (donations.Count == 0)
+                            {
+                                <div class="fund-detail-no-supporters" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                    <p style="font-size: 13px;">No supporters yet. Be the first!</p>
                                 </div>
-                                <span class="fund-detail-supporter-time">2 hours ago</span>
-                            </div>
-                            <div class="fund-detail-supporter">
-                                <div class="fund-detail-supporter-avatar" style="background: linear-gradient(135deg, #4f46e5, #22d3ee);"></div>
-                                <div class="fund-detail-supporter-info">
-                                    <span class="fund-detail-supporter-name">Maria K.</span>
-                                    <span class="fund-detail-supporter-amount">€25</span>
-                                </div>
-                                <span class="fund-detail-supporter-time">5 hours ago</span>
-                            </div>
-                            <div class="fund-detail-supporter">
-                                <div class="fund-detail-supporter-avatar" style="background: linear-gradient(135deg, #f97316, #fb7185);"></div>
-                                <div class="fund-detail-supporter-info">
-                                    <span class="fund-detail-supporter-name">Stefan P.</span>
-                                    <span class="fund-detail-supporter-amount">€100</span>
-                                </div>
-                                <span class="fund-detail-supporter-time">1 day ago</span>
-                            </div>
+                            }
+                            else
+                            {
+                                var index = 0;
+                                @foreach (var donation in donations)
+                                {
+                                    var colorIndex = Math.Abs(donation.DonorName.GetHashCode()) % colors.Length;
+                                    var timeAgo = GetTimeAgo(donation.CreatedAt);
+                                    var isHidden = index >= initialShow;
+                                    <div class="fund-detail-supporter @(isHidden ? "supporter-hidden" : "")" data-index="@index" style="@(isHidden ? "display: none;" : "")">
+                                        <div class="fund-detail-supporter-avatar" style="background: @colors[colorIndex];"></div>
+                                        <div class="fund-detail-supporter-info">
+                                            <span class="fund-detail-supporter-name">@donation.DonorName</span>
+                                            <span class="fund-detail-supporter-amount">€@donation.Amount.ToString("N0")</span>
+                                        </div>
+                                        <span class="fund-detail-supporter-time">@timeAgo</span>
+                                    </div>
+                                    index++;
+                                }
+                            }
                         </div>
-                        <a href="#" class="fund-detail-see-all">See all @Model.SupportersCount supporters →</a>
+                        @if (Model.SupportersCount > 3)
+                        {
+                            <div class="supporters-expand-section">
+                                <button type="button" class="fund-detail-see-all" id="toggleSupportersBtn" data-expanded="false">
+                                    <span id="toggleText">See all @Model.SupportersCount supporters</span>
+                                    <span class="toggle-arrow" id="toggleArrow">↓</span>
+                                </button>
+                                <div class="supporters-pagination" id="supportersPagination" style="display: none;">
+                                    <button type="button" class="pagination-btn" id="prevPageBtn" disabled>←</button>
+                                    <span class="pagination-info" id="paginationInfo">Page 1</span>
+                                    <button type="button" class="pagination-btn" id="nextPageBtn">→</button>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             </aside>
@@ -248,6 +284,173 @@
                     setTimeout(() => selectedAmountDisplay.classList.remove('shake'), 500);
                 }
             });
+
+            // Supporters expand/collapse with pagination
+            const toggleBtn = document.getElementById('toggleSupportersBtn');
+            const toggleText = document.getElementById('toggleText');
+            const toggleArrow = document.getElementById('toggleArrow');
+            const pagination = document.getElementById('supportersPagination');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            const pageInfo = document.getElementById('paginationInfo');
+            const supporters = document.querySelectorAll('.fund-detail-supporter');
+
+            const totalSupporters = @Model.SupportersCount;
+            const itemsPerPage = 5;
+            let currentPage = 1;
+            let isExpanded = false;
+
+            function updatePagination() {
+                const totalPages = Math.ceil(supporters.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, supporters.length);
+
+                supporters.forEach((supporter, index) => {
+                    if (isExpanded) {
+                        if (index >= startIndex && index < endIndex) {
+                            supporter.style.display = '';
+                            supporter.style.animation = 'fadeSlideIn 0.3s ease forwards';
+                            supporter.style.animationDelay = `${(index - startIndex) * 0.05}s`;
+                        } else {
+                            supporter.style.display = 'none';
+                        }
+                    } else {
+                        // Show only first 3 when collapsed
+                        supporter.style.display = index < 3 ? '' : 'none';
+                    }
+                });
+
+                if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                if (prevBtn) prevBtn.disabled = currentPage === 1;
+                if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    isExpanded = !isExpanded;
+
+                    if (isExpanded) {
+                        toggleText.textContent = 'Show less';
+                        toggleArrow.textContent = '↑';
+                        toggleArrow.style.transform = 'rotate(180deg)';
+                        if (pagination && supporters.length > itemsPerPage) {
+                            pagination.style.display = 'flex';
+                        }
+                        currentPage = 1;
+                    } else {
+                        toggleText.textContent = `See all ${totalSupporters} supporters`;
+                        toggleArrow.textContent = '↓';
+                        toggleArrow.style.transform = 'rotate(0deg)';
+                        if (pagination) pagination.style.display = 'none';
+                    }
+
+                    updatePagination();
+                });
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        updatePagination();
+                    }
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    const totalPages = Math.ceil(supporters.length / itemsPerPage);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        updatePagination();
+                    }
+                });
+            }
         });
     </script>
+
+    <style>
+        .supporters-expand-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .fund-detail-see-all {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(70, 230, 164, 0.1);
+            border: 1px solid rgba(70, 230, 164, 0.3);
+            border-radius: 10px;
+            color: #46e6a4;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fund-detail-see-all:hover {
+            background: rgba(70, 230, 164, 0.2);
+            border-color: rgba(70, 230, 164, 0.5);
+        }
+
+        .toggle-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .supporters-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .pagination-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: rgba(70, 230, 164, 0.15);
+            border-color: rgba(70, 230, 164, 0.4);
+            color: #46e6a4;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .fund-detail-supporter {
+            opacity: 0;
+            animation: fadeSlideIn 0.3s ease forwards;
+        }
+
+        @@keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 }
