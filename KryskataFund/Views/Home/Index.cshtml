@@ -1120,23 +1120,40 @@
     }
 
     .fund-card {
-        border-radius: var(--radius-lg);
-        background: radial-gradient(circle at top, rgba(24, 24, 45, 0.96) 0, rgba(6, 8, 18, 0.98) 60%);
-        border: 1px solid rgba(38, 40, 78, 0.9);
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85);
+        border-radius: 20px;
+        background: rgba(12, 14, 25, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         overflow: hidden;
         display: flex;
         flex-direction: column;
         cursor: pointer;
         position: relative;
-        transition: transform var(--transition-med), box-shadow var(--transition-med), border var(--transition-med), background var(--transition-med);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .fund-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.1) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+        z-index: 1;
     }
 
     .fund-card:hover {
-        transform: translateY(-6px) translateZ(0) scale(1.01);
-        box-shadow: 0 26px 60px rgba(15, 23, 42, 0.96);
-        border-color: rgba(70, 230, 164, 0.55);
-        background: radial-gradient(circle at top, rgba(70, 230, 164, 0.25) 0, rgba(6, 8, 18, 0.98) 55%);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow:
+            0 20px 40px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(70, 230, 164, 0.2);
+        border-color: rgba(70, 230, 164, 0.3);
+    }
+
+    .fund-card:hover::before {
+        opacity: 1;
     }
 
     .fund-media {
