@@ -116,6 +116,10 @@ namespace KryskataFund.Controllers
 
             ViewBag.IsSignedIn = HttpContext.Session.GetString("IsSignedIn") == "true";
 
+            // Check if current user is the creator
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            ViewBag.IsCreator = fund.CreatorId == userId;
+
             // Get all donations for this fund (for pagination)
             var recentDonations = _context.Donations
                 .Where(d => d.FundId == id)
@@ -123,6 +127,14 @@ namespace KryskataFund.Controllers
                 .ToList();
 
             ViewBag.RecentDonations = recentDonations;
+
+            // Get all updates for this fund
+            var updates = _context.FundUpdates
+                .Where(u => u.FundId == id)
+                .OrderByDescending(u => u.CreatedAt)
+                .ToList();
+
+            ViewBag.FundUpdates = updates;
 
             return View(fund);
         }
@@ -182,6 +194,49 @@ namespace KryskataFund.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Donation successful!" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostUpdate(int fundId, string title, string content)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Please sign in" });
+            }
+
+            var fund = await _context.Funds.FindAsync(fundId);
+            if (fund == null)
+            {
+                return Json(new { success = false, message = "Fund not found" });
+            }
+
+            // Only the creator can post updates
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            if (fund.CreatorId != userId)
+            {
+                return Json(new { success = false, message = "Only the fund creator can post updates" });
+            }
+
+            var update = new FundUpdate
+            {
+                FundId = fundId,
+                Title = title,
+                Content = content,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.FundUpdates.Add(update);
+            await _context.SaveChangesAsync();
+
+            return Json(new {
+                success = true,
+                update = new {
+                    id = update.Id,
+                    title = update.Title,
+                    content = update.Content,
+                    createdAt = update.CreatedAt.ToString("MMM d, yyyy")
+                }
+            });
         }
     }
 }
