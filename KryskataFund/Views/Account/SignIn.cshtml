@@ -14,6 +14,11 @@
                 <p class="auth-subtitle">Sign in to support the campaigns you love</p>
             </div>
 
+            @if (ViewData["Error"] != null)
+            {
+                <div class="auth-error">@ViewData["Error"]</div>
+            }
+
             <form class="auth-form" method="post" asp-action="SignIn" asp-route-returnUrl="@returnUrl">
                 <div class="form-group">
                     <label class="form-label" for="email">Email</label>
@@ -62,7 +67,7 @@
             </div>
 
             <div class="auth-footer">
-                <p>Don't have an account? <a href="#" class="auth-link">Sign up</a></p>
+                <p>Don't have an account? <a asp-action="SignUp" asp-route-returnUrl="@returnUrl" class="auth-link">Sign up</a></p>
             </div>
         </div>
     </div>
