@@ -16,6 +16,8 @@
     var isOverfunded = Model.RaisedAmount > Model.GoalAmount;
     var statusText = isOverfunded ? $"{progressPercent}% funded" : Model.DaysLeft == 0 ? "Ended" : $"{Model.DaysLeft} days left";
     var isSignedIn = ViewBag.IsSignedIn ?? false;
+    var isCreator = ViewBag.IsCreator ?? false;
+    var fundUpdates = ViewBag.FundUpdates as List<KryskataFund.Models.FundUpdate> ?? new List<KryskataFund.Models.FundUpdate>();
     var signInUrl = Url.Action("SignIn", "Account", new { returnUrl = Context.Request.Path });
 }
 
@@ -59,14 +61,77 @@
                         <p>@Model.Description</p>
                     </div>
 
-                    <!-- Updates section (placeholder) -->
+                    <!-- Updates section -->
                     <div class="fund-detail-updates">
-                        <h2>Updates</h2>
-                        <div class="fund-detail-update-empty">
-                            <span>No updates yet</span>
-                            <p>The creator hasn't posted any updates for this campaign.</p>
+                        <div class="updates-header">
+                            <h2>Updates <span class="updates-count">(@fundUpdates.Count)</span></h2>
+                            @if (isCreator)
+                            {
+                                <button class="btn-post-update" id="openUpdateModal">
+                                    <span>+</span> Post Update
+                                </button>
+                            }
+                        </div>
+
+                        <div class="updates-list" id="updatesList">
+                            @if (fundUpdates.Count == 0)
+                            {
+                                <div class="fund-detail-update-empty" id="emptyUpdates">
+                                    <span>📢</span>
+                                    <p>No updates yet</p>
+                                    @if (isCreator)
+                                    {
+                                        <small>Share progress with your supporters!</small>
+                                    }
+                                    else
+                                    {
+                                        <small>The creator hasn't posted any updates.</small>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var update in fundUpdates)
+                                {
+                                    <div class="update-item">
+                                        <div class="update-header">
+                                            <h3 class="update-title">@update.Title</h3>
+                                            <span class="update-date">@update.CreatedAt.ToString("MMM d, yyyy")</span>
+                                        </div>
+                                        <p class="update-content">@update.Content</p>
+                                    </div>
+                                }
+                            }
                         </div>
                     </div>
+
+                    <!-- Post Update Modal (for creator only) -->
+                    @if (isCreator)
+                    {
+                        <div class="update-modal" id="updateModal">
+                            <div class="update-modal-backdrop" id="updateModalBackdrop"></div>
+                            <div class="update-modal-content">
+                                <div class="update-modal-header">
+                                    <h3>📢 Post an Update</h3>
+                                    <button class="update-modal-close" id="closeUpdateModal">×</button>
+                                </div>
+                                <div class="update-modal-body">
+                                    <div class="update-form-group">
+                                        <label for="updateTitle">Title</label>
+                                        <input type="text" id="updateTitle" placeholder="What's new?" maxlength="200">
+                                    </div>
+                                    <div class="update-form-group">
+                                        <label for="updateContent">Content</label>
+                                        <textarea id="updateContent" rows="5" placeholder="Share your progress, milestones, or news with your supporters..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="update-modal-footer">
+                                    <button class="btn-update-cancel" id="cancelUpdate">Cancel</button>
+                                    <button class="btn-update-submit" id="submitUpdate">Post Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
                 </div>
             </section>
 
@@ -366,6 +431,97 @@
                     }
                 });
             }
+
+            // Updates modal functionality
+            const openModalBtn = document.getElementById('openUpdateModal');
+            const closeModalBtn = document.getElementById('closeUpdateModal');
+            const cancelBtn = document.getElementById('cancelUpdate');
+            const submitBtn = document.getElementById('submitUpdate');
+            const updateModal = document.getElementById('updateModal');
+            const modalBackdrop = document.getElementById('updateModalBackdrop');
+            const updateTitle = document.getElementById('updateTitle');
+            const updateContent = document.getElementById('updateContent');
+            const updatesList = document.getElementById('updatesList');
+            const emptyUpdates = document.getElementById('emptyUpdates');
+
+            function openModal() {
+                if (updateModal) {
+                    updateModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeModal() {
+                if (updateModal) {
+                    updateModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    if (updateTitle) updateTitle.value = '';
+                    if (updateContent) updateContent.value = '';
+                }
+            }
+
+            if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+            if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+
+            if (submitBtn) {
+                submitBtn.addEventListener('click', async function() {
+                    const title = updateTitle.value.trim();
+                    const content = updateContent.value.trim();
+
+                    if (!title || !content) {
+                        alert('Please fill in both title and content');
+                        return;
+                    }
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Posting...';
+
+                    try {
+                        const response = await fetch('/Funds/PostUpdate', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `fundId=${fundId}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Hide empty state if visible
+                            if (emptyUpdates) emptyUpdates.style.display = 'none';
+
+                            // Add the new update to the list
+                            const updateHtml = `
+                                <div class="update-item new-update">
+                                    <div class="update-header">
+                                        <h3 class="update-title">${data.update.title}</h3>
+                                        <span class="update-date">${data.update.createdAt}</span>
+                                    </div>
+                                    <p class="update-content">${data.update.content}</p>
+                                </div>
+                            `;
+                            updatesList.insertAdjacentHTML('afterbegin', updateHtml);
+
+                            // Update the count
+                            const countSpan = document.querySelector('.updates-count');
+                            if (countSpan) {
+                                const currentCount = parseInt(countSpan.textContent.match(/\d+/) || 0);
+                                countSpan.textContent = `(${currentCount + 1})`;
+                            }
+
+                            closeModal();
+                        } else {
+                            alert(data.message || 'Failed to post update');
+                        }
+                    } catch (error) {
+                        alert('An error occurred. Please try again.');
+                    }
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Post Update';
+                });
+            }
         });
     </script>
 
@@ -451,6 +607,294 @@
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* Updates Section Styles */
+        .updates-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .updates-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .updates-count {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .btn-post-update {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #46e6a4 0%, #22d3ee 100%);
+            border: none;
+            border-radius: 10px;
+            color: #050509;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-post-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(70, 230, 164, 0.4);
+        }
+
+        .updates-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .fund-detail-update-empty {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .fund-detail-update-empty span {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .fund-detail-update-empty p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .fund-detail-update-empty small {
+            color: var(--text-muted);
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .update-item {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .update-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(70, 230, 164, 0.2);
+        }
+
+        .update-item.new-update {
+            animation: slideInUpdate 0.4s ease;
+            border-color: rgba(70, 230, 164, 0.4);
+            box-shadow: 0 0 20px rgba(70, 230, 164, 0.1);
+        }
+
+        @@keyframes slideInUpdate {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .update-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .update-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .update-date {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .update-content {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        /* Update Modal */
+        .update-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .update-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .update-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 9, 0.9);
+            backdrop-filter: blur(8px);
+        }
+
+        .update-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 500px;
+            background: linear-gradient(180deg, rgba(20, 22, 35, 0.98) 0%, rgba(12, 14, 25, 0.98) 100%);
+            border: 1px solid rgba(70, 230, 164, 0.2);
+            border-radius: 20px;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .update-modal.active .update-modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .update-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .update-modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .update-modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .update-modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .update-modal-body {
+            padding: 24px;
+        }
+
+        .update-form-group {
+            margin-bottom: 16px;
+        }
+
+        .update-form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .update-form-group input,
+        .update-form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            resize: vertical;
+        }
+
+        .update-form-group input:focus,
+        .update-form-group textarea:focus {
+            outline: none;
+            border-color: rgba(70, 230, 164, 0.5);
+            background: rgba(70, 230, 164, 0.05);
+        }
+
+        .update-form-group input::placeholder,
+        .update-form-group textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .update-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-update-cancel {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-update-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-update-submit {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #46e6a4 0%, #22d3ee 100%);
+            border: none;
+            border-radius: 10px;
+            color: #050509;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-update-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(70, 230, 164, 0.4);
+        }
+
+        .btn-update-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
     </style>
 }
