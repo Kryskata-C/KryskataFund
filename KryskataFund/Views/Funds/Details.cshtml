@@ -4,6 +4,8 @@
     var progressPercent = Model.ProgressPercent;
     var isOverfunded = Model.RaisedAmount > Model.GoalAmount;
     var statusText = isOverfunded ? $"{progressPercent}% funded" : Model.DaysLeft == 0 ? "Ended" : $"{Model.DaysLeft} days left";
+    var isSignedIn = ViewBag.IsSignedIn ?? false;
+    var signInUrl = Url.Action("SignIn", "Account", new { returnUrl = Context.Request.Path });
 }
 
 <div class="page-root">
@@ -234,8 +236,18 @@
             });
 
             // Handle donate button click
+            const isSignedIn = @(isSignedIn ? "true" : "false");
+            const signInUrl = '@Html.Raw(signInUrl)';
+
             donateBtn.addEventListener('click', function() {
                 if (currentAmount > 0) {
+                    // Check if user is signed in
+                    if (!isSignedIn) {
+                        // Redirect to sign in page
+                        window.location.href = signInUrl;
+                        return;
+                    }
+
                     // Add a pulse animation
                     this.classList.add('pulse');
                     setTimeout(() => this.classList.remove('pulse'), 300);
