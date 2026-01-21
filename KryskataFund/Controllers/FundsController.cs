@@ -107,5 +107,24 @@ namespace KryskataFund.Controllers
 
             return View(fund);
         }
+
+        public IActionResult Donate(int id, int amount)
+        {
+            // Check if user is signed in
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", "Account", new { returnUrl = $"/Funds/Donate?id={id}&amount={amount}" });
+            }
+
+            var fund = _fakeFunds.FirstOrDefault(f => f.Id == id);
+
+            if (fund == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Amount = amount;
+            return View(fund);
+        }
     }
 }
