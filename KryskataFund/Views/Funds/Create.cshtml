@@ -1,4 +1,5 @@
-﻿@{
+@model KryskataFund.Models.CreateFundViewModel
+@{
     ViewData["Title"] = "Create a fund";
 }
 
@@ -66,13 +67,25 @@
                 <h2>Fund details</h2>
                 <p>Everything you enter here will appear on your public campaign page.</p>
 
-                <form method="post" asp-controller="Funds" asp-action="Create">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="form-errors" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px 16px; margin-bottom: 20px;">
+                        <ul style="list-style: none; margin: 0; padding: 0; color: #fca5a5; font-size: 13px;">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li style="margin-bottom: 4px;">@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form method="post" asp-controller="Funds" asp-action="Create" enctype="multipart/form-data">
                     <div class="form-grid">
                         <div class="form-field form-field--full">
                             <label class="form-label" for="Title">
                                 Title <span>*</span>
                             </label>
-                            <input class="form-input" id="Title" name="Title" placeholder="Help me launch my first project" />
+                            <input class="form-input" id="Title" name="Title" asp-for="Title" placeholder="Help me launch my first project" />
                             <div class="form-help">
                                 Keep it short, clear and specific. This is the first thing people will see.
                             </div>
@@ -82,9 +95,9 @@
                             <label class="form-label" for="GoalAmount">
                                 Goal amount (€) <span>*</span>
                             </label>
-                            <input class="form-input" id="GoalAmount" name="GoalAmount" type="number" min="1" step="1" placeholder="5000" />
+                            <input class="form-input" id="GoalAmount" name="GoalAmount" asp-for="GoalAmount" type="number" min="100" max="1000000" step="1" placeholder="5000" />
                             <div class="form-help">
-                                How much do you want to raise in total?
+                                How much do you want to raise? (€100 - €1,000,000)
                             </div>
                         </div>
 
@@ -92,14 +105,16 @@
                             <label class="form-label" for="Category">
                                 Category <span>*</span>
                             </label>
-                            <select class="form-select" id="Category" name="Category">
+                            <select class="form-select" id="Category" name="Category" asp-for="Category">
                                 <option value="">Select a category</option>
-                                <option>Education</option>
-                                <option>Health</option>
-                                <option>Animals</option>
-                                <option>Dreams & projects</option>
-                                <option>Emergency</option>
-                                <option>Just for fun</option>
+                                <option value="Education">Education</option>
+                                <option value="Health">Health</option>
+                                <option value="Animals">Animals</option>
+                                <option value="Creative">Creative</option>
+                                <option value="Dreams">Dreams</option>
+                                <option value="Just for fun">Just for fun</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Community">Community</option>
                             </select>
                             <div class="form-help">
                                 This helps people discover your fund.
@@ -107,22 +122,47 @@
                         </div>
 
                         <div class="form-field">
-                            <label class="form-label" for="Deadline">
-                                End date
+                            <label class="form-label" for="DurationDays">
+                                Campaign duration (days) <span>*</span>
                             </label>
-                            <input class="form-input" id="Deadline" name="Deadline" type="date" />
+                            <input class="form-input" id="DurationDays" name="DurationDays" asp-for="DurationDays" type="number" min="1" max="90" value="30" />
                             <div class="form-help">
-                                Optional. Leave empty for an open-ended campaign.
+                                How long should your campaign run? (1-90 days)
                             </div>
                         </div>
 
                         <div class="form-field form-field--full">
-                            <label class="form-label" for="ImageUrl">
-                                Cover image URL
+                            <label class="form-label">
+                                Cover image <span style="color: var(--text-muted); font-weight: 400;">(URL or file)</span>
                             </label>
-                            <input class="form-input" id="ImageUrl" name="ImageUrl" placeholder="https://example.com/my-cover-image.jpg" />
-                            <div class="form-help">
-                                Use a clear image that represents your story (you can switch to file upload later in the project).
+
+                            <div class="image-upload-container" style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start;">
+                                <div style="flex: 1;">
+                                    <input class="form-input" id="ImageUrl" name="ImageUrl" asp-for="ImageUrl" placeholder="https://example.com/my-cover-image.jpg" />
+                                    <div class="form-help" style="margin-top: 6px;">
+                                        Paste an image URL
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; padding-top: 12px; color: var(--text-softer); font-size: 12px;">
+                                    OR
+                                </div>
+
+                                <div style="flex: 1;">
+                                    <div id="dropZone" class="drop-zone" style="border: 2px dashed rgba(70, 230, 164, 0.3); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: rgba(70, 230, 164, 0.05);">
+                                        <input type="file" id="ImageFile" name="ImageFile" accept="image/*" style="display: none;" />
+                                        <div id="dropZoneContent">
+                                            <div style="font-size: 24px; margin-bottom: 8px;">📁</div>
+                                            <div style="color: var(--text-muted); font-size: 13px;">Drop image here or click to upload</div>
+                                            <div style="color: var(--text-softer); font-size: 11px; margin-top: 4px;">PNG, JPG, GIF up to 5MB</div>
+                                        </div>
+                                        <div id="filePreview" style="display: none;">
+                                            <img id="previewImage" src="" alt="Preview" style="max-width: 100%; max-height: 120px; border-radius: 8px;" />
+                                            <div id="fileName" style="color: var(--text-muted); font-size: 12px; margin-top: 8px;"></div>
+                                            <button type="button" id="removeFile" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 4px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-top: 8px;">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -130,7 +170,7 @@
                             <label class="form-label" for="Description">
                                 Story <span>*</span>
                             </label>
-                            <textarea class="form-textarea" id="Description" name="Description" placeholder="Explain what you’re raising money for, why it matters, and how the funds will be used."></textarea>
+                            <textarea class="form-textarea" id="Description" name="Description" asp-for="Description" placeholder="Explain what you're raising money for, why it matters, and how the funds will be used. (Minimum 50 characters)"></textarea>
                             <div class="form-help">
                                 The more detail you give, the easier it is for people to trust and support you.
                             </div>
@@ -195,18 +235,117 @@
             const categorySelect = document.getElementById('Category');
             const descriptionInput = document.getElementById('Description');
 
-            const previewTitle = document.getElementById('PreviewTitle');
-            const previewMeta = document.getElementById('PreviewMeta');
-            const previewRaisedText = document.getElementById('PreviewRaisedText');
-            const previewGoalText = document.getElementById('PreviewGoalText');
-            const previewProgressFill = document.getElementById('PreviewProgressFill');
-            const previewDescriptionHint = document.getElementById('PreviewDescriptionHint');
+            const previewTitle = document.querySelector('.preview-title');
+            const previewMeta = document.querySelector('.preview-meta');
+            const previewRaisedText = document.querySelector('.preview-progress-labels span:first-child');
+            const previewGoalText = document.querySelector('.preview-progress-labels span:last-child');
+            const previewProgressFill = document.querySelector('.preview-progress-fill');
+            const previewDescriptionHint = document.querySelector('.preview-footer span:last-child');
+
+            // Drag and drop file upload
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('ImageFile');
+            const imageUrlInput = document.getElementById('ImageUrl');
+            const dropZoneContent = document.getElementById('dropZoneContent');
+            const filePreview = document.getElementById('filePreview');
+            const previewImage = document.getElementById('previewImage');
+            const fileName = document.getElementById('fileName');
+            const removeFile = document.getElementById('removeFile');
+
+            // Click to upload
+            dropZone.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // Drag over effect
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropZone.style.borderColor = 'rgba(70, 230, 164, 0.8)';
+                dropZone.style.background = 'rgba(70, 230, 164, 0.15)';
+            });
+
+            // Drag leave effect
+            dropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                dropZone.style.borderColor = 'rgba(70, 230, 164, 0.3)';
+                dropZone.style.background = 'rgba(70, 230, 164, 0.05)';
+            });
+
+            // Drop handler
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropZone.style.borderColor = 'rgba(70, 230, 164, 0.3)';
+                dropZone.style.background = 'rgba(70, 230, 164, 0.05)';
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files.length > 0) {
+                    handleFile(fileInput.files[0]);
+                }
+            });
+
+            // Handle file
+            function handleFile(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please upload an image file');
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+
+                // Clear URL input when file is selected
+                imageUrlInput.value = '';
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    fileName.textContent = file.name;
+                    dropZoneContent.style.display = 'none';
+                    filePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+
+                // Create a new FileList with this file
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+            }
+
+            // Remove file
+            removeFile.addEventListener('click', function(e) {
+                e.stopPropagation();
+                fileInput.value = '';
+                previewImage.src = '';
+                fileName.textContent = '';
+                dropZoneContent.style.display = 'block';
+                filePreview.style.display = 'none';
+            });
+
+            // Clear file when URL is entered
+            imageUrlInput.addEventListener('input', function() {
+                if (imageUrlInput.value.trim()) {
+                    fileInput.value = '';
+                    previewImage.src = '';
+                    fileName.textContent = '';
+                    dropZoneContent.style.display = 'block';
+                    filePreview.style.display = 'none';
+                }
+            });
 
             // Small helper to add a micro "pulse" animation
             function pulse(el) {
                 if (!el) return;
                 el.classList.remove('preview-pulse');
-                // Force reflow so animation can restart
                 void el.offsetWidth;
                 el.classList.add('preview-pulse');
             }
@@ -214,7 +353,6 @@
             // Live update title
             function updateTitle() {
                 if (!previewTitle) return;
-
                 const value = titleInput.value.trim();
                 previewTitle.textContent = value || 'Your campaign title will appear here';
                 pulse(previewTitle);
@@ -224,8 +362,7 @@
             function updateGoalAndMeta() {
                 const rawGoal = goalInput.value.trim();
                 const goal = parseFloat(rawGoal.replace(',', '.')) || 0;
-
-                const raised = 0; // For now always 0 in preview
+                const raised = 0;
                 const percent = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
 
                 if (previewRaisedText) {
@@ -233,12 +370,11 @@
                 }
 
                 if (previewGoalText) {
-                    previewGoalText.textContent = goal > 0 ? `Goal €${goal}` : 'Goal €0';
+                    previewGoalText.textContent = goal > 0 ? `Goal €${goal.toLocaleString()}` : 'Goal €0';
                 }
 
                 if (previewMeta) {
-                    previewMeta.textContent =
-                        `€${raised} raised • 0 supporters • ${percent}% of goal`;
+                    previewMeta.textContent = `€${raised} raised • 0 supporters • ${percent}% of goal`;
                 }
 
                 if (previewProgressFill) {
@@ -248,24 +384,20 @@
                 pulse(previewMeta);
             }
 
-            // Live update description-ish hint
+            // Live update description hint
             function updateDescription() {
                 if (!previewDescriptionHint) return;
-
                 const value = descriptionInput.value.trim();
-
                 if (!value) {
-                    previewDescriptionHint.textContent = 'Campaign goes here once it’s created';
+                    previewDescriptionHint.textContent = 'Campaign goes here once it\'s created';
                 } else {
-                    // Show a shortened preview
-                    const short = value.length > 80 ? value.substring(0, 80) + '…' : value;
+                    const short = value.length > 80 ? value.substring(0, 80) + '...' : value;
                     previewDescriptionHint.textContent = short;
                 }
-
                 pulse(previewDescriptionHint);
             }
 
-            // Optional: show category in meta if selected
+            // Show category in meta
             function updateCategory() {
                 const category = categorySelect.value;
                 const rawGoal = goalInput.value.trim();
@@ -292,7 +424,7 @@
             if (goalInput) {
                 goalInput.addEventListener('input', function () {
                     updateGoalAndMeta();
-                    updateCategory(); // keep meta in sync
+                    updateCategory();
                 });
                 updateGoalAndMeta();
             }
