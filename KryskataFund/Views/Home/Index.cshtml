@@ -274,52 +274,84 @@
 
     .btn-primary,
     .btn-ghost {
-        border-radius: var(--radius-pill);
-        padding: 9px 18px;
-        font-size: 13px;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 14px;
         font-weight: 600;
         border: none;
         cursor: pointer;
-        transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast), border var(--transition-fast);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         white-space: nowrap;
+        position: relative;
+        overflow: hidden;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, var(--accent-strong), #4da8ff);
+        background: linear-gradient(135deg, #46e6a4 0%, #22d3ee 50%, #4da8ff 100%);
+        background-size: 200% 200%;
         color: #050509;
-        box-shadow: 0 14px 30px rgba(70, 230, 164, 0.55);
-        position: relative;
-        overflow: hidden;
+        box-shadow:
+            0 4px 15px rgba(70, 230, 164, 0.4),
+            0 0 0 0 rgba(70, 230, 164, 0);
+        animation: gradientShift 4s ease infinite;
+    }
+
+    @@keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
     }
 
     .btn-primary::before {
         content: "";
         position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.4) 0, transparent 45%);
-        opacity: 0;
-        transition: opacity 0.2s ease-out;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
     }
 
     .btn-primary:hover {
-        transform: translateY(-1px) scale(1.01);
-        box-shadow: 0 18px 40px rgba(70, 230, 164, 0.7);
+        transform: translateY(-2px) scale(1.02);
+        box-shadow:
+            0 8px 25px rgba(70, 230, 164, 0.5),
+            0 0 30px rgba(70, 230, 164, 0.3);
     }
 
     .btn-primary:hover::before {
-        opacity: 1;
+        left: 100%;
+    }
+
+    .btn-primary:active {
+        transform: translateY(0) scale(0.98);
     }
 
     .btn-ghost {
-        background: transparent;
-        color: var(--text-muted);
-        border: 1px solid rgba(68, 70, 110, 0.85);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-main);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-ghost::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.1), rgba(56, 189, 248, 0.1));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: inherit;
     }
 
     .btn-ghost:hover {
-        background: rgba(24, 26, 45, 0.96);
-        color: var(--text-main);
-        transform: translateY(-1px);
+        border-color: rgba(70, 230, 164, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-ghost:hover::before {
+        opacity: 1;
     }
 
     /* Layout: hero + sidebar */
