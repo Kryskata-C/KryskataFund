@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -10,51 +10,43 @@
     <link rel="stylesheet" href="~/KryskataFund.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <header class="nav">
-            <div class="nav-left">
-                <a asp-area="" asp-controller="Home" asp-action="Index" class="brand-badge">
-                    <div class="brand-icon"></div>
-                    <div>
-                        <div class="brand-text-main">KryskataFund</div>
-                        <div class="brand-text-sub">crowdfunding made simple.</div>
-                    </div>
-                </a>
+    <div class="page-wrapper">
+        <header class="site-nav">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <a asp-area="" asp-controller="Home" asp-action="Index" class="brand">
+                        <div class="brand-icon"></div>
+                        <span class="brand-name">KryskataFund</span>
+                    </a>
+                </div>
 
-                <nav class="nav-links">
-                    <div class="nav-link nav-link--active">
-                        Discover
-                        <span class="nav-tag">Live</span>
-                    </div>
-                    <div class="nav-link">Categories</div>
-                    <div class="nav-link">Success wall</div>
-                    <div class="nav-link">How it works</div>
+                <nav class="nav-center">
+                    <a asp-controller="Home" asp-action="Index" class="nav-item nav-item--active">Discover</a>
+                    <a href="#" class="nav-item">Categories</a>
+                    <a href="#" class="nav-item">Success Stories</a>
+                    <a href="#" class="nav-item">How it works</a>
                 </nav>
-            </div>
 
-            <div class="nav-right">
-                <div class="nav-cta">
-                    <div class="nav-pill">
-                        <span class="nav-pill-dot"></span>
-                        192 people browsing campaigns
-                    </div>
-                    <button class="btn-ghost">Sign in</button>
-                    <a asp-controller="Funds" asp-action="Create" class="btn-primary">Make my fund</a>
+                <div class="nav-right">
+                    <button class="btn-signin">Sign in</button>
+                    <a asp-controller="Funds" asp-action="Create" class="btn-create">
+                        <span>+</span> Create Fund
+                    </a>
                 </div>
             </div>
         </header>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        <main class="main-content">
             @RenderBody()
         </main>
+
+        <footer class="site-footer">
+            <div class="footer-content">
+                &copy; 2025 KryskataFund - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
+        </footer>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - KryskataFund - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
