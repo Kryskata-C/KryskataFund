@@ -998,6 +998,14 @@ a {
         color: var(--text-muted);
     }
 
+.category-pill:hover:not(.category-pill--active) {
+    background: rgba(20, 25, 50, 0.98);
+    border-color: rgba(77, 168, 255, 0.6);
+    color: var(--text-main);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(77, 168, 255, 0.25);
+}
+
 .category-pill--active {
     border-color: rgba(70, 230, 164, 0.85);
     background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.24) 0, rgba(11, 15, 30, 0.98) 55%);
