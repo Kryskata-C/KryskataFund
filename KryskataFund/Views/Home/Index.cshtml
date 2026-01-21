@@ -6,6 +6,9 @@
     var selectedCategory = ViewBag.SelectedCategory as string;
     var totalRaised = ViewBag.TotalRaised ?? 0m;
     var liveCampaigns = ViewBag.LiveCampaigns ?? 0;
+    var todaysImpact = ViewBag.TodaysImpact ?? 0m;
+    var avgSupport = ViewBag.AvgSupport ?? 0m;
+    var topCategory = ViewBag.TopCategory as string ?? "None";
 
     // Define all possible categories
     var allCategories = new[] { "Education", "Health", "Animals", "Creative", "Dreams", "Just for fun", "Technology", "Community" };
@@ -1050,6 +1053,124 @@
         margin-left: auto;
     }
 
+    /* Live indicators */
+    .live-dot, .feed-live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+        display: inline-block;
+        margin-right: 6px;
+        animation: livePulse 2s ease-in-out infinite;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+
+    @@keyframes livePulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(0.9); }
+    }
+
+    .feed-live-indicator {
+        display: flex;
+        align-items: center;
+        font-size: 10px;
+        color: #22c55e;
+    }
+
+    .feed-loading {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-muted);
+        font-size: 11px;
+    }
+
+    .feed-empty {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-muted);
+        font-size: 11px;
+    }
+
+    .feed-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        color: #e5e7eb;
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: rgba(17, 24, 39, 0.98);
+        margin-bottom: 6px;
+        animation: feedFadeIn 0.4s ease;
+        transition: all 0.3s ease;
+    }
+
+    .feed-row:hover {
+        background: rgba(70, 230, 164, 0.1);
+    }
+
+    @@keyframes feedFadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .feed-row.new-activity {
+        animation: feedNew 0.5s ease;
+        background: rgba(70, 230, 164, 0.15);
+    }
+
+    @@keyframes feedNew {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+        }
+        50% {
+            transform: translateY(2px) scale(1.02);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .feed-pill--donation {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(74, 222, 128, 0.9));
+        color: #050509;
+    }
+
+    .feed-pill--fund {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(96, 165, 250, 0.9));
+        color: #050509;
+    }
+
+    .feed-pill--milestone {
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(192, 132, 252, 0.9));
+        color: #050509;
+    }
+
+    .feed-text {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .stat-update {
+        animation: statPop 0.5s ease;
+    }
+
+    @@keyframes statPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); color: #22c55e; }
+        100% { transform: scale(1); }
+    }
+
     /* Categories + main list */
     .section-header {
         display: flex;
@@ -1580,54 +1701,49 @@
                         <h2>Live stats</h2>
                         <span>Live overview of the platform.</span>
                     </div>
-                    <div class="sidebar-pill">
-                        Platform status: Online
+                    <div class="sidebar-pill" id="liveIndicator">
+                        <span class="live-dot"></span>
+                        Live
                     </div>
                 </div>
 
                 <div class="sidebar-grid">
                     <div class="sidebar-stat-card sidebar-stat-card--green">
-                        <div class="sidebar-stat-label">Today’s impact</div>
-                        <div class="sidebar-stat-value">€7,420</div>
-                        <div class="sidebar-stat-sub">Donations across all active funds</div>
+                        <div class="sidebar-stat-label">Today's impact</div>
+                        <div class="sidebar-stat-value" id="todaysImpact">€@(((decimal)todaysImpact).ToString("N0"))</div>
+                        <div class="sidebar-stat-sub">Donations made today</div>
                     </div>
                     <div class="sidebar-stat-card">
                         <div class="sidebar-stat-label">Avg. support</div>
-                        <div class="sidebar-stat-value">€26</div>
-                        <div class="sidebar-stat-sub">Per supporter</div>
+                        <div class="sidebar-stat-value" id="avgSupport">€@(((decimal)avgSupport).ToString("N0"))</div>
+                        <div class="sidebar-stat-sub">Per donation</div>
                     </div>
                 </div>
 
                 <div class="sidebar-pill-row">
                     <span class="chip chip--accent">
                         <span class="chip-dot"></span>
-                        Top category: Education
+                        Top category: @topCategory
                     </span>
-                    <span class="chip">Health & medical</span>
-                    <span class="chip">Creative projects</span>
+                    @{
+                        var otherCategories = categoryCounts.Where(c => c.Key != topCategory).OrderByDescending(c => c.Value).Take(2);
+                    }
+                    @foreach (var cat in otherCategories)
+                    {
+                        <span class="chip">@cat.Key</span>
+                    }
                 </div>
 
                 <div class="sidebar-feed">
                     <div class="sidebar-feed-header">
                         <span>Activity feed</span>
-                        <span>Updated in real time</span>
+                        <span class="feed-live-indicator">
+                            <span class="feed-live-dot"></span>
+                            Live
+                        </span>
                     </div>
-                    <div class="sidebar-feed-body">
-                        <div class="feed-row">
-                            <span class="feed-pill">New fund</span>
-                            <span>Maria launched “Laptop for uni”.</span>
-                            <span class="feed-time">• 2 min ago</span>
-                        </div>
-                        <div class="feed-row">
-                            <span class="feed-pill">Donation</span>
-                            <span><span class="feed-amount">€50</span> to “Help stray dogs in Sofia”.</span>
-                            <span class="feed-time">• 6 min ago</span>
-                        </div>
-                        <div class="feed-row">
-                            <span class="feed-pill">Milestone</span>
-                            <span>“Fix my gaming PC” hit 120% of goal.</span>
-                            <span class="feed-time">• 12 min ago</span>
-                        </div>
+                    <div class="sidebar-feed-body" id="activityFeed">
+                        <div class="feed-loading">Loading activity...</div>
                     </div>
                 </div>
             </aside>
@@ -1822,3 +1938,110 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityFeed = document.getElementById('activityFeed');
+            const todaysImpactEl = document.getElementById('todaysImpact');
+            const avgSupportEl = document.getElementById('avgSupport');
+
+            let lastActivityCount = 0;
+
+            // Function to truncate text
+            function truncate(str, max) {
+                return str.length > max ? str.substring(0, max) + '...' : str;
+            }
+
+            // Function to render activity feed
+            function renderActivity(activities) {
+                if (!activities || activities.length === 0) {
+                    activityFeed.innerHTML = '<div class="feed-empty">No activity yet. Be the first to donate!</div>';
+                    return;
+                }
+
+                let html = '';
+                activities.forEach((activity, index) => {
+                    const isNew = index === 0 && activities.length > lastActivityCount;
+                    const newClass = isNew ? 'new-activity' : '';
+
+                    if (activity.type === 'donation') {
+                        html += `
+                            <div class="feed-row ${newClass}">
+                                <span class="feed-pill feed-pill--donation">Donation</span>
+                                <span class="feed-text"><span class="feed-amount">€${activity.amount}</span> to "${truncate(activity.fundTitle, 20)}"</span>
+                                <span class="feed-time">• ${activity.timeAgo}</span>
+                            </div>
+                        `;
+                    } else if (activity.type === 'new_fund') {
+                        html += `
+                            <div class="feed-row ${newClass}">
+                                <span class="feed-pill feed-pill--fund">New fund</span>
+                                <span class="feed-text">${activity.creatorName} launched "${truncate(activity.fundTitle, 18)}"</span>
+                                <span class="feed-time">• ${activity.timeAgo}</span>
+                            </div>
+                        `;
+                    } else if (activity.type === 'milestone') {
+                        html += `
+                            <div class="feed-row ${newClass}">
+                                <span class="feed-pill feed-pill--milestone">Milestone</span>
+                                <span class="feed-text">"${truncate(activity.fundTitle, 18)}" hit ${activity.percent}%!</span>
+                                <span class="feed-time">• ${activity.timeAgo}</span>
+                            </div>
+                        `;
+                    }
+                });
+
+                activityFeed.innerHTML = html;
+                lastActivityCount = activities.length;
+            }
+
+            // Function to update stats
+            function updateStats(stats) {
+                const newImpact = '€' + stats.todaysImpact.toLocaleString();
+                const newAvg = '€' + stats.avgSupport.toLocaleString();
+
+                if (todaysImpactEl.textContent !== newImpact) {
+                    todaysImpactEl.textContent = newImpact;
+                    todaysImpactEl.classList.add('stat-update');
+                    setTimeout(() => todaysImpactEl.classList.remove('stat-update'), 500);
+                }
+
+                if (avgSupportEl.textContent !== newAvg) {
+                    avgSupportEl.textContent = newAvg;
+                    avgSupportEl.classList.add('stat-update');
+                    setTimeout(() => avgSupportEl.classList.remove('stat-update'), 500);
+                }
+            }
+
+            // Fetch activity feed
+            async function fetchActivity() {
+                try {
+                    const response = await fetch('/Home/GetRecentActivity');
+                    const activities = await response.json();
+                    renderActivity(activities);
+                } catch (error) {
+                    console.error('Error fetching activity:', error);
+                }
+            }
+
+            // Fetch live stats
+            async function fetchStats() {
+                try {
+                    const response = await fetch('/Home/GetLiveStats');
+                    const stats = await response.json();
+                    updateStats(stats);
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
+                }
+            }
+
+            // Initial fetch
+            fetchActivity();
+
+            // Poll every 5 seconds for real-time updates
+            setInterval(fetchActivity, 5000);
+            setInterval(fetchStats, 5000);
+        });
+    </script>
+}
