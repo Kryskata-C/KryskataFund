@@ -785,10 +785,15 @@ a {
 /* Sidebar: stats + mini feed */
 .sidebar-card {
     border-radius: 26px;
-    background: rgba(5, 6, 14, 0.96);
+    background:
+        radial-gradient(circle at top right, rgba(70, 230, 164, 0.08) 0, transparent 50%),
+        linear-gradient(180deg, rgba(12, 14, 25, 0.5) 0%, rgba(8, 10, 18, 0.4) 100%);
     padding: 16px 18px 18px;
-    border: 1px solid rgba(36, 38, 70, 0.9);
-    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(70, 230, 164, 0.12);
+    box-shadow:
+        0 4px 30px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
     display: flex;
     flex-direction: column;
     gap: 16px;
