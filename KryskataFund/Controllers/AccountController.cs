@@ -144,8 +144,54 @@ namespace KryskataFund.Controllers
             ViewBag.TotalRaised = totalRaised;
             ViewBag.TotalDonated = totalDonated;
             ViewBag.TotalSupporters = totalSupporters;
+            ViewBag.BuddyGlasses = user.BuddyGlasses;
+            ViewBag.BuddyHat = user.BuddyHat;
+            ViewBag.BuddyMask = user.BuddyMask;
 
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveBuddyCustomization(string? glasses, string? hat, string? mask)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Not signed in" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return Json(new { success = false, message = "User not found" });
+            }
+
+            user.BuddyGlasses = glasses;
+            user.BuddyHat = hat;
+            user.BuddyMask = mask;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        public IActionResult GetBuddyCustomization()
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { glasses = (string?)null, hat = (string?)null, mask = (string?)null });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return Json(new { glasses = (string?)null, hat = (string?)null, mask = (string?)null });
+            }
+
+            return Json(new { glasses = user.BuddyGlasses, hat = user.BuddyHat, mask = user.BuddyMask });
         }
 
         private static string HashPassword(string password)
