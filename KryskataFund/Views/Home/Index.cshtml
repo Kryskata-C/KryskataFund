@@ -1,6 +1,14 @@
 @model List<KryskataFund.Models.Fund>
 @{
     ViewData["Title"] = "KryskataFund – Home";
+    var categoryCounts = ViewBag.CategoryCounts as Dictionary<string, int> ?? new Dictionary<string, int>();
+    var totalCount = ViewBag.TotalCount ?? 0;
+    var selectedCategory = ViewBag.SelectedCategory as string;
+    var totalRaised = ViewBag.TotalRaised ?? 0m;
+    var liveCampaigns = ViewBag.LiveCampaigns ?? 0;
+
+    // Define all possible categories
+    var allCategories = new[] { "Education", "Health", "Animals", "Creative", "Dreams", "Just for fun", "Technology", "Community" };
 }
 
 <style>
@@ -1079,6 +1087,15 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        text-decoration: none;
+        font-size: 12px;
+    }
+
+    .category-pill:hover {
+        border-color: rgba(70, 230, 164, 0.5);
+        background: rgba(70, 230, 164, 0.1);
+        color: var(--text-main);
+        transform: translateY(-2px);
     }
 
     .category-pill span {
@@ -1087,13 +1104,24 @@
         border-radius: 999px;
         background: rgba(24, 27, 56, 1);
         color: var(--text-muted);
+        transition: all 0.2s ease;
+    }
+
+    .category-pill:hover span {
+        background: rgba(70, 230, 164, 0.2);
+        color: var(--accent);
     }
 
     .category-pill--active {
         border-color: rgba(70, 230, 164, 0.85);
         background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.24) 0, rgba(11, 15, 30, 0.98) 55%);
         color: var(--accent);
-        box-shadow: 0 12px 28px rgba(70, 230, 164, 0.5);
+        box-shadow: 0 8px 24px rgba(70, 230, 164, 0.3);
+    }
+
+    .category-pill--active:hover {
+        transform: none;
+        box-shadow: 0 8px 24px rgba(70, 230, 164, 0.4);
     }
 
     .category-pill--active span {
@@ -1519,15 +1547,15 @@
                         <div class="hero-meta">
                             <div class="hero-meta-block">
                                 <span class="meta-label">Total raised</span>
-                                <span class="meta-value">€184,230</span>
+                                <span class="meta-value">€@(((decimal)totalRaised).ToString("N0"))</span>
                             </div>
                             <div class="hero-meta-block">
                                 <span class="meta-label">Live campaigns</span>
-                                <span class="meta-value">127</span>
+                                <span class="meta-value">@liveCampaigns</span>
                             </div>
                             <div class="hero-meta-block">
-                                <span class="meta-label">Avg. time to create</span>
-                                <span class="meta-value">2 min</span>
+                                <span class="meta-label">Total campaigns</span>
+                                <span class="meta-value">@totalCount</span>
                             </div>
                         </div>
                     </div>
@@ -1609,30 +1637,26 @@
         <section>
             <div class="section-header">
                 <div class="section-title-block">
-                    <h2>Trending funds</h2>
-                    <span>Campaigns people are backing right now.</span>
+                    <h2>@(string.IsNullOrEmpty(selectedCategory) ? "All funds" : selectedCategory + " funds")</h2>
+                    <span>@(string.IsNullOrEmpty(selectedCategory) ? "Browse all campaigns" : $"Showing {Model.Count} campaigns in {selectedCategory}")</span>
                 </div>
                 <div class="category-row">
-                    <button class="category-pill category-pill--active">
+                    <a asp-controller="Home" asp-action="Index" class="category-pill @(string.IsNullOrEmpty(selectedCategory) ? "category-pill--active" : "")">
                         All
-                        <span>127</span>
-                    </button>
-                    <button class="category-pill">
-                        Education
-                        <span>34</span>
-                    </button>
-                    <button class="category-pill">
-                        Health
-                        <span>19</span>
-                    </button>
-                    <button class="category-pill">
-                        Animals
-                        <span>22</span>
-                    </button>
-                    <button class="category-pill">
-                        Dreams & projects
-                        <span>52</span>
-                    </button>
+                        <span>@totalCount</span>
+                    </a>
+                    @foreach (var cat in allCategories)
+                    {
+                        var count = categoryCounts.ContainsKey(cat) ? categoryCounts[cat] : 0;
+                        if (count > 0)
+                        {
+                            <a asp-controller="Home" asp-action="Index" asp-route-category="@cat"
+                               class="category-pill @(selectedCategory == cat ? "category-pill--active" : "")">
+                                @cat
+                                <span>@count</span>
+                            </a>
+                        }
+                    }
                 </div>
             </div>
 
@@ -1640,10 +1664,23 @@
                 @if (Model.Count == 0)
                 {
                     <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                        <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🚀</div>
-                        <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-main);">No funds yet</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Be the first to create a fund and start raising support!</p>
-                        <a asp-controller="Funds" asp-action="Create" class="btn-primary">Create the first fund</a>
+                        @if (!string.IsNullOrEmpty(selectedCategory))
+                        {
+                            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🔍</div>
+                            <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-main);">No @selectedCategory funds yet</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Be the first to create a fund in this category!</p>
+                            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                <a asp-controller="Funds" asp-action="Create" class="btn-primary">Create a fund</a>
+                                <a asp-controller="Home" asp-action="Index" class="btn-ghost">View all funds</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🚀</div>
+                            <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-main);">No funds yet</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 20px;">Be the first to create a fund and start raising support!</p>
+                            <a asp-controller="Funds" asp-action="Create" class="btn-primary">Create the first fund</a>
+                        }
                     </div>
                 }
                 @foreach (var fund in Model)
