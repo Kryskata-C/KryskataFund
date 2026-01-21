@@ -99,6 +99,9 @@
             const cardNumberInput = document.getElementById('cardNumber');
             const cardExpiryInput = document.getElementById('cardExpiry');
 
+            const fundId = @Model.Id;
+            const donationAmount = @amount;
+
             // Format card number with spaces
             cardNumberInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
@@ -116,24 +119,45 @@
             });
 
             // Handle form submit
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
                 // Start loading animation
                 payBtn.classList.add('loading');
                 payBtn.disabled = true;
 
-                // Simulate payment processing
-                setTimeout(() => {
-                    // Show success state on button
-                    payBtn.classList.remove('loading');
-                    payBtn.classList.add('success');
+                try {
+                    // Process the donation
+                    const response = await fetch('/Funds/ProcessDonation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `fundId=${fundId}&amount=${donationAmount}`
+                    });
 
-                    // After button animation, show overlay
-                    setTimeout(() => {
-                        successOverlay.classList.add('visible');
-                    }, 800);
-                }, 2000);
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Show success state on button
+                        payBtn.classList.remove('loading');
+                        payBtn.classList.add('success');
+
+                        // After button animation, show overlay
+                        setTimeout(() => {
+                            successOverlay.classList.add('visible');
+                        }, 800);
+                    } else {
+                        alert(result.message || 'Payment failed. Please try again.');
+                        payBtn.classList.remove('loading');
+                        payBtn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    payBtn.classList.remove('loading');
+                    payBtn.disabled = false;
+                }
             });
         });
     </script>
