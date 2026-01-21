@@ -106,6 +106,48 @@ namespace KryskataFund.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        public IActionResult Profile()
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", new { returnUrl = "/Account/Profile" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return RedirectToAction("SignOut");
+            }
+
+            // Get user's created funds
+            var createdFunds = _context.Funds
+                .Where(f => f.CreatorId == userId)
+                .OrderByDescending(f => f.CreatedAt)
+                .ToList();
+
+            // Get user's donations
+            var donations = _context.Donations
+                .Where(d => d.UserId == userId)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            // Calculate stats
+            var totalRaised = createdFunds.Sum(f => f.RaisedAmount);
+            var totalDonated = donations.Sum(d => d.Amount);
+            var totalSupporters = createdFunds.Sum(f => f.SupportersCount);
+
+            ViewBag.User = user;
+            ViewBag.CreatedFunds = createdFunds;
+            ViewBag.Donations = donations;
+            ViewBag.TotalRaised = totalRaised;
+            ViewBag.TotalDonated = totalDonated;
+            ViewBag.TotalSupporters = totalSupporters;
+
+            return View();
+        }
+
         private static string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
