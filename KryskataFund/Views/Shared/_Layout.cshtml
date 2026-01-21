@@ -37,7 +37,7 @@
                     </a>
                     @if (Context.Session.GetString("IsSignedIn") == "true")
                     {
-                        <div class="profile-buddy-container">
+                        <div class="profile-buddy-container" id="buddyContainer">
                             <div class="profile-buddy" id="profileBuddy">
                                 <!-- Cute blob character -->
                                 <div class="buddy-body">
@@ -57,17 +57,44 @@
                                 </div>
                                 <div class="buddy-glow"></div>
                             </div>
-                            <div class="profile-dropdown" id="profileDropdown">
-                                <div class="dropdown-header">
-                                    <span class="dropdown-email">@Context.Session.GetString("UserEmail")</span>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <a asp-controller="Account" asp-action="SignOut" class="dropdown-item">
-                                    <span class="dropdown-icon">👋</span>
-                                    Sign out
-                                </a>
+                            <!-- Portal/vortex effect -->
+                            <div class="buddy-portal" id="buddyPortal">
+                                <div class="portal-ring"></div>
+                                <div class="portal-ring"></div>
+                                <div class="portal-ring"></div>
+                                <div class="portal-core"></div>
                             </div>
+                            <!-- Particles for sucking effect -->
+                            <div class="buddy-particles" id="buddyParticles"></div>
                         </div>
+                        <script>
+                            document.getElementById('profileBuddy').addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                const container = document.getElementById('buddyContainer');
+                                const buddy = document.getElementById('profileBuddy');
+                                const portal = document.getElementById('buddyPortal');
+                                const particles = document.getElementById('buddyParticles');
+
+                                // Create particles
+                                for (let i = 0; i < 12; i++) {
+                                    const particle = document.createElement('div');
+                                    particle.className = 'buddy-particle';
+                                    particle.style.setProperty('--angle', (i * 30) + 'deg');
+                                    particle.style.setProperty('--delay', (i * 0.05) + 's');
+                                    particles.appendChild(particle);
+                                }
+
+                                // Activate portal and suck-in animation
+                                portal.classList.add('active');
+                                buddy.classList.add('sucking-in');
+
+                                // Navigate after animation
+                                setTimeout(() => {
+                                    sessionStorage.setItem('buddyEmerging', 'true');
+                                    window.location.href = '/Account/Profile';
+                                }, 800);
+                            });
+                        </script>
                     }
                 </div>
             </div>
