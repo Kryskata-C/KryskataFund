@@ -2769,10 +2769,10 @@ a {
 
 /* Password requirements */
 .password-requirements {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 16px;
+    margin-top: 12px;
     max-height: 0;
     opacity: 0;
     overflow: hidden;
@@ -2780,7 +2780,7 @@ a {
 }
 
 .password-requirements.visible {
-    max-height: 100px;
+    max-height: 80px;
     opacity: 1;
 }
 
@@ -2791,25 +2791,55 @@ a {
 }
 
 .requirement {
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(255, 73, 118, 0.1);
-    border: 1px solid rgba(255, 73, 118, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-softer);
+    transition: all 0.25s ease;
+}
+
+.req-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    background: rgba(255, 73, 118, 0.15);
+    border: 1.5px solid var(--accent-danger);
     color: var(--accent-danger);
-    transition: all 0.3s ease;
-    opacity: 1;
-    transform: scale(1);
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+}
+
+.req-icon::after {
+    content: "✕";
+    font-weight: 700;
+}
+
+.req-text {
+    transition: all 0.25s ease;
 }
 
 .requirement.met {
-    opacity: 0;
-    transform: scale(0.8);
-    max-width: 0;
-    padding: 0;
-    margin: 0;
-    border: none;
-    overflow: hidden;
+    color: var(--accent);
+}
+
+.requirement.met .req-icon {
+    background: rgba(70, 230, 164, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.requirement.met .req-icon::after {
+    content: "✓";
+}
+
+.requirement.met .req-text {
+    text-decoration: line-through;
+    opacity: 0.5;
 }
 
 /* Auth error message */
