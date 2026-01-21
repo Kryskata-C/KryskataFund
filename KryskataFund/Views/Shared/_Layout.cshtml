@@ -28,7 +28,15 @@
                 </nav>
 
                 <div class="nav-right">
-                    <button class="btn-signin">Sign in</button>
+                    @if (Context.Session.GetString("IsSignedIn") == "true")
+                    {
+                        <span class="nav-user-email">@Context.Session.GetString("UserEmail")</span>
+                        <a asp-controller="Account" asp-action="SignOut" class="btn-signin">Sign out</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="SignIn" class="btn-signin">Sign in</a>
+                    }
                     <a asp-controller="Funds" asp-action="Create" class="btn-create">
                         <span>+</span> Create Fund
                     </a>
