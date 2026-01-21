@@ -19,6 +19,7 @@ namespace KryskataFund.Controllers
         public IActionResult Index(string? category = null)
         {
             var allFunds = _context.Funds.ToList();
+            var allDonations = _context.Donations.ToList();
 
             // Get category counts
             var categoryCounts = allFunds
@@ -33,12 +34,113 @@ namespace KryskataFund.Controllers
             ViewBag.TotalRaised = allFunds.Sum(f => f.RaisedAmount);
             ViewBag.LiveCampaigns = allFunds.Count(f => f.DaysLeft > 0);
 
+            // Calculate today's impact (donations made today)
+            var today = DateTime.UtcNow.Date;
+            var todaysDonations = allDonations.Where(d => d.CreatedAt.Date == today).ToList();
+            ViewBag.TodaysImpact = todaysDonations.Sum(d => d.Amount);
+
+            // Calculate average support per donation
+            ViewBag.AvgSupport = allDonations.Count > 0
+                ? Math.Round(allDonations.Average(d => d.Amount), 0)
+                : 0;
+
+            // Get top category
+            var topCategory = categoryCounts.OrderByDescending(c => c.Value).FirstOrDefault();
+            ViewBag.TopCategory = topCategory.Key ?? "None";
+
             // Filter funds if category is selected
             var funds = string.IsNullOrEmpty(category)
                 ? allFunds.OrderByDescending(f => f.CreatedAt).ToList()
                 : allFunds.Where(f => f.Category == category).OrderByDescending(f => f.CreatedAt).ToList();
 
             return View(funds);
+        }
+
+        public IActionResult GetRecentActivity()
+        {
+            var activities = new List<object>();
+
+            // Get recent donations (last 10)
+            var recentDonations = _context.Donations
+                .OrderByDescending(d => d.CreatedAt)
+                .Take(10)
+                .ToList();
+
+            foreach (var donation in recentDonations)
+            {
+                var fund = _context.Funds.FirstOrDefault(f => f.Id == donation.FundId);
+                activities.Add(new
+                {
+                    type = "donation",
+                    donorName = donation.DonorName,
+                    amount = donation.Amount,
+                    fundTitle = fund?.Title ?? "Unknown fund",
+                    timeAgo = GetTimeAgo(donation.CreatedAt),
+                    timestamp = donation.CreatedAt
+                });
+            }
+
+            // Get recent funds (last 5)
+            var recentFunds = _context.Funds
+                .OrderByDescending(f => f.CreatedAt)
+                .Take(5)
+                .ToList();
+
+            foreach (var fund in recentFunds)
+            {
+                activities.Add(new
+                {
+                    type = "new_fund",
+                    creatorName = fund.CreatorName,
+                    fundTitle = fund.Title,
+                    timeAgo = GetTimeAgo(fund.CreatedAt),
+                    timestamp = fund.CreatedAt
+                });
+
+                // Check for milestones (100% funded)
+                if (fund.ProgressPercent >= 100)
+                {
+                    activities.Add(new
+                    {
+                        type = "milestone",
+                        fundTitle = fund.Title,
+                        percent = fund.ProgressPercent,
+                        timeAgo = GetTimeAgo(fund.CreatedAt),
+                        timestamp = fund.CreatedAt
+                    });
+                }
+            }
+
+            // Sort by timestamp and take most recent
+            var sortedActivities = activities
+                .OrderByDescending(a => ((dynamic)a).timestamp)
+                .Take(5)
+                .ToList();
+
+            return Json(sortedActivities);
+        }
+
+        public IActionResult GetLiveStats()
+        {
+            var allDonations = _context.Donations.ToList();
+            var today = DateTime.UtcNow.Date;
+            var todaysDonations = allDonations.Where(d => d.CreatedAt.Date == today).ToList();
+
+            return Json(new
+            {
+                todaysImpact = todaysDonations.Sum(d => d.Amount),
+                avgSupport = allDonations.Count > 0 ? Math.Round(allDonations.Average(d => d.Amount), 0) : 0
+            });
+        }
+
+        private static string GetTimeAgo(DateTime dateTime)
+        {
+            var timeSpan = DateTime.UtcNow - dateTime;
+            if (timeSpan.TotalSeconds < 60) return "just now";
+            if (timeSpan.TotalMinutes < 60) return $"{(int)timeSpan.TotalMinutes} min ago";
+            if (timeSpan.TotalHours < 24) return $"{(int)timeSpan.TotalHours}h ago";
+            if (timeSpan.TotalDays < 7) return $"{(int)timeSpan.TotalDays}d ago";
+            return dateTime.ToString("MMM d");
         }
 
         public IActionResult Privacy()
