@@ -2842,6 +2842,359 @@ a {
     opacity: 0.5;
 }
 
+/* ============================================
+   PAYMENT PAGE STYLES
+   ============================================ */
+
+.payment-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding: 40px 20px;
+}
+
+.payment-card {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at top left, rgba(70, 230, 164, 0.08) 0, transparent 50%),
+        linear-gradient(180deg, rgba(15, 18, 30, 0.6) 0%, rgba(8, 10, 18, 0.5) 100%);
+    border: 1px solid rgba(70, 230, 164, 0.12);
+    box-shadow:
+        0 4px 30px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    padding: 32px;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.payment-header {
+    margin-bottom: 24px;
+}
+
+.payment-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    transition: color 0.2s ease;
+}
+
+.payment-back:hover {
+    color: var(--accent);
+}
+
+.payment-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.payment-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.payment-amount-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(70, 230, 164, 0.1), rgba(56, 189, 248, 0.08));
+    border: 1px solid rgba(70, 230, 164, 0.2);
+    margin-bottom: 28px;
+}
+
+.payment-amount-label {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.payment-amount-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.card-input-wrapper {
+    position: relative;
+}
+
+.card-input-wrapper .form-input {
+    padding-right: 80px;
+}
+
+.card-icons {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 6px;
+}
+
+.card-icon {
+    width: 32px;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.card-visa {
+    background: linear-gradient(135deg, #1a1f71, #0d47a1);
+}
+
+.card-mastercard {
+    background: linear-gradient(135deg, #eb001b, #f79e1b);
+}
+
+/* Pay Button with Animation */
+.btn-pay {
+    position: relative;
+    width: 100%;
+    padding: 18px 24px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent-strong), #22c55e);
+    border: none;
+    color: #050509;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(70, 230, 164, 0.35);
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.btn-pay:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(70, 230, 164, 0.45);
+}
+
+.btn-pay:disabled {
+    cursor: not-allowed;
+}
+
+.btn-pay-text,
+.btn-pay-loader,
+.btn-pay-success {
+    transition: all 0.4s ease;
+}
+
+.btn-pay-loader,
+.btn-pay-success {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+}
+
+/* Loading State */
+.btn-pay.loading .btn-pay-text {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.btn-pay.loading .btn-pay-loader {
+    opacity: 1;
+}
+
+.loader-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(5, 5, 9, 0.2);
+    border-top-color: #050509;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Success State */
+.btn-pay.success {
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+}
+
+.btn-pay.success .btn-pay-text {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.btn-pay.success .btn-pay-success {
+    opacity: 1;
+}
+
+.checkmark {
+    width: 32px;
+    height: 32px;
+}
+
+.checkmark-circle {
+    stroke: #050509;
+    stroke-width: 2;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: strokeCircle 0.6s ease-out forwards;
+}
+
+.checkmark-check {
+    stroke: #050509;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: strokeCheck 0.3s ease-out 0.4s forwards;
+}
+
+@keyframes strokeCircle {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes strokeCheck {
+    to { stroke-dashoffset: 0; }
+}
+
+.payment-security {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--text-softer);
+}
+
+.security-icon {
+    font-size: 14px;
+}
+
+/* Success Overlay */
+.payment-success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 9, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+    z-index: 1000;
+}
+
+.payment-success-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.success-content {
+    text-align: center;
+    animation: successPop 0.5s ease-out;
+}
+
+@keyframes successPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.success-checkmark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #4ade80);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 40px rgba(34, 197, 94, 0.5);
+}
+
+.success-checkmark svg {
+    width: 40px;
+    height: 40px;
+}
+
+.success-checkmark circle {
+    stroke: #050509;
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: strokeCircle 0.6s ease-out 0.2s forwards;
+}
+
+.success-checkmark path {
+    stroke: #050509;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: strokeCheck 0.3s ease-out 0.6s forwards;
+}
+
+.success-content h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.success-content p {
+    font-size: 16px;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+}
+
+.btn-back-home {
+    display: inline-block;
+    padding: 14px 32px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-back-home:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
 /* Auth error message */
 .auth-error {
     padding: 12px 16px;
