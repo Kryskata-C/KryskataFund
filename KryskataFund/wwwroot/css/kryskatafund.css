@@ -360,6 +360,27 @@ a {
     }
 }
 
+/* Entrance animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 /* Hero card */
 .hero-card {
     border-radius: 32px;
@@ -371,6 +392,7 @@ a {
     overflow: hidden;
     isolation: isolate;
     min-height: 320px;
+    animation: fadeInUp 0.6s ease-out;
 }
 
     .hero-card::before {
@@ -745,6 +767,7 @@ a {
     gap: 16px;
     position: relative;
     overflow: hidden;
+    animation: fadeInUp 0.6s ease-out 0.1s both;
 }
 
     .sidebar-card::before {
@@ -1048,7 +1071,16 @@ a {
     cursor: pointer;
     position: relative;
     transition: transform var(--transition-med), box-shadow var(--transition-med), border var(--transition-med), background var(--transition-med);
+    animation: fadeInUp 0.5s ease-out both;
 }
+
+/* Staggered entrance for fund cards */
+.fund-card:nth-child(1) { animation-delay: 0.1s; }
+.fund-card:nth-child(2) { animation-delay: 0.15s; }
+.fund-card:nth-child(3) { animation-delay: 0.2s; }
+.fund-card:nth-child(4) { animation-delay: 0.25s; }
+.fund-card:nth-child(5) { animation-delay: 0.3s; }
+.fund-card:nth-child(6) { animation-delay: 0.35s; }
 
     .fund-card:hover {
         transform: translateY(-6px) translateZ(0) scale(1.01);
