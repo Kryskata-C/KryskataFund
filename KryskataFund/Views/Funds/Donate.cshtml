@@ -1,0 +1,140 @@
+@model KryskataFund.Models.Fund
+@{
+    ViewData["Title"] = "Complete Donation";
+    var amount = ViewBag.Amount ?? 0;
+}
+
+<div class="page-root">
+    <div class="payment-container">
+        <div class="payment-card">
+            <!-- Payment Header -->
+            <div class="payment-header">
+                <a asp-action="Details" asp-route-id="@Model.Id" class="payment-back">
+                    <span>←</span> Back
+                </a>
+                <h1 class="payment-title">Complete your donation</h1>
+                <p class="payment-subtitle">Supporting: @Model.Title</p>
+            </div>
+
+            <!-- Amount Display -->
+            <div class="payment-amount-box">
+                <span class="payment-amount-label">Donation amount</span>
+                <span class="payment-amount-value">€@amount</span>
+            </div>
+
+            <!-- Card Form -->
+            <form id="paymentForm" class="payment-form">
+                <div class="form-group">
+                    <label class="form-label">Cardholder Name</label>
+                    <input type="text" class="form-input" id="cardName" placeholder="Name on card" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Card Number</label>
+                    <div class="card-input-wrapper">
+                        <input type="text" class="form-input card-number-input" id="cardNumber"
+                               placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        <div class="card-icons">
+                            <span class="card-icon card-visa"></span>
+                            <span class="card-icon card-mastercard"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="text" class="form-input" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CVV</label>
+                        <input type="text" class="form-input" id="cardCvv" placeholder="123" maxlength="4" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-pay" id="payBtn">
+                    <span class="btn-pay-text">Pay €@amount</span>
+                    <div class="btn-pay-loader">
+                        <div class="loader-spinner"></div>
+                    </div>
+                    <div class="btn-pay-success">
+                        <svg class="checkmark" viewBox="0 0 52 52">
+                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </button>
+            </form>
+
+            <!-- Security Note -->
+            <div class="payment-security">
+                <span class="security-icon">🔒</span>
+                <span>Your payment information is secure and encrypted</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Overlay -->
+<div class="payment-success-overlay" id="successOverlay">
+    <div class="success-content">
+        <div class="success-checkmark">
+            <svg viewBox="0 0 52 52">
+                <circle cx="26" cy="26" r="25" fill="none"/>
+                <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+        </div>
+        <h2>Thank you!</h2>
+        <p>Your donation of €@amount has been received</p>
+        <a asp-controller="Home" asp-action="Index" class="btn-back-home">Back to campaigns</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('paymentForm');
+            const payBtn = document.getElementById('payBtn');
+            const successOverlay = document.getElementById('successOverlay');
+            const cardNumberInput = document.getElementById('cardNumber');
+            const cardExpiryInput = document.getElementById('cardExpiry');
+
+            // Format card number with spaces
+            cardNumberInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+                let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
+                e.target.value = formatted;
+            });
+
+            // Format expiry date
+            cardExpiryInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                }
+                e.target.value = value;
+            });
+
+            // Handle form submit
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Start loading animation
+                payBtn.classList.add('loading');
+                payBtn.disabled = true;
+
+                // Simulate payment processing
+                setTimeout(() => {
+                    // Show success state on button
+                    payBtn.classList.remove('loading');
+                    payBtn.classList.add('success');
+
+                    // After button animation, show overlay
+                    setTimeout(() => {
+                        successOverlay.classList.add('visible');
+                    }, 800);
+                }, 2000);
+            });
+        });
+    </script>
+}
