@@ -1,0 +1,230 @@
+@{
+    ViewData["Title"] = "My Profile";
+    var user = ViewBag.User as KryskataFund.Models.User;
+    var createdFunds = ViewBag.CreatedFunds as List<KryskataFund.Models.Fund> ?? new List<KryskataFund.Models.Fund>();
+    var donations = ViewBag.Donations as List<KryskataFund.Models.Donation> ?? new List<KryskataFund.Models.Donation>();
+    var totalRaised = ViewBag.TotalRaised ?? 0m;
+    var totalDonated = ViewBag.TotalDonated ?? 0m;
+    var totalSupporters = ViewBag.TotalSupporters ?? 0;
+    var memberSince = user?.CreatedAt.ToString("MMMM yyyy") ?? "Unknown";
+    var username = "@" + (user?.Email.Split('@')[0] ?? "user");
+}
+
+<div class="profile-page">
+    <!-- Emergence animation container -->
+    <div class="emergence-container" id="emergenceContainer">
+        <div class="emergence-portal">
+            <div class="emergence-ring"></div>
+            <div class="emergence-ring"></div>
+            <div class="emergence-ring"></div>
+        </div>
+        <div class="emergence-buddy" id="emergenceBuddy">
+            <div class="buddy-body large">
+                <div class="buddy-face">
+                    <div class="buddy-eyes">
+                        <div class="buddy-eye left">
+                            <div class="buddy-pupil"></div>
+                        </div>
+                        <div class="buddy-eye right">
+                            <div class="buddy-pupil"></div>
+                        </div>
+                    </div>
+                    <div class="buddy-mouth"></div>
+                    <div class="buddy-blush left"></div>
+                    <div class="buddy-blush right"></div>
+                </div>
+            </div>
+            <div class="buddy-glow large"></div>
+        </div>
+        <div class="emergence-particles" id="emergenceParticles"></div>
+    </div>
+
+    <!-- Profile content (hidden until animation completes) -->
+    <div class="profile-content" id="profileContent">
+        <div class="profile-header">
+            <a asp-controller="Home" asp-action="Index" class="back-link">
+                <span class="back-arrow">←</span>
+                Back to campaigns
+            </a>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Main profile card -->
+            <section class="profile-card profile-main">
+                <div class="profile-avatar-section">
+                    <div class="profile-avatar-buddy">
+                        <div class="buddy-body medium">
+                            <div class="buddy-face">
+                                <div class="buddy-eyes">
+                                    <div class="buddy-eye left">
+                                        <div class="buddy-pupil"></div>
+                                    </div>
+                                    <div class="buddy-eye right">
+                                        <div class="buddy-pupil"></div>
+                                    </div>
+                                </div>
+                                <div class="buddy-mouth"></div>
+                                <div class="buddy-blush left"></div>
+                                <div class="buddy-blush right"></div>
+                            </div>
+                        </div>
+                        <div class="buddy-glow medium"></div>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h1 class="profile-username">@username</h1>
+                    <p class="profile-email">@user?.Email</p>
+                    <div class="profile-meta">
+                        <span class="profile-badge">
+                            <span class="badge-icon">✨</span>
+                            Member since @memberSince
+                        </span>
+                    </div>
+                </div>
+
+                <div class="profile-stats-grid">
+                    <div class="profile-stat">
+                        <span class="stat-value">€@(((decimal)totalRaised).ToString("N0"))</span>
+                        <span class="stat-label">Total raised</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value">€@(((decimal)totalDonated).ToString("N0"))</span>
+                        <span class="stat-label">Total donated</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value">@createdFunds.Count</span>
+                        <span class="stat-label">Funds created</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value">@donations.Count</span>
+                        <span class="stat-label">Donations made</span>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <a asp-controller="Funds" asp-action="Create" class="btn-profile-action primary">
+                        <span>+</span> Create New Fund
+                    </a>
+                    <a asp-controller="Account" asp-action="SignOut" class="btn-profile-action secondary">
+                        <span>👋</span> Sign Out
+                    </a>
+                </div>
+            </section>
+
+            <!-- My Funds section -->
+            <section class="profile-card profile-funds">
+                <div class="section-header">
+                    <h2>My Funds</h2>
+                    <span class="section-count">@createdFunds.Count funds</span>
+                </div>
+
+                @if (createdFunds.Count == 0)
+                {
+                    <div class="empty-section">
+                        <div class="empty-icon">🚀</div>
+                        <p>You haven't created any funds yet</p>
+                        <a asp-controller="Funds" asp-action="Create" class="btn-empty">Create your first fund</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="funds-list">
+                        @foreach (var fund in createdFunds.Take(5))
+                        {
+                            <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="fund-item">
+                                <div class="fund-item-image" style="@(fund.ImageUrl != null ? $"background: url('{fund.ImageUrl}') center/cover;" : $"background: linear-gradient(135deg, {fund.CategoryColor}, #4da8ff);")"></div>
+                                <div class="fund-item-info">
+                                    <h3>@fund.Title</h3>
+                                    <div class="fund-item-meta">
+                                        <span class="fund-item-progress">@fund.ProgressPercent% funded</span>
+                                        <span>€@fund.RaisedAmount.ToString("N0") raised</span>
+                                    </div>
+                                    <div class="fund-item-bar">
+                                        <div class="fund-item-fill" style="width: @Math.Min(100, fund.ProgressPercent)%;"></div>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </section>
+
+            <!-- My Donations section -->
+            <section class="profile-card profile-donations">
+                <div class="section-header">
+                    <h2>My Donations</h2>
+                    <span class="section-count">@donations.Count donations</span>
+                </div>
+
+                @if (donations.Count == 0)
+                {
+                    <div class="empty-section">
+                        <div class="empty-icon">💚</div>
+                        <p>You haven't made any donations yet</p>
+                        <a asp-controller="Home" asp-action="Index" class="btn-empty">Discover campaigns</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="donations-list">
+                        @foreach (var donation in donations.Take(5))
+                        {
+                            var fund = createdFunds.FirstOrDefault(f => f.Id == donation.FundId);
+                            <div class="donation-item">
+                                <div class="donation-amount">€@donation.Amount.ToString("N0")</div>
+                                <div class="donation-info">
+                                    <span class="donation-fund">Fund #@donation.FundId</span>
+                                    <span class="donation-date">@donation.CreatedAt.ToString("MMM d, yyyy")</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shouldAnimate = sessionStorage.getItem('buddyEmerging') === 'true';
+            const emergenceContainer = document.getElementById('emergenceContainer');
+            const profileContent = document.getElementById('profileContent');
+            const emergenceBuddy = document.getElementById('emergenceBuddy');
+            const emergenceParticles = document.getElementById('emergenceParticles');
+
+            if (shouldAnimate) {
+                sessionStorage.removeItem('buddyEmerging');
+
+                // Create emergence particles
+                for (let i = 0; i < 16; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'emergence-particle';
+                    particle.style.setProperty('--angle', (i * 22.5) + 'deg');
+                    particle.style.setProperty('--delay', (i * 0.03) + 's');
+                    emergenceParticles.appendChild(particle);
+                }
+
+                // Show emergence animation
+                emergenceContainer.classList.add('active');
+                emergenceBuddy.classList.add('emerging');
+
+                // After emergence animation, show profile content
+                setTimeout(() => {
+                    emergenceContainer.classList.add('fade-out');
+                    profileContent.classList.add('visible');
+                }, 1200);
+
+                setTimeout(() => {
+                    emergenceContainer.style.display = 'none';
+                }, 1800);
+            } else {
+                // No animation, just show content
+                emergenceContainer.style.display = 'none';
+                profileContent.classList.add('visible', 'no-animation');
+            }
+        });
+    </script>
+}
