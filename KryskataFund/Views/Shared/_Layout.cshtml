@@ -28,18 +28,47 @@
                 </nav>
 
                 <div class="nav-right">
-                    @if (Context.Session.GetString("IsSignedIn") == "true")
-                    {
-                        <span class="nav-user-email">@Context.Session.GetString("UserEmail")</span>
-                        <a asp-controller="Account" asp-action="SignOut" class="btn-signin">Sign out</a>
-                    }
-                    else
+                    @if (Context.Session.GetString("IsSignedIn") != "true")
                     {
                         <a asp-controller="Account" asp-action="SignIn" class="btn-signin">Sign in</a>
                     }
                     <a asp-controller="Funds" asp-action="Create" class="btn-create">
                         <span>+</span> Create Fund
                     </a>
+                    @if (Context.Session.GetString("IsSignedIn") == "true")
+                    {
+                        <div class="profile-buddy-container">
+                            <div class="profile-buddy" id="profileBuddy">
+                                <!-- Cute blob character -->
+                                <div class="buddy-body">
+                                    <div class="buddy-face">
+                                        <div class="buddy-eyes">
+                                            <div class="buddy-eye left">
+                                                <div class="buddy-pupil"></div>
+                                            </div>
+                                            <div class="buddy-eye right">
+                                                <div class="buddy-pupil"></div>
+                                            </div>
+                                        </div>
+                                        <div class="buddy-mouth"></div>
+                                        <div class="buddy-blush left"></div>
+                                        <div class="buddy-blush right"></div>
+                                    </div>
+                                </div>
+                                <div class="buddy-glow"></div>
+                            </div>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <div class="dropdown-header">
+                                    <span class="dropdown-email">@Context.Session.GetString("UserEmail")</span>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a asp-controller="Account" asp-action="SignOut" class="dropdown-item">
+                                    <span class="dropdown-icon">👋</span>
+                                    Sign out
+                                </a>
+                            </div>
+                        </div>
+                    }
                 </div>
             </div>
         </header>
