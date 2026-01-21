@@ -102,6 +102,9 @@ namespace KryskataFund.Controllers
                 return NotFound();
             }
 
+            // Check if user is signed in (using session for now)
+            ViewBag.IsSignedIn = HttpContext.Session.GetString("IsSignedIn") == "true";
+
             return View(fund);
         }
     }
