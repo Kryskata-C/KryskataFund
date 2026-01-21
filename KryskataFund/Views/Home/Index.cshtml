@@ -95,131 +95,173 @@
         padding: 28px 20px 64px;
     }
 
-    /* Top nav */
+    /* Top nav - Modern glassmorphism */
     .nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 32px;
         position: sticky;
-        top: 0;
+        top: 12px;
         z-index: 20;
-        padding: 10px 18px;
-        border-radius: var(--radius-pill);
-        backdrop-filter: blur(16px);
-        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.12), transparent 60%),
-        rgba(5, 5, 13, 0.92);
-        border: 1px solid rgba(120, 122, 165, 0.35);
-        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.85);
+        padding: 8px 12px;
+        border-radius: 20px;
+        backdrop-filter: blur(20px) saturate(180%);
+        background: rgba(10, 12, 20, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        animation: navSlideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @@keyframes navSlideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .nav-left,
     .nav-right {
         display: flex;
         align-items: center;
-        gap: 18px;
+        gap: 8px;
     }
 
     .brand-badge {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 14px;
-        border-radius: var(--radius-pill);
-        border: 1px solid rgba(120, 122, 165, 0.55);
-        background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.18), transparent 60%),
-        rgba(9, 10, 20, 0.95);
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+        gap: 10px;
+        padding: 8px 16px;
+        border-radius: 14px;
+        border: none;
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.15) 0%, rgba(56, 189, 248, 0.1) 100%);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+    }
+
+    .brand-badge:hover {
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.25) 0%, rgba(56, 189, 248, 0.2) 100%);
+        transform: scale(1.02);
     }
 
     .brand-icon {
-        width: 26px;
-        height: 26px;
+        width: 32px;
+        height: 32px;
         border-radius: 10px;
-        background: conic-gradient(from 140deg, #46e6a4, #4da8ff, #ffb547, #ff4976, #46e6a4);
+        background: linear-gradient(135deg, #46e6a4, #4da8ff);
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
         overflow: hidden;
+        animation: iconPulse 3s ease-in-out infinite;
+    }
+
+    @@keyframes iconPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(70, 230, 164, 0.4); }
+        50% { box-shadow: 0 0 20px 5px rgba(70, 230, 164, 0.2); }
     }
 
     .brand-icon::after {
         content: "K";
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 800;
         color: #050509;
-        text-shadow: 0 0 12px rgba(5, 5, 9, 0.9);
     }
 
     .brand-text-main {
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        font-size: 15px;
-        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        font-size: 16px;
+        background: linear-gradient(135deg, #fff, #a0a3c4);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
     }
 
     .brand-text-sub {
-        font-size: 11px;
-        color: var(--text-muted);
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
+        display: none;
     }
 
     .nav-links {
         display: flex;
         align-items: center;
-        gap: 14px;
-        font-size: 13px;
+        gap: 4px;
+        font-size: 14px;
         color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.03);
+        padding: 4px;
+        border-radius: 12px;
     }
 
     .nav-link {
-        padding: 6px 10px;
-        border-radius: var(--radius-pill);
+        padding: 8px 16px;
+        border-radius: 10px;
         position: relative;
         overflow: hidden;
         cursor: pointer;
-        transition: background var(--transition-fast), color 0.15s ease-out, transform 0.15s ease-out;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        font-weight: 500;
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.2), rgba(56, 189, 248, 0.15));
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        border-radius: inherit;
     }
 
     .nav-link:hover {
         color: var(--text-main);
-        background: rgba(36, 38, 70, 0.9);
         transform: translateY(-1px);
     }
 
+    .nav-link:hover::before {
+        opacity: 1;
+    }
+
     .nav-link--active {
-        background: linear-gradient(135deg, rgba(70, 230, 164, 0.2), rgba(77, 168, 255, 0.18));
+        background: linear-gradient(135deg, rgba(70, 230, 164, 0.2), rgba(56, 189, 248, 0.15));
         color: var(--text-main);
-        border: 1px solid rgba(70, 230, 164, 0.7);
-        box-shadow: 0 0 16px rgba(70, 230, 164, 0.4);
+        box-shadow: 0 0 20px rgba(70, 230, 164, 0.3);
     }
 
     .nav-tag {
-        font-size: 11px;
-        color: var(--accent);
-        background: rgba(70, 230, 164, 0.12);
-        padding: 3px 7px;
-        border-radius: 999px;
+        font-size: 10px;
+        color: #050509;
+        background: linear-gradient(135deg, #46e6a4, #4da8ff);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        margin-left: 6px;
     }
 
     .nav-cta {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
     }
 
     .nav-pill {
-        padding: 6px 11px;
-        border-radius: var(--radius-pill);
-        background: rgba(12, 13, 24, 0.96);
-        border: 1px solid rgba(68, 70, 110, 0.8);
-        font-size: 12px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        font-size: 13px;
         color: var(--text-muted);
         display: inline-flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
+        font-weight: 500;
     }
 
     .nav-pill-dot {
