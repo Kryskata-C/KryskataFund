@@ -14,5 +14,10 @@ namespace KryskataFund.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Buddy customization
+        public string? BuddyGlasses { get; set; }
+        public string? BuddyHat { get; set; }
+        public string? BuddyMask { get; set; }
     }
 }
