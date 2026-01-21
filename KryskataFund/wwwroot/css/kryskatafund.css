@@ -2740,3 +2740,13 @@ a {
     color: #5ef7b5;
     text-decoration: underline;
 }
+
+/* Navbar user email display */
+.nav-user-email {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(70, 230, 164, 0.1);
+    border: 1px solid rgba(70, 230, 164, 0.2);
+}
