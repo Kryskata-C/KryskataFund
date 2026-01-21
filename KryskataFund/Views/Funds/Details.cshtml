@@ -236,23 +236,12 @@
             });
 
             // Handle donate button click
-            const isSignedIn = @(isSignedIn ? "true" : "false");
-            const signInUrl = '@Html.Raw(signInUrl)';
+            const fundId = @Model.Id;
 
             donateBtn.addEventListener('click', function() {
                 if (currentAmount > 0) {
-                    // Check if user is signed in
-                    if (!isSignedIn) {
-                        // Redirect to sign in page
-                        window.location.href = signInUrl;
-                        return;
-                    }
-
-                    // Add a pulse animation
-                    this.classList.add('pulse');
-                    setTimeout(() => this.classList.remove('pulse'), 300);
-
-                    alert('Thank you for your donation of €' + currentAmount + '! (This is a demo)');
+                    // Redirect to payment page
+                    window.location.href = '/Funds/Donate?id=' + fundId + '&amount=' + currentAmount;
                 } else {
                     // Shake animation if no amount selected
                     selectedAmountDisplay.classList.add('shake');
