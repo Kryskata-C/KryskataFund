@@ -66,6 +66,27 @@ html {
     color: var(--text-main);
 }
 
+/* Focus-visible styling for accessibility */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(70, 230, 164, 0.25);
+}
+
+.fund-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgba(70, 230, 164, 0.2);
+}
+
 /* Reset-ish */
 * {
     margin: 0;
