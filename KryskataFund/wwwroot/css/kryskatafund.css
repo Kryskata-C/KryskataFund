@@ -3206,3 +3206,224 @@ a {
     margin-bottom: 16px;
     text-align: center;
 }
+
+/* ================================================
+   PROFILE BUDDY - Cute Animated Character
+   ================================================ */
+
+.profile-buddy-container {
+    position: relative;
+    margin-left: 8px;
+}
+
+.profile-buddy {
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    position: relative;
+    animation: buddyFloat 3s ease-in-out infinite;
+}
+
+@keyframes buddyFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+.buddy-body {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #46e6a4 0%, #22d3ee 50%, #4da8ff 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    position: relative;
+    box-shadow:
+        0 4px 15px rgba(70, 230, 164, 0.4),
+        inset 0 -4px 10px rgba(0, 0, 0, 0.1),
+        inset 0 4px 10px rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.profile-buddy:hover .buddy-body {
+    transform: scale(1.1);
+}
+
+.buddy-glow {
+    position: absolute;
+    inset: -5px;
+    background: radial-gradient(circle, rgba(70, 230, 164, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+.buddy-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 4px;
+}
+
+.buddy-eyes {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.buddy-eye {
+    width: 10px;
+    height: 10px;
+    background: #0a0a14;
+    border-radius: 50%;
+    position: relative;
+    animation: blink 4s ease-in-out infinite;
+}
+
+.buddy-eye.left {
+    animation-delay: 0s;
+}
+
+.buddy-eye.right {
+    animation-delay: 0.1s;
+}
+
+@keyframes blink {
+    0%, 45%, 55%, 100% {
+        transform: scaleY(1);
+    }
+    50% {
+        transform: scaleY(0.1);
+    }
+}
+
+.buddy-pupil {
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    animation: lookAround 6s ease-in-out infinite;
+}
+
+@keyframes lookAround {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(2px, 0); }
+    50% { transform: translate(2px, 2px); }
+    75% { transform: translate(-1px, 1px); }
+}
+
+.buddy-mouth {
+    width: 8px;
+    height: 4px;
+    background: #0a0a14;
+    border-radius: 0 0 10px 10px;
+    margin-top: 1px;
+    animation: smile 3s ease-in-out infinite;
+}
+
+@keyframes smile {
+    0%, 100% { width: 8px; height: 4px; }
+    50% { width: 10px; height: 5px; }
+}
+
+.buddy-blush {
+    width: 6px;
+    height: 4px;
+    background: rgba(255, 150, 180, 0.6);
+    border-radius: 50%;
+    position: absolute;
+    top: 18px;
+}
+
+.buddy-blush.left {
+    left: 4px;
+}
+
+.buddy-blush.right {
+    right: 4px;
+}
+
+/* Dropdown menu */
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 200px;
+    background: rgba(15, 16, 23, 0.98);
+    border: 1px solid rgba(70, 230, 164, 0.2);
+    border-radius: 14px;
+    padding: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    z-index: 1000;
+}
+
+.profile-buddy-container:hover .profile-dropdown,
+.profile-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.dropdown-header {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(70, 230, 164, 0.08);
+}
+
+.dropdown-email {
+    font-size: 12px;
+    color: var(--text-muted);
+    word-break: break-all;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(70, 230, 164, 0.15);
+    color: #46e6a4;
+}
+
+.dropdown-icon {
+    font-size: 16px;
+}
+
+/* Happy wiggle on hover */
+.profile-buddy:hover .buddy-body {
+    animation: happyWiggle 0.5s ease-in-out;
+}
+
+@keyframes happyWiggle {
+    0%, 100% { transform: scale(1.1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(-5deg); }
+    75% { transform: scale(1.1) rotate(5deg); }
+}
