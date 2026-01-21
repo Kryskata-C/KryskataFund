@@ -89,17 +89,26 @@
 
                     <!-- Donation buttons -->
                     <div class="fund-detail-donate-section">
-                        <button class="btn-donate btn-donate--primary">
+                        <div class="fund-detail-quick-amounts">
+                            <button class="btn-quick-amount" data-amount="10">€10</button>
+                            <button class="btn-quick-amount" data-amount="25">€25</button>
+                            <button class="btn-quick-amount" data-amount="50">€50</button>
+                            <button class="btn-quick-amount" data-amount="100">€100</button>
+                            <div class="btn-custom-amount">
+                                <span class="custom-amount-label">€</span>
+                                <input type="number" class="custom-amount-input" placeholder="Custom" min="1" id="customAmount">
+                            </div>
+                        </div>
+
+                        <div class="selected-amount-display" id="selectedAmountDisplay">
+                            <span class="selected-amount-label">Your donation</span>
+                            <span class="selected-amount-value">€<span id="animatedAmount">0</span></span>
+                        </div>
+
+                        <button class="btn-donate btn-donate--primary" id="donateBtn">
                             <span class="btn-donate-icon">💚</span>
                             Donate now
                         </button>
-
-                        <div class="fund-detail-quick-amounts">
-                            <button class="btn-quick-amount">€10</button>
-                            <button class="btn-quick-amount">€25</button>
-                            <button class="btn-quick-amount">€50</button>
-                            <button class="btn-quick-amount">€100</button>
-                        </div>
 
                         <button class="btn-donate btn-donate--ghost">
                             <span class="btn-donate-icon">🔗</span>
@@ -143,3 +152,101 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const quickAmountBtns = document.querySelectorAll('.btn-quick-amount');
+            const customAmountInput = document.getElementById('customAmount');
+            const selectedAmountDisplay = document.getElementById('selectedAmountDisplay');
+            const animatedAmountSpan = document.getElementById('animatedAmount');
+            const donateBtn = document.getElementById('donateBtn');
+
+            let currentAmount = 0;
+            let isAnimating = false;
+
+            // Count up animation function
+            function animateCountUp(targetAmount, duration = 600) {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const startAmount = 0;
+                const startTime = performance.now();
+
+                // Show the display with animation
+                selectedAmountDisplay.classList.add('visible');
+
+                function updateCount(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // Easing function (ease out cubic)
+                    const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+                    const currentValue = Math.floor(startAmount + (targetAmount - startAmount) * easeProgress);
+                    animatedAmountSpan.textContent = currentValue;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        animatedAmountSpan.textContent = targetAmount;
+                        isAnimating = false;
+                    }
+                }
+
+                requestAnimationFrame(updateCount);
+            }
+
+            // Handle quick amount button clicks
+            quickAmountBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    quickAmountBtns.forEach(b => b.classList.remove('active'));
+                    customAmountInput.classList.remove('active');
+                    customAmountInput.value = '';
+
+                    // Add active class to clicked button
+                    this.classList.add('active');
+
+                    const amount = parseInt(this.dataset.amount);
+                    currentAmount = amount;
+                    animateCountUp(amount);
+                });
+            });
+
+            // Handle custom amount input
+            customAmountInput.addEventListener('input', function() {
+                quickAmountBtns.forEach(b => b.classList.remove('active'));
+
+                const amount = parseInt(this.value) || 0;
+                if (amount > 0) {
+                    this.classList.add('active');
+                    currentAmount = amount;
+                    animateCountUp(amount);
+                } else {
+                    this.classList.remove('active');
+                    selectedAmountDisplay.classList.remove('visible');
+                }
+            });
+
+            customAmountInput.addEventListener('focus', function() {
+                quickAmountBtns.forEach(b => b.classList.remove('active'));
+            });
+
+            // Handle donate button click
+            donateBtn.addEventListener('click', function() {
+                if (currentAmount > 0) {
+                    // Add a pulse animation
+                    this.classList.add('pulse');
+                    setTimeout(() => this.classList.remove('pulse'), 300);
+
+                    alert('Thank you for your donation of €' + currentAmount + '! (This is a demo)');
+                } else {
+                    // Shake animation if no amount selected
+                    selectedAmountDisplay.classList.add('shake');
+                    setTimeout(() => selectedAmountDisplay.classList.remove('shake'), 500);
+                }
+            });
+        });
+    </script>
+}
