@@ -116,6 +116,14 @@ namespace KryskataFund.Controllers
 
             ViewBag.IsSignedIn = HttpContext.Session.GetString("IsSignedIn") == "true";
 
+            // Get all donations for this fund (for pagination)
+            var recentDonations = _context.Donations
+                .Where(d => d.FundId == id)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            ViewBag.RecentDonations = recentDonations;
+
             return View(fund);
         }
 
@@ -135,6 +143,45 @@ namespace KryskataFund.Controllers
 
             ViewBag.Amount = amount;
             return View(fund);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProcessDonation(int fundId, decimal amount)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Please sign in to donate" });
+            }
+
+            var fund = await _context.Funds.FindAsync(fundId);
+            if (fund == null)
+            {
+                return Json(new { success = false, message = "Fund not found" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var donorName = "@" + userEmail.Split('@')[0];
+
+            // Create the donation record
+            var donation = new Donation
+            {
+                FundId = fundId,
+                UserId = userId,
+                DonorName = donorName,
+                Amount = amount,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Donations.Add(donation);
+
+            // Update the fund's raised amount and supporters count
+            fund.RaisedAmount += amount;
+            fund.SupportersCount += 1;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Donation successful!" });
         }
     }
 }
