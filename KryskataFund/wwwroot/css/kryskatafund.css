@@ -1660,3 +1660,451 @@ a {
         opacity: 0.95;
     }
 }
+
+/* ------------ FUND DETAILS PAGE STYLES ------------ */
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(15, 17, 30, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.6);
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+    transition: all var(--transition-fast);
+    animation: fadeIn 0.4s ease-out;
+}
+
+.back-link:hover {
+    background: rgba(25, 30, 50, 0.95);
+    color: var(--text-main);
+    border-color: var(--accent);
+    transform: translateX(-4px);
+}
+
+.back-arrow {
+    font-size: 16px;
+    transition: transform var(--transition-fast);
+}
+
+.back-link:hover .back-arrow {
+    transform: translateX(-3px);
+}
+
+.fund-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: 28px;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@media (max-width: 1024px) {
+    .fund-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Main content area */
+.fund-detail-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.fund-detail-hero {
+    position: relative;
+    height: 280px;
+    border-radius: 24px 24px 0 0;
+    background: radial-gradient(circle at center, #1f2937 0, #020617 70%);
+    overflow: hidden;
+}
+
+.fund-detail-hero-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(70, 230, 164, 0.25), rgba(56, 189, 248, 0.2)),
+        repeating-linear-gradient(135deg, rgba(15, 23, 42, 0.7) 0, rgba(15, 23, 42, 0.7) 2px, rgba(15, 23, 42, 0.4) 2px, rgba(15, 23, 42, 0.4) 4px);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+}
+
+.fund-detail-category-tag {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(148, 163, 184, 0.7);
+    color: #e5e7eb;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    backdrop-filter: blur(8px);
+}
+
+.fund-detail-tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+.fund-detail-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+}
+
+.fund-detail-badge--success {
+    background: rgba(34, 197, 94, 0.25);
+    border: 1px solid rgba(34, 197, 94, 0.8);
+    color: #bbf7d0;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+}
+
+.fund-detail-content {
+    background: rgba(7, 9, 18, 0.98);
+    border: 1px solid rgba(38, 40, 78, 0.9);
+    border-top: none;
+    border-radius: 0 0 24px 24px;
+    padding: 28px;
+}
+
+.fund-detail-title {
+    font-size: clamp(24px, 3vw, 32px);
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    color: var(--text-main);
+}
+
+.fund-detail-creator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: rgba(15, 18, 35, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.6);
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.fund-detail-creator strong {
+    color: var(--accent);
+}
+
+.fund-detail-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.fund-detail-story {
+    margin-bottom: 32px;
+}
+
+.fund-detail-story h2,
+.fund-detail-updates h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fund-detail-story h2::before {
+    content: "📖";
+}
+
+.fund-detail-updates h2::before {
+    content: "📢";
+}
+
+.fund-detail-story p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+}
+
+.fund-detail-updates {
+    padding-top: 24px;
+    border-top: 1px dashed rgba(55, 65, 81, 0.6);
+}
+
+.fund-detail-update-empty {
+    padding: 20px;
+    border-radius: 16px;
+    background: rgba(15, 18, 35, 0.6);
+    border: 1px dashed rgba(55, 65, 81, 0.6);
+    text-align: center;
+}
+
+.fund-detail-update-empty span {
+    font-size: 13px;
+    color: var(--text-softer);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.fund-detail-update-empty p {
+    font-size: 12px;
+    color: var(--text-softer);
+    opacity: 0.7;
+}
+
+/* Sidebar */
+.fund-detail-sidebar {
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.fund-detail-card {
+    border-radius: 24px;
+    background: radial-gradient(circle at top left, rgba(70, 230, 164, 0.12) 0, rgba(7, 9, 18, 0.98) 50%);
+    border: 1px solid rgba(70, 230, 164, 0.35);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+.fund-detail-progress-section {
+    padding: 24px;
+    border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+}
+
+.fund-detail-amount {
+    margin-bottom: 16px;
+}
+
+.fund-detail-raised {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+    letter-spacing: -0.02em;
+}
+
+.fund-detail-goal {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.fund-detail-progress-bar {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(24, 31, 52, 0.9);
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.fund-detail-progress-fill {
+    height: 100%;
+    width: var(--progress, 0%);
+    background: linear-gradient(90deg, #22c55e, #4ade80, #a3e635);
+    border-radius: 999px;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+    animation: progressGrow 1s cubic-bezier(0.16, 0.9, 0.36, 1) forwards;
+    transform-origin: left center;
+}
+
+.fund-detail-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.fund-detail-stat {
+    text-align: center;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(15, 18, 35, 0.8);
+    border: 1px solid rgba(55, 65, 81, 0.5);
+}
+
+.fund-detail-stat-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-main);
+    display: block;
+}
+
+.fund-detail-stat-label {
+    font-size: 11px;
+    color: var(--text-softer);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* Donation section */
+.fund-detail-donate-section {
+    padding: 24px;
+    border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-donate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+}
+
+.btn-donate--primary {
+    background: linear-gradient(135deg, var(--accent-strong), #22c55e);
+    color: #050509;
+    box-shadow: 0 12px 30px rgba(70, 230, 164, 0.5);
+}
+
+.btn-donate--primary:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(70, 230, 164, 0.65);
+}
+
+.btn-donate--ghost {
+    background: rgba(15, 18, 35, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.8);
+    color: var(--text-muted);
+}
+
+.btn-donate--ghost:hover {
+    background: rgba(25, 30, 50, 0.95);
+    color: var(--text-main);
+    border-color: var(--accent-info);
+}
+
+.btn-donate-icon {
+    font-size: 18px;
+}
+
+.fund-detail-quick-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.btn-quick-amount {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(15, 18, 35, 0.9);
+    border: 1px solid rgba(55, 65, 81, 0.7);
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-quick-amount:hover {
+    background: rgba(70, 230, 164, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+}
+
+/* Supporters section */
+.fund-detail-supporters {
+    padding: 20px 24px 24px;
+}
+
+.fund-detail-supporters h3 {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.fund-detail-supporter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fund-detail-supporter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(15, 18, 35, 0.7);
+    border: 1px solid rgba(55, 65, 81, 0.4);
+    transition: all var(--transition-fast);
+}
+
+.fund-detail-supporter:hover {
+    background: rgba(20, 25, 45, 0.9);
+    border-color: rgba(70, 230, 164, 0.3);
+}
+
+.fund-detail-supporter-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.fund-detail-supporter-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.fund-detail-supporter-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.fund-detail-supporter-amount {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.fund-detail-supporter-time {
+    font-size: 11px;
+    color: var(--text-softer);
+}
+
+.fund-detail-see-all {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    margin-top: 12px;
+    border-radius: 10px;
+    background: rgba(15, 18, 35, 0.5);
+    border: 1px dashed rgba(55, 65, 81, 0.6);
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: all var(--transition-fast);
+}
+
+.fund-detail-see-all:hover {
+    background: rgba(70, 230, 164, 0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+}
