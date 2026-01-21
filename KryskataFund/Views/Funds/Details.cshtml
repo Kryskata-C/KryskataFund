@@ -1,0 +1,145 @@
+@model KryskataFund.Models.Fund
+@{
+    ViewData["Title"] = Model.Title;
+    var progressPercent = Model.ProgressPercent;
+    var isOverfunded = Model.RaisedAmount > Model.GoalAmount;
+    var statusText = isOverfunded ? $"{progressPercent}% funded" : Model.DaysLeft == 0 ? "Ended" : $"{Model.DaysLeft} days left";
+}
+
+<div class="page-root">
+    <div class="page-shell">
+        <!-- Back button -->
+        <a asp-controller="Home" asp-action="Index" class="back-link">
+            <span class="back-arrow">←</span>
+            Back to campaigns
+        </a>
+
+        <div class="fund-detail-grid">
+            <!-- Main content -->
+            <section class="fund-detail-main">
+                <!-- Hero image area -->
+                <div class="fund-detail-hero">
+                    <div class="fund-detail-hero-gradient"></div>
+                    <div class="fund-detail-category-tag" style="--cat-color: @Model.CategoryColor;">
+                        <span class="fund-detail-tag-dot" style="background: @Model.CategoryColor; box-shadow: 0 0 10px @Model.CategoryColor;"></span>
+                        @Model.Category
+                    </div>
+                    @if (isOverfunded)
+                    {
+                        <div class="fund-detail-badge fund-detail-badge--success">
+                            Goal reached!
+                        </div>
+                    }
+                </div>
+
+                <!-- Title and story -->
+                <div class="fund-detail-content">
+                    <h1 class="fund-detail-title">@Model.Title</h1>
+
+                    <div class="fund-detail-creator">
+                        <div class="fund-detail-avatar" style="background: linear-gradient(135deg, @Model.CategoryColor, #4da8ff);"></div>
+                        <span>Created by <strong>@Model.CreatorName</strong></span>
+                    </div>
+
+                    <div class="fund-detail-story">
+                        <h2>About this campaign</h2>
+                        <p>@Model.Description</p>
+                    </div>
+
+                    <!-- Updates section (placeholder) -->
+                    <div class="fund-detail-updates">
+                        <h2>Updates</h2>
+                        <div class="fund-detail-update-empty">
+                            <span>No updates yet</span>
+                            <p>The creator hasn't posted any updates for this campaign.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sidebar with donation -->
+            <aside class="fund-detail-sidebar">
+                <div class="fund-detail-card">
+                    <!-- Progress section -->
+                    <div class="fund-detail-progress-section">
+                        <div class="fund-detail-amount">
+                            <span class="fund-detail-raised">€@Model.RaisedAmount.ToString("N0")</span>
+                            <span class="fund-detail-goal">raised of €@Model.GoalAmount.ToString("N0") goal</span>
+                        </div>
+
+                        <div class="fund-detail-progress-bar">
+                            <div class="fund-detail-progress-fill" style="--progress: @Math.Min(100, progressPercent)%;"></div>
+                        </div>
+
+                        <div class="fund-detail-stats">
+                            <div class="fund-detail-stat">
+                                <span class="fund-detail-stat-value">@Model.SupportersCount</span>
+                                <span class="fund-detail-stat-label">supporters</span>
+                            </div>
+                            <div class="fund-detail-stat">
+                                <span class="fund-detail-stat-value">@progressPercent%</span>
+                                <span class="fund-detail-stat-label">funded</span>
+                            </div>
+                            <div class="fund-detail-stat">
+                                <span class="fund-detail-stat-value">@(Model.DaysLeft == 0 ? "Ended" : Model.DaysLeft.ToString())</span>
+                                <span class="fund-detail-stat-label">@(Model.DaysLeft == 0 ? "" : "days left")</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donation buttons -->
+                    <div class="fund-detail-donate-section">
+                        <button class="btn-donate btn-donate--primary">
+                            <span class="btn-donate-icon">💚</span>
+                            Donate now
+                        </button>
+
+                        <div class="fund-detail-quick-amounts">
+                            <button class="btn-quick-amount">€10</button>
+                            <button class="btn-quick-amount">€25</button>
+                            <button class="btn-quick-amount">€50</button>
+                            <button class="btn-quick-amount">€100</button>
+                        </div>
+
+                        <button class="btn-donate btn-donate--ghost">
+                            <span class="btn-donate-icon">🔗</span>
+                            Share campaign
+                        </button>
+                    </div>
+
+                    <!-- Recent supporters -->
+                    <div class="fund-detail-supporters">
+                        <h3>Recent supporters</h3>
+                        <div class="fund-detail-supporter-list">
+                            <div class="fund-detail-supporter">
+                                <div class="fund-detail-supporter-avatar" style="background: linear-gradient(135deg, #22c55e, #4ade80);"></div>
+                                <div class="fund-detail-supporter-info">
+                                    <span class="fund-detail-supporter-name">Anonymous</span>
+                                    <span class="fund-detail-supporter-amount">€50</span>
+                                </div>
+                                <span class="fund-detail-supporter-time">2 hours ago</span>
+                            </div>
+                            <div class="fund-detail-supporter">
+                                <div class="fund-detail-supporter-avatar" style="background: linear-gradient(135deg, #4f46e5, #22d3ee);"></div>
+                                <div class="fund-detail-supporter-info">
+                                    <span class="fund-detail-supporter-name">Maria K.</span>
+                                    <span class="fund-detail-supporter-amount">€25</span>
+                                </div>
+                                <span class="fund-detail-supporter-time">5 hours ago</span>
+                            </div>
+                            <div class="fund-detail-supporter">
+                                <div class="fund-detail-supporter-avatar" style="background: linear-gradient(135deg, #f97316, #fb7185);"></div>
+                                <div class="fund-detail-supporter-info">
+                                    <span class="fund-detail-supporter-name">Stefan P.</span>
+                                    <span class="fund-detail-supporter-amount">€100</span>
+                                </div>
+                                <span class="fund-detail-supporter-time">1 day ago</span>
+                            </div>
+                        </div>
+                        <a href="#" class="fund-detail-see-all">See all @Model.SupportersCount supporters →</a>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
