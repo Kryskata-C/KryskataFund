@@ -1,4 +1,5 @@
-﻿@{
+@model List<KryskataFund.Models.Fund>
+@{
     ViewData["Title"] = "KryskataFund – Home";
 }
 
@@ -1636,257 +1637,63 @@
             </div>
 
             <div class="funds-grid">
-                <!-- CARD 1 -->
-                <a asp-controller="Funds" asp-action="Details" asp-route-id="1" class="fund-card" style="--progress: 68%;">
-                    <div class="fund-media">
-                        <div class="fund-media-gradient"></div>
-                        <div class="fund-media-tag">
-                            <span class="fund-media-tag-dot"></span>
-                            Education
-                        </div>
-                        <div class="fund-media-meter">
-                            68% funded
-                        </div>
+                @if (Model.Count == 0)
+                {
+                    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🚀</div>
+                        <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-main);">No funds yet</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Be the first to create a fund and start raising support!</p>
+                        <a asp-controller="Funds" asp-action="Create" class="btn-primary">Create the first fund</a>
                     </div>
-                    <div class="fund-body">
-                        <h3 class="fund-title">Send Alex to their first year of Computer Science</h3>
-                        <p class="fund-desc">
-                            Help Alex cover tuition, dorm and a second-hand laptop so they can finally
-                            start building the apps they've always dreamed of.
-                        </p>
+                }
+                @foreach (var fund in Model)
+                {
+                    var statusText = fund.ProgressPercent >= 100 ? $"{fund.ProgressPercent}% funded"
+                        : fund.ProgressPercent >= 80 ? "Almost there"
+                        : fund.ProgressPercent >= 50 ? $"{fund.ProgressPercent}% funded"
+                        : fund.ProgressPercent >= 20 ? "Boost needed"
+                        : "Fresh start";
 
-                        <div class="fund-progress">
-                            <div class="fund-progress-bar">
-                                <div class="fund-progress-fill"></div>
+                    <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="fund-card" style="--progress: @(fund.ProgressPercent)%;">
+                        <div class="fund-media" style="@(fund.ImageUrl != null ? $"background: url('{fund.ImageUrl}') center/cover;" : "")">
+                            <div class="fund-media-gradient"></div>
+                            <div class="fund-media-tag">
+                                <span class="fund-media-tag-dot" style="background: @fund.CategoryColor; box-shadow: 0 0 10px @(fund.CategoryColor)cc;"></span>
+                                @fund.Category
                             </div>
-                            <div class="fund-progress-labels">
-                                <span>€6,800 raised</span>
-                                <span>Goal €10,000</span>
+                            <div class="fund-media-meter">
+                                @statusText
                             </div>
                         </div>
+                        <div class="fund-body">
+                            <h3 class="fund-title">@fund.Title</h3>
+                            <p class="fund-desc">
+                                @(fund.Description.Length > 120 ? fund.Description.Substring(0, 120) + "..." : fund.Description)
+                            </p>
 
-                        <div class="fund-footer">
-                            <div class="fund-footer-left">
-                                <span class="fund-footer-pill">182 supporters</span>
-                                <span>• 4 days left</span>
+                            <div class="fund-progress">
+                                <div class="fund-progress-bar">
+                                    <div class="fund-progress-fill"></div>
+                                </div>
+                                <div class="fund-progress-labels">
+                                    <span>€@fund.RaisedAmount.ToString("N0") raised</span>
+                                    <span>Goal €@fund.GoalAmount.ToString("N0")</span>
+                                </div>
                             </div>
-                            <div class="fund-footer-right">
-                                <div class="fund-avatar"></div>
-                                <span>by @@alex.codes</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
 
-                <!-- CARD 2 -->
-                <a asp-controller="Funds" asp-action="Details" asp-route-id="2" class="fund-card" style="--progress: 92%;">
-                    <div class="fund-media">
-                        <div class="fund-media-gradient"></div>
-                        <div class="fund-media-tag">
-                            <span class="fund-media-tag-dot" style="background: #f97316; box-shadow: 0 0 10px rgba(249, 115, 22, 0.9);"></span>
-                            Health
-                        </div>
-                        <div class="fund-media-meter">
-                            Almost there
-                        </div>
-                    </div>
-                    <div class="fund-body">
-                        <h3 class="fund-title">Support Sofia's recovery after surgery</h3>
-                        <p class="fund-desc">
-                            Sofia is recovering from a major surgery and needs help with physiotherapy and
-                            bills for the next few months.
-                        </p>
-
-                        <div class="fund-progress">
-                            <div class="fund-progress-bar">
-                                <div class="fund-progress-fill"></div>
-                            </div>
-                            <div class="fund-progress-labels">
-                                <span>€9,200 raised</span>
-                                <span>Goal €10,000</span>
+                            <div class="fund-footer">
+                                <div class="fund-footer-left">
+                                    <span class="fund-footer-pill">@fund.SupportersCount supporters</span>
+                                    <span>• @(fund.DaysLeft > 0 ? $"{fund.DaysLeft} days left" : "ended")</span>
+                                </div>
+                                <div class="fund-footer-right">
+                                    <div class="fund-avatar" style="background: linear-gradient(135deg, @fund.CategoryColor, #4f46e5);"></div>
+                                    <span>by @fund.CreatorName</span>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="fund-footer">
-                            <div class="fund-footer-left">
-                                <span class="fund-footer-pill">402 supporters</span>
-                                <span>• 1 day left</span>
-                            </div>
-                            <div class="fund-footer-right">
-                                <div class="fund-avatar" style="background: linear-gradient(135deg, #f97316, #fb7185);"></div>
-                                <span>by @@friendsOfSofia</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- CARD 3 -->
-                <a asp-controller="Funds" asp-action="Details" asp-route-id="3" class="fund-card" style="--progress: 43%;">
-                    <div class="fund-media">
-                        <div class="fund-media-gradient"></div>
-                        <div class="fund-media-tag">
-                            <span class="fund-media-tag-dot" style="background: #22d3ee; box-shadow: 0 0 10px rgba(34, 211, 238, 0.9);"></span>
-                            Animals
-                        </div>
-                        <div class="fund-media-meter">
-                            Boost needed
-                        </div>
-                    </div>
-                    <div class="fund-body">
-                        <h3 class="fund-title">Build a warm shelter for stray dogs in Sofia</h3>
-                        <p class="fund-desc">
-                            Local volunteers are transforming an empty space into a safe, heated shelter
-                            for stray dogs before winter hits.
-                        </p>
-
-                        <div class="fund-progress">
-                            <div class="fund-progress-bar">
-                                <div class="fund-progress-fill"></div>
-                            </div>
-                            <div class="fund-progress-labels">
-                                <span>€4,300 raised</span>
-                                <span>Goal €10,000</span>
-                            </div>
-                        </div>
-
-                        <div class="fund-footer">
-                            <div class="fund-footer-left">
-                                <span class="fund-footer-pill">93 supporters</span>
-                                <span>• 10 days left</span>
-                            </div>
-                            <div class="fund-footer-right">
-                                <div class="fund-avatar" style="background: linear-gradient(135deg, #22d3ee, #4f46e5);"></div>
-                                <span>by @@streetPawsBG</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- CARD 4 -->
-                <a asp-controller="Funds" asp-action="Details" asp-route-id="4" class="fund-card" style="--progress: 120%;">
-                    <div class="fund-media">
-                        <div class="fund-media-gradient"></div>
-                        <div class="fund-media-tag">
-                            <span class="fund-media-tag-dot" style="background: #a855f7; box-shadow: 0 0 10px rgba(168, 85, 247, 0.9);"></span>
-                            Creative
-                        </div>
-                        <div class="fund-media-meter">
-                            120% funded
-                        </div>
-                    </div>
-                    <div class="fund-body">
-                        <h3 class="fund-title">Short film: “404 – Dream Not Found”</h3>
-                        <p class="fund-desc">
-                            A student-made sci-fi short about life, latency and trying to connect
-                            when everything keeps buffering.
-                        </p>
-
-                        <div class="fund-progress">
-                            <div class="fund-progress-bar">
-                                <div class="fund-progress-fill"></div>
-                            </div>
-                            <div class="fund-progress-labels">
-                                <span>€12,000 raised</span>
-                                <span>Goal €10,000</span>
-                            </div>
-                        </div>
-
-                        <div class="fund-footer">
-                            <div class="fund-footer-left">
-                                <span class="fund-footer-pill">321 supporters</span>
-                                <span>• ended</span>
-                            </div>
-                            <div class="fund-footer-right">
-                                <div class="fund-avatar" style="background: linear-gradient(135deg, #a855f7, #ec4899);"></div>
-                                <span>by @@filmCrew</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- CARD 5 -->
-                <a asp-controller="Funds" asp-action="Details" asp-route-id="5" class="fund-card" style="--progress: 35%;">
-                    <div class="fund-media">
-                        <div class="fund-media-gradient"></div>
-                        <div class="fund-media-tag">
-                            <span class="fund-media-tag-dot" style="background: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.9);"></span>
-                            Dreams
-                        </div>
-                        <div class="fund-media-meter">
-                            Fresh start
-                        </div>
-                    </div>
-                    <div class="fund-body">
-                        <h3 class="fund-title">From bedroom beats to first studio session</h3>
-                        <p class="fund-desc">
-                            Help this bedroom producer book time in a real studio and release their
-                            first EP on streaming platforms.
-                        </p>
-
-                        <div class="fund-progress">
-                            <div class="fund-progress-bar">
-                                <div class="fund-progress-fill"></div>
-                            </div>
-                            <div class="fund-progress-labels">
-                                <span>€1,750 raised</span>
-                                <span>Goal €5,000</span>
-                            </div>
-                        </div>
-
-                        <div class="fund-footer">
-                            <div class="fund-footer-left">
-                                <span class="fund-footer-pill">64 supporters</span>
-                                <span>• 21 days left</span>
-                            </div>
-                            <div class="fund-footer-right">
-                                <div class="fund-avatar" style="background: linear-gradient(135deg, #facc15, #fb923c);"></div>
-                                <span>by @@lofiRoom</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- CARD 6 -->
-                <a asp-controller="Funds" asp-action="Details" asp-route-id="6" class="fund-card" style="--progress: 15%;">
-                    <div class="fund-media">
-                        <div class="fund-media-gradient"></div>
-                        <div class="fund-media-tag">
-                            <span class="fund-media-tag-dot" style="background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.9);"></span>
-                            Just for fun
-                        </div>
-                        <div class="fund-media-meter">
-                            It's a meme
-                        </div>
-                    </div>
-                    <div class="fund-body">
-                        <h3 class="fund-title">Help me finally buy that RGB keyboard</h3>
-                        <p class="fund-desc">
-                            Is it necessary? No. Is it responsible? Also no. Is it extremely on brand
-                            for this platform? Absolutely.
-                        </p>
-
-                        <div class="fund-progress">
-                            <div class="fund-progress-bar">
-                                <div class="fund-progress-fill"></div>
-                            </div>
-                            <div class="fund-progress-labels">
-                                <span>€150 raised</span>
-                                <span>Goal €1,000</span>
-                            </div>
-                        </div>
-
-                        <div class="fund-footer">
-                            <div class="fund-footer-left">
-                                <span class="fund-footer-pill">23 supporters</span>
-                                <span>• 30 days left</span>
-                            </div>
-                            <div class="fund-footer-right">
-                                <div class="fund-avatar" style="background: linear-gradient(135deg, #ef4444, #f97316);"></div>
-                                <span>by @@rgbEnjoyer</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                }
             </div>
         </section>
 
