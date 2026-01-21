@@ -8,6 +8,9 @@
     var totalSupporters = ViewBag.TotalSupporters ?? 0;
     var memberSince = user?.CreatedAt.ToString("MMMM yyyy") ?? "Unknown";
     var username = "@" + (user?.Email.Split('@')[0] ?? "user");
+    var buddyGlasses = ViewBag.BuddyGlasses as string;
+    var buddyHat = ViewBag.BuddyHat as string;
+    var buddyMask = ViewBag.BuddyMask as string;
 }
 
 <div class="profile-page">
@@ -33,6 +36,10 @@
                     <div class="buddy-blush left"></div>
                     <div class="buddy-blush right"></div>
                 </div>
+                <!-- Customization layers -->
+                <div class="buddy-accessory buddy-glasses @(buddyGlasses != null ? $"glasses-{buddyGlasses}" : "")"></div>
+                <div class="buddy-accessory buddy-hat @(buddyHat != null ? $"hat-{buddyHat}" : "")"></div>
+                <div class="buddy-accessory buddy-mask @(buddyMask != null ? $"mask-{buddyMask}" : "")"></div>
             </div>
             <div class="buddy-glow large"></div>
         </div>
@@ -52,8 +59,8 @@
             <!-- Main profile card -->
             <section class="profile-card profile-main">
                 <div class="profile-avatar-section">
-                    <div class="profile-avatar-buddy">
-                        <div class="buddy-body medium">
+                    <div class="profile-avatar-buddy" id="avatarBuddy" title="Click to customize!">
+                        <div class="buddy-body medium" id="previewBuddy">
                             <div class="buddy-face">
                                 <div class="buddy-eyes">
                                     <div class="buddy-eye left">
@@ -67,8 +74,13 @@
                                 <div class="buddy-blush left"></div>
                                 <div class="buddy-blush right"></div>
                             </div>
+                            <!-- Customization layers -->
+                            <div class="buddy-accessory buddy-glasses" id="previewGlasses" data-current="@buddyGlasses"></div>
+                            <div class="buddy-accessory buddy-hat" id="previewHat" data-current="@buddyHat"></div>
+                            <div class="buddy-accessory buddy-mask" id="previewMask" data-current="@buddyMask"></div>
                         </div>
                         <div class="buddy-glow medium"></div>
+                        <div class="customize-hint">✨ Click to customize!</div>
                     </div>
                 </div>
 
@@ -184,11 +196,172 @@
             </section>
         </div>
     </div>
+
+    <!-- Customization Modal -->
+    <div class="customize-modal" id="customizeModal">
+        <div class="customize-backdrop" id="customizeBackdrop"></div>
+        <div class="customize-panel">
+            <div class="customize-header">
+                <h2>✨ Customize Your Buddy</h2>
+                <button class="customize-close" id="customizeClose">×</button>
+            </div>
+
+            <div class="customize-preview">
+                <div class="preview-buddy-container">
+                    <div class="buddy-body xlarge" id="modalPreviewBuddy">
+                        <div class="buddy-face">
+                            <div class="buddy-eyes">
+                                <div class="buddy-eye left">
+                                    <div class="buddy-pupil"></div>
+                                </div>
+                                <div class="buddy-eye right">
+                                    <div class="buddy-pupil"></div>
+                                </div>
+                            </div>
+                            <div class="buddy-mouth"></div>
+                            <div class="buddy-blush left"></div>
+                            <div class="buddy-blush right"></div>
+                        </div>
+                        <div class="buddy-accessory buddy-glasses" id="modalGlasses"></div>
+                        <div class="buddy-accessory buddy-hat" id="modalHat"></div>
+                        <div class="buddy-accessory buddy-mask" id="modalMask"></div>
+                    </div>
+                    <div class="buddy-glow xlarge"></div>
+                </div>
+            </div>
+
+            <div class="customize-tabs">
+                <button class="customize-tab active" data-tab="glasses">🕶️ Glasses</button>
+                <button class="customize-tab" data-tab="hats">🎩 Hats</button>
+                <button class="customize-tab" data-tab="masks">🎭 Masks</button>
+            </div>
+
+            <div class="customize-content">
+                <!-- Glasses Tab -->
+                <div class="customize-options active" id="glassesTab">
+                    <div class="option-item" data-type="glasses" data-value="">
+                        <div class="option-preview none">None</div>
+                        <span>None</span>
+                    </div>
+                    <div class="option-item" data-type="glasses" data-value="round">
+                        <div class="option-preview"><div class="mini-glasses glasses-round"></div></div>
+                        <span>Round</span>
+                    </div>
+                    <div class="option-item" data-type="glasses" data-value="nerd">
+                        <div class="option-preview"><div class="mini-glasses glasses-nerd"></div></div>
+                        <span>Nerd</span>
+                    </div>
+                    <div class="option-item" data-type="glasses" data-value="sunglasses">
+                        <div class="option-preview"><div class="mini-glasses glasses-sunglasses"></div></div>
+                        <span>Shades</span>
+                    </div>
+                    <div class="option-item" data-type="glasses" data-value="cyber">
+                        <div class="option-preview"><div class="mini-glasses glasses-cyber"></div></div>
+                        <span>Cyber</span>
+                    </div>
+                    <div class="option-item" data-type="glasses" data-value="heart">
+                        <div class="option-preview"><div class="mini-glasses glasses-heart"></div></div>
+                        <span>Heart</span>
+                    </div>
+                    <div class="option-item" data-type="glasses" data-value="monocle">
+                        <div class="option-preview"><div class="mini-glasses glasses-monocle"></div></div>
+                        <span>Monocle</span>
+                    </div>
+                </div>
+
+                <!-- Hats Tab -->
+                <div class="customize-options" id="hatsTab">
+                    <div class="option-item" data-type="hats" data-value="">
+                        <div class="option-preview none">None</div>
+                        <span>None</span>
+                    </div>
+                    <div class="option-item" data-type="hats" data-value="crown">
+                        <div class="option-preview"><div class="mini-hat hat-crown"></div></div>
+                        <span>Crown</span>
+                    </div>
+                    <div class="option-item" data-type="hats" data-value="beanie">
+                        <div class="option-preview"><div class="mini-hat hat-beanie"></div></div>
+                        <span>Beanie</span>
+                    </div>
+                    <div class="option-item" data-type="hats" data-value="tophat">
+                        <div class="option-preview"><div class="mini-hat hat-tophat"></div></div>
+                        <span>Top Hat</span>
+                    </div>
+                    <div class="option-item" data-type="hats" data-value="cap">
+                        <div class="option-preview"><div class="mini-hat hat-cap"></div></div>
+                        <span>Cap</span>
+                    </div>
+                    <div class="option-item" data-type="hats" data-value="halo">
+                        <div class="option-preview"><div class="mini-hat hat-halo"></div></div>
+                        <span>Halo</span>
+                    </div>
+                    <div class="option-item special" data-type="hats" data-value="imene">
+                        <div class="option-preview"><div class="mini-hat hat-imene"></div></div>
+                        <span>и мене</span>
+                    </div>
+                </div>
+
+                <!-- Masks Tab -->
+                <div class="customize-options" id="masksTab">
+                    <div class="option-item" data-type="masks" data-value="">
+                        <div class="option-preview none">None</div>
+                        <span>None</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="ninja">
+                        <div class="option-preview"><div class="mini-mask mask-ninja"></div></div>
+                        <span>Ninja</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="oni">
+                        <div class="option-preview"><div class="mini-mask mask-oni"></div></div>
+                        <span>Oni</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="phantom">
+                        <div class="option-preview"><div class="mini-mask mask-phantom"></div></div>
+                        <span>Phantom</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="gas">
+                        <div class="option-preview"><div class="mini-mask mask-gas"></div></div>
+                        <span>Gas Mask</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="cyber">
+                        <div class="option-preview"><div class="mini-mask mask-cyber"></div></div>
+                        <span>Cyber</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="cat">
+                        <div class="option-preview"><div class="mini-mask mask-cat"></div></div>
+                        <span>Cat</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="skull">
+                        <div class="option-preview"><div class="mini-mask mask-skull"></div></div>
+                        <span>Skull</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="kitsune">
+                        <div class="option-preview"><div class="mini-mask mask-kitsune"></div></div>
+                        <span>Kitsune</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="glitch">
+                        <div class="option-preview"><div class="mini-mask mask-glitch"></div></div>
+                        <span>Glitch</span>
+                    </div>
+                    <div class="option-item" data-type="masks" data-value="neon">
+                        <div class="option-preview"><div class="mini-mask mask-neon"></div></div>
+                        <span>Neon</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="customize-actions">
+                <button class="btn-customize-reset" id="resetBtn">Reset All</button>
+                <button class="btn-customize-save" id="saveBtn">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // === EMERGENCE ANIMATION ===
             const shouldAnimate = sessionStorage.getItem('buddyEmerging') === 'true';
             const emergenceContainer = document.getElementById('emergenceContainer');
             const profileContent = document.getElementById('profileContent');
@@ -198,7 +371,6 @@
             if (shouldAnimate) {
                 sessionStorage.removeItem('buddyEmerging');
 
-                // Create emergence particles
                 for (let i = 0; i < 16; i++) {
                     const particle = document.createElement('div');
                     particle.className = 'emergence-particle';
@@ -207,11 +379,9 @@
                     emergenceParticles.appendChild(particle);
                 }
 
-                // Show emergence animation
                 emergenceContainer.classList.add('active');
                 emergenceBuddy.classList.add('emerging');
 
-                // After emergence animation, show profile content
                 setTimeout(() => {
                     emergenceContainer.classList.add('fade-out');
                     profileContent.classList.add('visible');
@@ -221,10 +391,158 @@
                     emergenceContainer.style.display = 'none';
                 }, 1800);
             } else {
-                // No animation, just show content
                 emergenceContainer.style.display = 'none';
                 profileContent.classList.add('visible', 'no-animation');
             }
+
+            // === CUSTOMIZATION SYSTEM ===
+            const modal = document.getElementById('customizeModal');
+            const avatarBuddy = document.getElementById('avatarBuddy');
+            const closeBtn = document.getElementById('customizeClose');
+            const backdrop = document.getElementById('customizeBackdrop');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const tabs = document.querySelectorAll('.customize-tab');
+            const optionContainers = document.querySelectorAll('.customize-options');
+
+            // Current selections
+            let currentGlasses = document.getElementById('previewGlasses').dataset.current || '';
+            let currentHat = document.getElementById('previewHat').dataset.current || '';
+            let currentMask = document.getElementById('previewMask').dataset.current || '';
+
+            // Apply initial customization
+            applyCustomization();
+
+            // Open modal
+            avatarBuddy.addEventListener('click', function() {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                updateModalPreview();
+                highlightSelected();
+            });
+
+            // Close modal
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            closeBtn.addEventListener('click', closeModal);
+            backdrop.addEventListener('click', closeModal);
+
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const tabName = this.dataset.tab;
+                    optionContainers.forEach(container => {
+                        container.classList.remove('active');
+                        if (container.id === tabName + 'Tab') {
+                            container.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            // Option selection
+            document.querySelectorAll('.option-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const value = this.dataset.value;
+
+                    // Update selection
+                    if (type === 'glasses') currentGlasses = value;
+                    if (type === 'hats') currentHat = value;
+                    if (type === 'masks') currentMask = value;
+
+                    // Update preview
+                    updateModalPreview();
+                    highlightSelected();
+
+                    // Add selection animation
+                    this.classList.add('selected-animation');
+                    setTimeout(() => this.classList.remove('selected-animation'), 300);
+                });
+            });
+
+            // Update modal preview
+            function updateModalPreview() {
+                const modalGlasses = document.getElementById('modalGlasses');
+                const modalHat = document.getElementById('modalHat');
+                const modalMask = document.getElementById('modalMask');
+
+                modalGlasses.className = 'buddy-accessory buddy-glasses' + (currentGlasses ? ' glasses-' + currentGlasses : '');
+                modalHat.className = 'buddy-accessory buddy-hat' + (currentHat ? ' hat-' + currentHat : '');
+                modalMask.className = 'buddy-accessory buddy-mask' + (currentMask ? ' mask-' + currentMask : '');
+            }
+
+            // Highlight selected options
+            function highlightSelected() {
+                document.querySelectorAll('.option-item').forEach(item => {
+                    const type = item.dataset.type;
+                    const value = item.dataset.value;
+                    let isSelected = false;
+
+                    if (type === 'glasses' && value === currentGlasses) isSelected = true;
+                    if (type === 'hats' && value === currentHat) isSelected = true;
+                    if (type === 'masks' && value === currentMask) isSelected = true;
+
+                    item.classList.toggle('selected', isSelected);
+                });
+            }
+
+            // Apply customization to profile buddy
+            function applyCustomization() {
+                const previewGlasses = document.getElementById('previewGlasses');
+                const previewHat = document.getElementById('previewHat');
+                const previewMask = document.getElementById('previewMask');
+
+                previewGlasses.className = 'buddy-accessory buddy-glasses' + (currentGlasses ? ' glasses-' + currentGlasses : '');
+                previewHat.className = 'buddy-accessory buddy-hat' + (currentHat ? ' hat-' + currentHat : '');
+                previewMask.className = 'buddy-accessory buddy-mask' + (currentMask ? ' mask-' + currentMask : '');
+            }
+
+            // Save customization
+            saveBtn.addEventListener('click', async function() {
+                saveBtn.disabled = true;
+                saveBtn.textContent = '⏳ Saving...';
+
+                try {
+                    const response = await fetch('/Account/SaveBuddyCustomization', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `glasses=${encodeURIComponent(currentGlasses)}&hat=${encodeURIComponent(currentHat)}&mask=${encodeURIComponent(currentMask)}`
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        applyCustomization();
+                        saveBtn.textContent = '✅ Saved!';
+                        setTimeout(() => {
+                            closeModal();
+                            saveBtn.textContent = '💾 Save Changes';
+                            saveBtn.disabled = false;
+                        }, 800);
+                    }
+                } catch (error) {
+                    saveBtn.textContent = '❌ Error';
+                    setTimeout(() => {
+                        saveBtn.textContent = '💾 Save Changes';
+                        saveBtn.disabled = false;
+                    }, 1500);
+                }
+            });
+
+            // Reset customization
+            resetBtn.addEventListener('click', function() {
+                currentGlasses = '';
+                currentHat = '';
+                currentMask = '';
+                updateModalPreview();
+                highlightSelected();
+            });
         });
     </script>
 }
