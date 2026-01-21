@@ -26,7 +26,7 @@
                     <label class="form-label" asp-for="Password">Password</label>
                     <input type="password" asp-for="Password" class="form-input" placeholder="Create a password">
                     <span asp-validation-for="Password" class="form-error"></span>
-                    <div class="password-requirements">
+                    <div class="password-requirements" id="password-requirements">
                         <span class="requirement" id="req-length">At least 8 characters</span>
                         <span class="requirement" id="req-upper">1 uppercase letter</span>
                         <span class="requirement" id="req-lower">1 lowercase letter</span>
@@ -78,40 +78,63 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const passwordInput = document.getElementById('Password');
+            const requirements = document.getElementById('password-requirements');
             const reqLength = document.getElementById('req-length');
             const reqUpper = document.getElementById('req-upper');
             const reqLower = document.getElementById('req-lower');
             const reqNumber = document.getElementById('req-number');
 
+            // Show requirements when user starts typing
+            passwordInput.addEventListener('focus', function() {
+                if (this.value.length > 0) {
+                    requirements.classList.add('visible');
+                }
+            });
+
             passwordInput.addEventListener('input', function() {
                 const password = this.value;
 
-                // Check length
+                // Show requirements when typing starts
+                if (password.length > 0) {
+                    requirements.classList.add('visible');
+                } else {
+                    requirements.classList.remove('visible');
+                }
+
+                // Check length - hide if met
                 if (password.length >= 8) {
                     reqLength.classList.add('met');
                 } else {
                     reqLength.classList.remove('met');
                 }
 
-                // Check uppercase
+                // Check uppercase - hide if met
                 if (/[A-Z]/.test(password)) {
                     reqUpper.classList.add('met');
                 } else {
                     reqUpper.classList.remove('met');
                 }
 
-                // Check lowercase
+                // Check lowercase - hide if met
                 if (/[a-z]/.test(password)) {
                     reqLower.classList.add('met');
                 } else {
                     reqLower.classList.remove('met');
                 }
 
-                // Check number
+                // Check number - hide if met
                 if (/\d/.test(password)) {
                     reqNumber.classList.add('met');
                 } else {
                     reqNumber.classList.remove('met');
+                }
+
+                // Hide entire requirements box if all met
+                const allMet = password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password);
+                if (allMet) {
+                    requirements.classList.add('all-met');
+                } else {
+                    requirements.classList.remove('all-met');
                 }
             });
         });
