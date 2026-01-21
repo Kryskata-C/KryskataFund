@@ -11,6 +11,7 @@ namespace KryskataFund.Data
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Fund> Funds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
