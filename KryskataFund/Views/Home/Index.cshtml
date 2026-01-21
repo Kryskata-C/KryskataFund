@@ -1946,28 +1946,45 @@
             const todaysImpactEl = document.getElementById('todaysImpact');
             const avgSupportEl = document.getElementById('avgSupport');
 
-            let lastActivityCount = 0;
+            let lastActivityHash = '';
+            let isFirstLoad = true;
 
             // Function to truncate text
             function truncate(str, max) {
                 return str.length > max ? str.substring(0, max) + '...' : str;
             }
 
+            // Create a hash of activities to detect changes
+            function getActivityHash(activities) {
+                return activities.map(a => `${a.type}-${a.timeAgo}-${a.fundTitle || ''}`).join('|');
+            }
+
             // Function to render activity feed
-            function renderActivity(activities) {
+            function renderActivity(activities, forceRender = false) {
                 if (!activities || activities.length === 0) {
                     activityFeed.innerHTML = '<div class="feed-empty">No activity yet. Be the first to donate!</div>';
+                    lastActivityHash = '';
                     return;
                 }
 
+                const newHash = getActivityHash(activities);
+
+                // Don't re-render if nothing changed
+                if (newHash === lastActivityHash && !forceRender) {
+                    return;
+                }
+
+                const hadPreviousActivities = lastActivityHash !== '';
+                const isNewActivity = hadPreviousActivities && newHash !== lastActivityHash;
+
                 let html = '';
                 activities.forEach((activity, index) => {
-                    const isNew = index === 0 && activities.length > lastActivityCount;
-                    const newClass = isNew ? 'new-activity' : '';
+                    // Only animate the first item if there's genuinely new activity
+                    const shouldAnimate = isNewActivity && index === 0 && !isFirstLoad;
 
                     if (activity.type === 'donation') {
                         html += `
-                            <div class="feed-row ${newClass}">
+                            <div class="feed-row${shouldAnimate ? ' new-activity' : ''}">
                                 <span class="feed-pill feed-pill--donation">Donation</span>
                                 <span class="feed-text"><span class="feed-amount">€${activity.amount}</span> to "${truncate(activity.fundTitle, 20)}"</span>
                                 <span class="feed-time">• ${activity.timeAgo}</span>
@@ -1975,7 +1992,7 @@
                         `;
                     } else if (activity.type === 'new_fund') {
                         html += `
-                            <div class="feed-row ${newClass}">
+                            <div class="feed-row${shouldAnimate ? ' new-activity' : ''}">
                                 <span class="feed-pill feed-pill--fund">New fund</span>
                                 <span class="feed-text">${activity.creatorName} launched "${truncate(activity.fundTitle, 18)}"</span>
                                 <span class="feed-time">• ${activity.timeAgo}</span>
@@ -1983,7 +2000,7 @@
                         `;
                     } else if (activity.type === 'milestone') {
                         html += `
-                            <div class="feed-row ${newClass}">
+                            <div class="feed-row${shouldAnimate ? ' new-activity' : ''}">
                                 <span class="feed-pill feed-pill--milestone">Milestone</span>
                                 <span class="feed-text">"${truncate(activity.fundTitle, 18)}" hit ${activity.percent}%!</span>
                                 <span class="feed-time">• ${activity.timeAgo}</span>
@@ -1993,7 +2010,8 @@
                 });
 
                 activityFeed.innerHTML = html;
-                lastActivityCount = activities.length;
+                lastActivityHash = newHash;
+                isFirstLoad = false;
             }
 
             // Function to update stats
