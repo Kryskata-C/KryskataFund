@@ -23,6 +23,11 @@
     --transition-med: 0.35s ease-out;
 }
 
+/* Smooth scrolling for better UX */
+html {
+    scroll-behavior: smooth;
+}
+
 /* Reset-ish */
 * {
     margin: 0;
