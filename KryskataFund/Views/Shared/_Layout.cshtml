@@ -36,8 +36,9 @@
                     </a>
                     @if (Context.Session.GetString("IsSignedIn") == "true")
                     {
+                        var isAdmin = Context.Session.GetString("IsAdmin") == "True";
                         <div class="profile-buddy-container" id="buddyContainer">
-                            <div class="profile-buddy" id="profileBuddy">
+                            <div class="profile-buddy @(isAdmin ? "buddy-admin" : "")" id="profileBuddy">
                                 <!-- Cute blob character -->
                                 <div class="buddy-body">
                                     <div class="buddy-face">

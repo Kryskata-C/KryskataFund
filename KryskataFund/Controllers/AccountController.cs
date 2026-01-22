@@ -44,6 +44,7 @@ namespace KryskataFund.Controllers
             HttpContext.Session.SetString("IsSignedIn", "true");
             HttpContext.Session.SetString("UserEmail", email);
             HttpContext.Session.SetString("UserId", user.Id.ToString());
+            HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {

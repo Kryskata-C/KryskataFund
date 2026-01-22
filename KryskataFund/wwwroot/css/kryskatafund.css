@@ -3212,6 +3212,19 @@ a {
     transform: scale(1.1);
 }
 
+/* Admin buddy - red theme */
+.profile-buddy.buddy-admin .buddy-body {
+    background: linear-gradient(135deg, #ff4976 0%, #ef4444 50%, #dc2626 100%);
+    box-shadow:
+        0 4px 15px rgba(239, 68, 68, 0.4),
+        inset 0 -4px 10px rgba(0, 0, 0, 0.1),
+        inset 0 4px 10px rgba(255, 255, 255, 0.3);
+}
+
+.profile-buddy.buddy-admin .buddy-glow {
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, transparent 70%);
+}
+
 .buddy-glow {
     position: absolute;
     inset: -5px;

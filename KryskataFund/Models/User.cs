@@ -15,6 +15,8 @@ namespace KryskataFund.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public bool IsAdmin { get; set; } = false;
+
         // Buddy customization
         public string? BuddyGlasses { get; set; }
         public string? BuddyHat { get; set; }
