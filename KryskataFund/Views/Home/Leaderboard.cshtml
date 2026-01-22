@@ -1,0 +1,511 @@
+@{
+    ViewData["Title"] = "Leaderboard";
+    var topCampaigns = ViewBag.TopCampaigns as List<KryskataFund.Models.Fund>;
+    var topDonors = ViewBag.TopDonors as IEnumerable<dynamic>;
+    var topCreators = ViewBag.TopCreators as IEnumerable<dynamic>;
+    var totalRaised = (decimal)(ViewBag.TotalRaised ?? 0m);
+    var totalDonations = (int)(ViewBag.TotalDonations ?? 0);
+    var totalCampaigns = (int)(ViewBag.TotalCampaigns ?? 0);
+    var totalUsers = (int)(ViewBag.TotalUsers ?? 0);
+}
+
+<div class="leaderboard-page">
+    <div class="leaderboard-header">
+        <div class="leaderboard-title">
+            <h1>Leaderboard</h1>
+            <p>Top contributors and campaigns on KryskataFund</p>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="leaderboard-stats">
+        <div class="lb-stat">
+            <span class="lb-stat-value">$@totalRaised.ToString("N0")</span>
+            <span class="lb-stat-label">Total Raised</span>
+        </div>
+        <div class="lb-stat">
+            <span class="lb-stat-value">@totalDonations</span>
+            <span class="lb-stat-label">Donations</span>
+        </div>
+        <div class="lb-stat">
+            <span class="lb-stat-value">@totalCampaigns</span>
+            <span class="lb-stat-label">Campaigns</span>
+        </div>
+        <div class="lb-stat">
+            <span class="lb-stat-value">@totalUsers</span>
+            <span class="lb-stat-label">Users</span>
+        </div>
+    </div>
+
+    <!-- Leaderboard Tabs -->
+    <div class="lb-tabs">
+        <button class="lb-tab active" data-tab="campaigns">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            Top Campaigns
+        </button>
+        <button class="lb-tab" data-tab="donors">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            Top Donors
+        </button>
+        <button class="lb-tab" data-tab="creators">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Top Creators
+        </button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="lb-content">
+        <!-- Top Campaigns -->
+        <div class="lb-panel" id="campaigns-panel">
+            @if (topCampaigns == null || !topCampaigns.Any())
+            {
+                <div class="lb-empty">No campaigns yet. Be the first to create one!</div>
+            }
+            else
+            {
+                <div class="lb-list">
+                    @{ var campaignRank = 0; }
+                    @foreach (var fund in topCampaigns)
+                    {
+                        campaignRank++;
+                        <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="lb-item">
+                            <div class="lb-rank @(campaignRank <= 3 ? $"rank-{campaignRank}" : "")">
+                                @if (campaignRank == 1)
+                                {
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                    </svg>
+                                }
+                                else
+                                {
+                                    @campaignRank
+                                }
+                            </div>
+                            <div class="lb-image" style="background-image: url('@(fund.ImageUrl ?? "/images/placeholder.jpg")');"></div>
+                            <div class="lb-info">
+                                <span class="lb-name">@fund.Title</span>
+                                <span class="lb-meta">by @fund.CreatorName • @fund.SupportersCount supporters</span>
+                            </div>
+                            <div class="lb-amount">
+                                <span class="lb-amount-value">$@fund.RaisedAmount.ToString("N0")</span>
+                                <span class="lb-amount-label">raised</span>
+                            </div>
+                            <div class="lb-progress-mini">
+                                <div class="lb-progress-bar" style="width: @fund.ProgressPercent%"></div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Top Donors -->
+        <div class="lb-panel hidden" id="donors-panel">
+            @if (topDonors == null || !topDonors.Any())
+            {
+                <div class="lb-empty">No donations yet. Be the first to donate!</div>
+            }
+            else
+            {
+                <div class="lb-list">
+                    @{ var donorRank = 0; }
+                    @foreach (var donor in topDonors)
+                    {
+                        donorRank++;
+                        <div class="lb-item">
+                            <div class="lb-rank @(donorRank <= 3 ? $"rank-{donorRank}" : "")">
+                                @if (donorRank == 1)
+                                {
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                    </svg>
+                                }
+                                else
+                                {
+                                    @donorRank
+                                }
+                            </div>
+                            <div class="lb-avatar lb-avatar-donor">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </div>
+                            <div class="lb-info">
+                                <span class="lb-name">@donor.DonorName</span>
+                                <span class="lb-meta">@donor.DonationCount donations made</span>
+                            </div>
+                            <div class="lb-amount lb-amount-pink">
+                                <span class="lb-amount-value">$@donor.TotalDonated.ToString("N0")</span>
+                                <span class="lb-amount-label">donated</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Top Creators -->
+        <div class="lb-panel hidden" id="creators-panel">
+            @if (topCreators == null || !topCreators.Any())
+            {
+                <div class="lb-empty">No creators yet. Start your first campaign!</div>
+            }
+            else
+            {
+                <div class="lb-list">
+                    @{ var creatorRank = 0; }
+                    @foreach (var creator in topCreators)
+                    {
+                        creatorRank++;
+                        <div class="lb-item">
+                            <div class="lb-rank @(creatorRank <= 3 ? $"rank-{creatorRank}" : "")">
+                                @if (creatorRank == 1)
+                                {
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                                    </svg>
+                                }
+                                else
+                                {
+                                    @creatorRank
+                                }
+                            </div>
+                            <div class="lb-avatar lb-avatar-creator">
+                                <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                            <div class="lb-info">
+                                <span class="lb-name">@creator.CreatorName</span>
+                                <span class="lb-meta">@creator.CampaignCount campaigns • @creator.TotalSupporters supporters</span>
+                            </div>
+                            <div class="lb-amount lb-amount-purple">
+                                <span class="lb-amount-value">$@creator.TotalRaised.ToString("N0")</span>
+                                <span class="lb-amount-label">raised</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .leaderboard-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 30px;
+    }
+
+    .leaderboard-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .leaderboard-title h1 {
+        font-size: 36px;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 10px;
+        background: linear-gradient(135deg, #4ade80, #22d3ee);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .leaderboard-title p {
+        color: var(--text-muted);
+        font-size: 16px;
+        margin: 0;
+    }
+
+    /* Stats */
+    .leaderboard-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .lb-stat {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .lb-stat-value {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        color: #4ade80;
+    }
+
+    .lb-stat-label {
+        display: block;
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+    /* Tabs */
+    .lb-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        padding-bottom: 24px;
+    }
+
+    .lb-tab {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .lb-tab:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+    }
+
+    .lb-tab.active {
+        background: rgba(74, 222, 128, 0.15);
+        border-color: rgba(74, 222, 128, 0.3);
+        color: #4ade80;
+    }
+
+    /* Content */
+    .lb-panel.hidden {
+        display: none;
+    }
+
+    .lb-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+        font-size: 16px;
+    }
+
+    .lb-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .lb-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .lb-item:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(74, 222, 128, 0.2);
+        transform: translateX(4px);
+    }
+
+    /* Rank */
+    .lb-rank {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+
+    .lb-rank.rank-1 {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #000;
+    }
+
+    .lb-rank.rank-2 {
+        background: linear-gradient(135deg, #94a3b8, #64748b);
+        color: #000;
+    }
+
+    .lb-rank.rank-3 {
+        background: linear-gradient(135deg, #cd7f32, #b8860b);
+        color: #000;
+    }
+
+    /* Image/Avatar */
+    .lb-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background-size: cover;
+        background-position: center;
+        flex-shrink: 0;
+    }
+
+    .lb-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .lb-avatar-donor {
+        background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(251, 113, 133, 0.2));
+        color: #fb7185;
+    }
+
+    .lb-avatar-creator {
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(192, 132, 252, 0.2));
+        color: #c084fc;
+    }
+
+    /* Info */
+    .lb-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .lb-name {
+        display: block;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .lb-meta {
+        display: block;
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* Amount */
+    .lb-amount {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .lb-amount-value {
+        display: block;
+        font-size: 18px;
+        font-weight: 700;
+        color: #4ade80;
+    }
+
+    .lb-amount-label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    .lb-amount-pink .lb-amount-value {
+        color: #fb7185;
+    }
+
+    .lb-amount-purple .lb-amount-value {
+        color: #c084fc;
+    }
+
+    /* Mini Progress */
+    .lb-progress-mini {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .lb-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4ade80, #22d3ee);
+        border-radius: 0 3px 3px 0;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .leaderboard-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .lb-tabs {
+            flex-wrap: wrap;
+        }
+
+        .lb-tab {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .lb-item {
+            flex-wrap: wrap;
+        }
+
+        .lb-amount {
+            margin-left: auto;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .leaderboard-stats {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .lb-stat-value {
+            font-size: 22px;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.lb-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.lb-panel').forEach(p => p.classList.add('hidden'));
+
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-panel').classList.remove('hidden');
+            });
+        });
+    </script>
+}
