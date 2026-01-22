@@ -1485,8 +1485,8 @@
 
     .fund-follow-btn {
         position: absolute;
-        top: 48px;
-        right: 12px;
+        bottom: 12px;
+        left: 12px;
         width: 36px;
         height: 36px;
         display: flex;
@@ -1905,13 +1905,6 @@
                     var isFollowing = followedFundIds.Contains(fund.Id);
 
                     <div class="fund-card-wrapper">
-                        <button class="fund-follow-btn @(isFollowing ? "following" : "")"
-                                onclick="toggleFollow(event, @fund.Id, this)"
-                                title="@(isFollowing ? "Unfollow" : "Follow")">
-                            <svg viewBox="0 0 24 24" fill="@(isFollowing ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
-                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                            </svg>
-                        </button>
                         <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="fund-card" style="--progress: @(fund.ProgressPercent)%;">
                             <div class="fund-media" style="@(fund.ImageUrl != null ? $"background: url('{fund.ImageUrl}') center/cover;" : "")">
                                 <div class="fund-media-gradient"></div>
@@ -1928,6 +1921,13 @@
                                         Verified
                                     </div>
                                 }
+                                <button class="fund-follow-btn @(isFollowing ? "following" : "")"
+                                        onclick="toggleFollow(event, @fund.Id, this)"
+                                        title="@(isFollowing ? "Unfollow" : "Follow")">
+                                    <svg viewBox="0 0 24 24" fill="@(isFollowing ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </button>
                                 <div class="fund-media-meter">
                                     @statusText
                                 </div>
