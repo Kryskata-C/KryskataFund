@@ -9,6 +9,8 @@
     var todaysImpact = ViewBag.TodaysImpact ?? 0m;
     var avgSupport = ViewBag.AvgSupport ?? 0m;
     var topCategory = ViewBag.TopCategory as string ?? "None";
+    var followedFundIds = ViewBag.FollowedFundIds as List<int> ?? new List<int>();
+    var isSignedIn = Context.Session.GetString("IsSignedIn") == "true";
 
     // Define all possible categories
     var allCategories = new[] { "Education", "Health", "Animals", "Creative", "Dreams", "Just for fun", "Technology", "Community" };
@@ -1453,6 +1455,98 @@
         background: linear-gradient(135deg, #22c55e, #4ade80);
     }
 
+    /* Verified badge */
+    .fund-verified-badge {
+        position: absolute;
+        right: 12px;
+        top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.95);
+        font-size: 10px;
+        font-weight: 600;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        z-index: 5;
+    }
+
+    .fund-verified-badge svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Follow/Bookmark button */
+    .fund-card-wrapper {
+        position: relative;
+    }
+
+    .fund-follow-btn {
+        position: absolute;
+        top: 48px;
+        right: 12px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        z-index: 10;
+    }
+
+    .fund-follow-btn svg {
+        width: 18px;
+        height: 18px;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+    }
+
+    .fund-follow-btn:hover {
+        transform: scale(1.15);
+        background: rgba(250, 204, 21, 0.2);
+        border-color: rgba(250, 204, 21, 0.5);
+    }
+
+    .fund-follow-btn:hover svg {
+        color: #facc15;
+    }
+
+    .fund-follow-btn.following {
+        background: rgba(250, 204, 21, 0.95);
+        border-color: #facc15;
+        box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
+    }
+
+    .fund-follow-btn.following svg {
+        color: #000;
+        fill: #000;
+    }
+
+    .fund-follow-btn.following:hover {
+        background: rgba(250, 204, 21, 0.8);
+    }
+
+    .fund-follow-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* Animation for follow action */
+    .fund-follow-btn.just-followed {
+        animation: followPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @@keyframes followPop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+        100% { transform: scale(1); }
+    }
+
     /* How it works section */
     .how-section {
         margin-top: 40px;
@@ -1808,46 +1902,65 @@
                         : fund.ProgressPercent >= 50 ? $"{fund.ProgressPercent}% funded"
                         : fund.ProgressPercent >= 20 ? "Boost needed"
                         : "Fresh start";
+                    var isFollowing = followedFundIds.Contains(fund.Id);
 
-                    <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="fund-card" style="--progress: @(fund.ProgressPercent)%;">
-                        <div class="fund-media" style="@(fund.ImageUrl != null ? $"background: url('{fund.ImageUrl}') center/cover;" : "")">
-                            <div class="fund-media-gradient"></div>
-                            <div class="fund-media-tag">
-                                <span class="fund-media-tag-dot" style="background: @fund.CategoryColor; box-shadow: 0 0 10px @(fund.CategoryColor)cc;"></span>
-                                @fund.Category
+                    <div class="fund-card-wrapper">
+                        <button class="fund-follow-btn @(isFollowing ? "following" : "")"
+                                onclick="toggleFollow(event, @fund.Id, this)"
+                                title="@(isFollowing ? "Unfollow" : "Follow")">
+                            <svg viewBox="0 0 24 24" fill="@(isFollowing ? "currentColor" : "none")" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </button>
+                        <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="fund-card" style="--progress: @(fund.ProgressPercent)%;">
+                            <div class="fund-media" style="@(fund.ImageUrl != null ? $"background: url('{fund.ImageUrl}') center/cover;" : "")">
+                                <div class="fund-media-gradient"></div>
+                                <div class="fund-media-tag">
+                                    <span class="fund-media-tag-dot" style="background: @fund.CategoryColor; box-shadow: 0 0 10px @(fund.CategoryColor)cc;"></span>
+                                    @fund.Category
+                                </div>
+                                @if (fund.IsVerified)
+                                {
+                                    <div class="fund-verified-badge">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                        </svg>
+                                        Verified
+                                    </div>
+                                }
+                                <div class="fund-media-meter">
+                                    @statusText
+                                </div>
                             </div>
-                            <div class="fund-media-meter">
-                                @statusText
-                            </div>
-                        </div>
-                        <div class="fund-body">
-                            <h3 class="fund-title">@fund.Title</h3>
-                            <p class="fund-desc">
-                                @(fund.Description.Length > 120 ? fund.Description.Substring(0, 120) + "..." : fund.Description)
-                            </p>
+                            <div class="fund-body">
+                                <h3 class="fund-title">@fund.Title</h3>
+                                <p class="fund-desc">
+                                    @(fund.Description.Length > 120 ? fund.Description.Substring(0, 120) + "..." : fund.Description)
+                                </p>
 
-                            <div class="fund-progress">
-                                <div class="fund-progress-bar">
-                                    <div class="fund-progress-fill"></div>
+                                <div class="fund-progress">
+                                    <div class="fund-progress-bar">
+                                        <div class="fund-progress-fill"></div>
+                                    </div>
+                                    <div class="fund-progress-labels">
+                                        <span>€@fund.RaisedAmount.ToString("N0") raised</span>
+                                        <span>Goal €@fund.GoalAmount.ToString("N0")</span>
+                                    </div>
                                 </div>
-                                <div class="fund-progress-labels">
-                                    <span>€@fund.RaisedAmount.ToString("N0") raised</span>
-                                    <span>Goal €@fund.GoalAmount.ToString("N0")</span>
-                                </div>
-                            </div>
 
-                            <div class="fund-footer">
-                                <div class="fund-footer-left">
-                                    <span class="fund-footer-pill">@fund.SupportersCount supporters</span>
-                                    <span>• @(fund.DaysLeft > 0 ? $"{fund.DaysLeft} days left" : "ended")</span>
-                                </div>
-                                <div class="fund-footer-right">
-                                    <div class="fund-avatar" style="background: linear-gradient(135deg, @fund.CategoryColor, #4f46e5);"></div>
-                                    <span>by @fund.CreatorName</span>
+                                <div class="fund-footer">
+                                    <div class="fund-footer-left">
+                                        <span class="fund-footer-pill">@fund.SupportersCount supporters</span>
+                                        <span>• @(fund.DaysLeft > 0 ? $"{fund.DaysLeft} days left" : "ended")</span>
+                                    </div>
+                                    <div class="fund-footer-right">
+                                        <div class="fund-avatar" style="background: linear-gradient(135deg, @fund.CategoryColor, #4f46e5);"></div>
+                                        <span>by @fund.CreatorName</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 }
             </div>
         </section>
@@ -2063,5 +2176,42 @@
             setInterval(fetchActivity, 5000);
             setInterval(fetchStats, 5000);
         });
+
+        // Toggle follow function
+        async function toggleFollow(event, fundId, button) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const isSignedIn = @(isSignedIn ? "true" : "false");
+            if (!isSignedIn) {
+                window.location.href = '/Account/SignIn?returnUrl=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+
+            try {
+                const response = await fetch('/Account/ToggleFollow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'fundId=' + fundId
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const svg = button.querySelector('svg');
+                    if (data.isFollowing) {
+                        button.classList.add('following', 'just-followed');
+                        button.title = 'Unfollow';
+                        svg.setAttribute('fill', 'currentColor');
+                        setTimeout(() => button.classList.remove('just-followed'), 500);
+                    } else {
+                        button.classList.remove('following');
+                        button.title = 'Follow';
+                        svg.setAttribute('fill', 'none');
+                    }
+                }
+            } catch (e) {
+                console.error('Error toggling follow:', e);
+            }
+        }
     </script>
 }
