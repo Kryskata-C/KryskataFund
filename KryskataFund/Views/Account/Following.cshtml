@@ -72,14 +72,14 @@
                             <div class="my-fund-meta">
                                 <span>@fund.SupportersCount supporters</span>
                                 <span>@fund.DaysLeft days left</span>
+                                <button class="unfollow-btn" onclick="event.preventDefault(); event.stopPropagation(); toggleFollow(@fund.Id, this)" title="Unfollow">
+                                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
                     </a>
-                    <button class="unfollow-btn" onclick="toggleFollow(@fund.Id, this)" title="Unfollow">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                    </button>
                 </div>
             }
         </div>
@@ -280,17 +280,15 @@
 
     .my-fund-meta {
         display: flex;
-        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
         font-size: 13px;
         color: var(--text-muted);
     }
 
     .unfollow-btn {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -300,7 +298,8 @@
         color: #000;
         cursor: pointer;
         transition: all 0.2s ease;
-        z-index: 10;
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     .unfollow-btn:hover {
