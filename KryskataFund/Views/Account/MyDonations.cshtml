@@ -1,0 +1,293 @@
+@{
+    ViewData["Title"] = "My Donations";
+    var myDonations = ViewBag.MyDonations as List<KryskataFund.Models.Donation>;
+    var funds = ViewBag.Funds as List<KryskataFund.Models.Fund>;
+    var totalDonated = (decimal)ViewBag.TotalDonated;
+    var campaignsSupported = (int)ViewBag.CampaignsSupported;
+}
+
+<div class="my-page">
+    <div class="my-page-header">
+        <div class="my-page-title">
+            <h1>My Donations</h1>
+            <p>Your contribution history</p>
+        </div>
+    </div>
+
+    <div class="my-stats-row">
+        <div class="my-stat-card my-stat-card--green">
+            <span class="my-stat-value">$@totalDonated.ToString("N0")</span>
+            <span class="my-stat-label">Total Donated</span>
+        </div>
+        <div class="my-stat-card">
+            <span class="my-stat-value">@myDonations?.Count</span>
+            <span class="my-stat-label">Donations Made</span>
+        </div>
+        <div class="my-stat-card">
+            <span class="my-stat-value">@campaignsSupported</span>
+            <span class="my-stat-label">Campaigns Supported</span>
+        </div>
+    </div>
+
+    @if (myDonations == null || myDonations.Count == 0)
+    {
+        <div class="my-empty-state">
+            <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </div>
+            <h3>No donations yet</h3>
+            <p>Support a campaign and make someone's dream come true!</p>
+            <a asp-controller="Home" asp-action="Index" class="btn-primary">Discover Campaigns</a>
+        </div>
+    }
+    else
+    {
+        <div class="donations-list">
+            @foreach (var donation in myDonations)
+            {
+                var fund = funds?.FirstOrDefault(f => f.Id == donation.FundId);
+                <div class="donation-card">
+                    <div class="donation-amount">
+                        <span class="amount-value">$@donation.Amount.ToString("N0")</span>
+                    </div>
+                    <div class="donation-details">
+                        <a asp-controller="Funds" asp-action="Details" asp-route-id="@donation.FundId" class="donation-fund-title">
+                            @(fund?.Title ?? "Unknown Campaign")
+                        </a>
+                        <div class="donation-meta">
+                            <span class="donation-date">@donation.CreatedAt.ToString("MMM d, yyyy 'at' h:mm tt")</span>
+                            @if (fund != null)
+                            {
+                                <span class="donation-category" style="background: @fund.CategoryColor;">@fund.Category</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="donation-status">
+                        <span class="status-badge status-completed">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Completed
+                        </span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .my-page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 30px;
+    }
+
+    .my-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .my-page-title h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #fff;
+        margin: 0;
+    }
+
+    .my-page-title p {
+        color: var(--text-muted);
+        margin: 5px 0 0;
+    }
+
+    .my-stats-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    .my-stat-card {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+    }
+
+    .my-stat-card--green {
+        background: rgba(74, 222, 128, 0.1);
+        border-color: rgba(74, 222, 128, 0.2);
+    }
+
+    .my-stat-value {
+        display: block;
+        font-size: 32px;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .my-stat-card--green .my-stat-value {
+        color: #4ade80;
+    }
+
+    .my-stat-label {
+        display: block;
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 5px;
+    }
+
+    .my-empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+    }
+
+    .empty-icon {
+        color: var(--text-muted);
+        margin-bottom: 20px;
+    }
+
+    .my-empty-state h3 {
+        font-size: 20px;
+        color: #fff;
+        margin: 0 0 10px;
+    }
+
+    .my-empty-state p {
+        color: var(--text-muted);
+        margin: 0 0 25px;
+    }
+
+    .donations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .donation-card {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 16px;
+        padding: 20px 25px;
+        transition: all 0.2s ease;
+    }
+
+    .donation-card:hover {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .donation-amount {
+        min-width: 100px;
+    }
+
+    .amount-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #4ade80;
+    }
+
+    .donation-details {
+        flex: 1;
+    }
+
+    .donation-fund-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .donation-fund-title:hover {
+        color: #4ade80;
+    }
+
+    .donation-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .donation-date {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .donation-category {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #000;
+    }
+
+    .donation-status {
+        min-width: 110px;
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-completed {
+        background: rgba(74, 222, 128, 0.15);
+        color: #4ade80;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #4ade80, #22d3ee);
+        border: none;
+        border-radius: 12px;
+        color: #000;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
+    }
+
+    @@media (max-width: 768px) {
+        .donation-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .donation-status {
+            text-align: left;
+        }
+
+        .my-stats-row {
+            flex-direction: column;
+        }
+    }
+</style>

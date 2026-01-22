@@ -195,6 +195,54 @@ namespace KryskataFund.Controllers
             return Json(new { glasses = user.BuddyGlasses, hat = user.BuddyHat, mask = user.BuddyMask });
         }
 
+        public IActionResult MyFunds()
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", new { returnUrl = "/Account/MyFunds" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var myFunds = _context.Funds
+                .Where(f => f.CreatorId == userId)
+                .OrderByDescending(f => f.CreatedAt)
+                .ToList();
+
+            var totalRaised = myFunds.Sum(f => f.RaisedAmount);
+            var totalSupporters = myFunds.Sum(f => f.SupportersCount);
+
+            ViewBag.MyFunds = myFunds;
+            ViewBag.TotalRaised = totalRaised;
+            ViewBag.TotalSupporters = totalSupporters;
+
+            return View();
+        }
+
+        public IActionResult MyDonations()
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", new { returnUrl = "/Account/MyDonations" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var myDonations = _context.Donations
+                .Where(d => d.UserId == userId)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            var funds = _context.Funds.ToList();
+            var totalDonated = myDonations.Sum(d => d.Amount);
+            var campaignsSupported = myDonations.Select(d => d.FundId).Distinct().Count();
+
+            ViewBag.MyDonations = myDonations;
+            ViewBag.Funds = funds;
+            ViewBag.TotalDonated = totalDonated;
+            ViewBag.CampaignsSupported = campaignsSupported;
+
+            return View();
+        }
+
         private static string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();

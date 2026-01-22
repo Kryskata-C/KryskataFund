@@ -148,6 +148,58 @@ namespace KryskataFund.Controllers
             return View();
         }
 
+        public IActionResult Leaderboard()
+        {
+            var allFunds = _context.Funds.ToList();
+            var allDonations = _context.Donations.ToList();
+            var allUsers = _context.Users.ToList();
+
+            // Top funded campaigns
+            var topCampaigns = allFunds
+                .OrderByDescending(f => f.RaisedAmount)
+                .Take(10)
+                .ToList();
+
+            // Top donors (by total amount donated)
+            var topDonors = allDonations
+                .GroupBy(d => d.UserId)
+                .Select(g => new {
+                    UserId = g.Key,
+                    DonorName = g.First().DonorName,
+                    TotalDonated = g.Sum(d => d.Amount),
+                    DonationCount = g.Count()
+                })
+                .OrderByDescending(d => d.TotalDonated)
+                .Take(10)
+                .ToList();
+
+            // Most active creators (by funds raised)
+            var topCreators = allFunds
+                .GroupBy(f => f.CreatorId)
+                .Select(g => new {
+                    CreatorId = g.Key,
+                    CreatorName = g.First().CreatorName,
+                    TotalRaised = g.Sum(f => f.RaisedAmount),
+                    CampaignCount = g.Count(),
+                    TotalSupporters = g.Sum(f => f.SupportersCount)
+                })
+                .OrderByDescending(c => c.TotalRaised)
+                .Take(10)
+                .ToList();
+
+            // Stats
+            ViewBag.TotalRaised = allFunds.Sum(f => f.RaisedAmount);
+            ViewBag.TotalDonations = allDonations.Count;
+            ViewBag.TotalCampaigns = allFunds.Count;
+            ViewBag.TotalUsers = allUsers.Count;
+
+            ViewBag.TopCampaigns = topCampaigns;
+            ViewBag.TopDonors = topDonors;
+            ViewBag.TopCreators = topCreators;
+
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
