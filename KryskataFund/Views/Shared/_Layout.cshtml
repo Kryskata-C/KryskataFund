@@ -21,9 +21,12 @@
 
                 <nav class="nav-center">
                     <a asp-controller="Home" asp-action="Index" class="nav-item nav-item--active">Discover</a>
-                    <a href="#" class="nav-item">Categories</a>
-                    <a href="#" class="nav-item">Success Stories</a>
-                    <a href="#" class="nav-item">How it works</a>
+                    @if (Context.Session.GetString("IsSignedIn") == "true")
+                    {
+                        <a asp-controller="Account" asp-action="MyFunds" class="nav-item">My Funds</a>
+                        <a asp-controller="Account" asp-action="MyDonations" class="nav-item">My Donations</a>
+                    }
+                    <a asp-controller="Home" asp-action="Leaderboard" class="nav-item">Leaderboard</a>
                     @if (Context.Session.GetString("IsAdmin") == "True")
                     {
                         <a asp-controller="Admin" asp-action="Dashboard" class="nav-item nav-item--admin">Admin Dashboard</a>
