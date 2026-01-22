@@ -36,6 +36,8 @@ namespace KryskataFund.Models
 
         public string CategoryColor { get; set; } = "#4ade80";
 
+        public bool IsVerified { get; set; } = false;
+
         [NotMapped]
         public int DaysLeft => Math.Max(0, (EndDate - DateTime.UtcNow).Days);
 
