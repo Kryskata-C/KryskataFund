@@ -33,7 +33,7 @@ using (var scope = app.Services.CreateScope())
 
     // Seed admin account if not exists
     const string adminEmail = "admin@kryskatafund.com";
-    const string adminPassword = "Admin123!";
+    const string adminPassword = "admin";
 
     if (!db.Users.Any(u => u.Email == adminEmail))
     {
