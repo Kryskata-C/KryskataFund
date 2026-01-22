@@ -53,6 +53,18 @@ namespace KryskataFund.Controllers
                 ? allFunds.OrderByDescending(f => f.CreatedAt).ToList()
                 : allFunds.Where(f => f.Category == category).OrderByDescending(f => f.CreatedAt).ToList();
 
+            // Get followed fund IDs for current user
+            var followedFundIds = new List<int>();
+            if (HttpContext.Session.GetString("IsSignedIn") == "true")
+            {
+                var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+                followedFundIds = _context.UserFollows
+                    .Where(f => f.UserId == userId)
+                    .Select(f => f.FundId)
+                    .ToList();
+            }
+            ViewBag.FollowedFundIds = followedFundIds;
+
             return View(funds);
         }
 
