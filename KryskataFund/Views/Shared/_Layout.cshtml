@@ -24,6 +24,10 @@
                     <a href="#" class="nav-item">Categories</a>
                     <a href="#" class="nav-item">Success Stories</a>
                     <a href="#" class="nav-item">How it works</a>
+                    @if (Context.Session.GetString("IsAdmin") == "True")
+                    {
+                        <a asp-controller="Admin" asp-action="Dashboard" class="nav-item nav-item--admin">Admin Dashboard</a>
+                    }
                 </nav>
 
                 <div class="nav-right">

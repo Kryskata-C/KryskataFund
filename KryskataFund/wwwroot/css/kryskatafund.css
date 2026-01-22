@@ -2332,6 +2332,16 @@ a {
     border-radius: 2px;
 }
 
+.nav-item--admin {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.nav-item--admin:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ff6b6b;
+}
+
 .nav-right {
     display: flex;
     align-items: center;
