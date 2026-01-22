@@ -243,6 +243,63 @@ namespace KryskataFund.Controllers
             return View();
         }
 
+        public IActionResult Following()
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", new { returnUrl = "/Account/Following" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var followedFundIds = _context.UserFollows
+                .Where(f => f.UserId == userId)
+                .Select(f => f.FundId)
+                .ToList();
+
+            var followedFunds = _context.Funds
+                .Where(f => followedFundIds.Contains(f.Id))
+                .OrderByDescending(f => f.CreatedAt)
+                .ToList();
+
+            ViewBag.FollowedFunds = followedFunds;
+            ViewBag.FollowCount = followedFunds.Count;
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ToggleFollow(int fundId)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Not signed in" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var existingFollow = _context.UserFollows
+                .FirstOrDefault(f => f.UserId == userId && f.FundId == fundId);
+
+            bool isNowFollowing;
+            if (existingFollow != null)
+            {
+                _context.UserFollows.Remove(existingFollow);
+                isNowFollowing = false;
+            }
+            else
+            {
+                _context.UserFollows.Add(new UserFollow
+                {
+                    UserId = userId,
+                    FundId = fundId,
+                    FollowedAt = DateTime.UtcNow
+                });
+                isNowFollowing = true;
+            }
+
+            _context.SaveChanges();
+            return Json(new { success = true, isFollowing = isNowFollowing });
+        }
+
         private static string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
