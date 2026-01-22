@@ -224,6 +224,26 @@ namespace KryskataFund.Controllers
             return Json(new { success = true, message = $"Added ${amount} to fund", newTotal = fund.RaisedAmount });
         }
 
+        [HttpPost]
+        public IActionResult ToggleVerified(int id)
+        {
+            if (!IsAdmin())
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            var fund = _context.Funds.Find(id);
+            if (fund == null)
+            {
+                return Json(new { success = false, message = "Fund not found" });
+            }
+
+            fund.IsVerified = !fund.IsVerified;
+            _context.SaveChanges();
+
+            return Json(new { success = true, isVerified = fund.IsVerified, message = fund.IsVerified ? "Fund verified" : "Verification removed" });
+        }
+
         public IActionResult GetStats()
         {
             if (!IsAdmin())
