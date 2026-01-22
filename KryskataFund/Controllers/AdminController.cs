@@ -27,12 +27,15 @@ namespace KryskataFund.Controllers
             }
 
             // Stats
+            var allFunds = _context.Funds.ToList();
+            var allDonationsList = _context.Donations.ToList();
+
             ViewBag.TotalUsers = _context.Users.Count();
-            ViewBag.TotalFunds = _context.Funds.Count();
-            ViewBag.TotalDonations = _context.Donations.Count();
-            ViewBag.TotalRaised = _context.Funds.Sum(f => f.RaisedAmount);
-            ViewBag.ActiveCampaigns = _context.Funds.Count(f => f.EndDate > DateTime.UtcNow);
-            ViewBag.CompletedCampaigns = _context.Funds.Count(f => f.RaisedAmount >= f.GoalAmount);
+            ViewBag.TotalFunds = allFunds.Count;
+            ViewBag.TotalDonations = allDonationsList.Count;
+            ViewBag.TotalRaised = allFunds.Sum(f => f.RaisedAmount);
+            ViewBag.ActiveCampaigns = allFunds.Count(f => f.EndDate > DateTime.UtcNow);
+            ViewBag.CompletedCampaigns = allFunds.Count(f => f.RaisedAmount >= f.GoalAmount);
 
             // Recent activity
             ViewBag.RecentUsers = _context.Users.OrderByDescending(u => u.CreatedAt).Take(5).ToList();
@@ -45,7 +48,7 @@ namespace KryskataFund.Controllers
             ViewBag.AllDonations = _context.Donations.OrderByDescending(d => d.CreatedAt).ToList();
 
             // Category breakdown
-            ViewBag.CategoryStats = _context.Funds
+            ViewBag.CategoryStats = allFunds
                 .GroupBy(f => f.Category)
                 .Select(g => new { Category = g.Key, Count = g.Count(), Raised = g.Sum(f => f.RaisedAmount) })
                 .ToList();
@@ -232,19 +235,23 @@ namespace KryskataFund.Controllers
             var thisWeek = today.AddDays(-7);
             var thisMonth = today.AddDays(-30);
 
+            var allDonations = _context.Donations.ToList();
+            var allUsers = _context.Users.ToList();
+            var allFunds = _context.Funds.ToList();
+
             return Json(new
             {
                 success = true,
-                todayDonations = _context.Donations.Count(d => d.CreatedAt.Date == today),
-                todayAmount = _context.Donations.Where(d => d.CreatedAt.Date == today).Sum(d => d.Amount),
-                weekDonations = _context.Donations.Count(d => d.CreatedAt >= thisWeek),
-                weekAmount = _context.Donations.Where(d => d.CreatedAt >= thisWeek).Sum(d => d.Amount),
-                monthDonations = _context.Donations.Count(d => d.CreatedAt >= thisMonth),
-                monthAmount = _context.Donations.Where(d => d.CreatedAt >= thisMonth).Sum(d => d.Amount),
-                newUsersToday = _context.Users.Count(u => u.CreatedAt.Date == today),
-                newUsersWeek = _context.Users.Count(u => u.CreatedAt >= thisWeek),
-                newFundsToday = _context.Funds.Count(f => f.CreatedAt.Date == today),
-                newFundsWeek = _context.Funds.Count(f => f.CreatedAt >= thisWeek)
+                todayDonations = allDonations.Count(d => d.CreatedAt.Date == today),
+                todayAmount = allDonations.Where(d => d.CreatedAt.Date == today).Sum(d => d.Amount),
+                weekDonations = allDonations.Count(d => d.CreatedAt >= thisWeek),
+                weekAmount = allDonations.Where(d => d.CreatedAt >= thisWeek).Sum(d => d.Amount),
+                monthDonations = allDonations.Count(d => d.CreatedAt >= thisMonth),
+                monthAmount = allDonations.Where(d => d.CreatedAt >= thisMonth).Sum(d => d.Amount),
+                newUsersToday = allUsers.Count(u => u.CreatedAt.Date == today),
+                newUsersWeek = allUsers.Count(u => u.CreatedAt >= thisWeek),
+                newFundsToday = allFunds.Count(f => f.CreatedAt.Date == today),
+                newFundsWeek = allFunds.Count(f => f.CreatedAt >= thisWeek)
             });
         }
     }
