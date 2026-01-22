@@ -191,6 +191,7 @@
                             <th>Title</th>
                             <th>Creator</th>
                             <th>Category</th>
+                            <th>Status</th>
                             <th>Progress</th>
                             <th>Actions</th>
                         </tr>
@@ -209,6 +210,11 @@
                                     <td class="category-cell">
                                         <span class="category-badge" style="background: @fund.CategoryColor">@fund.Category</span>
                                     </td>
+                                    <td class="status-cell">
+                                        <span class="verified-badge-admin @(fund.IsVerified ? "verified" : "")">
+                                            @(fund.IsVerified ? "Verified" : "Unverified")
+                                        </span>
+                                    </td>
                                     <td class="progress-cell">
                                         <div class="mini-progress">
                                             <div class="mini-progress-bar" style="width: @fund.ProgressPercent%"></div>
@@ -216,6 +222,12 @@
                                         <span>$@fund.RaisedAmount.ToString("N0") / $@fund.GoalAmount.ToString("N0")</span>
                                     </td>
                                     <td class="actions-cell">
+                                        <button class="action-btn verify-btn @(fund.IsVerified ? "active" : "")" onclick="toggleVerified(@fund.Id)" title="@(fund.IsVerified ? "Remove Verification" : "Verify Fund")">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                            </svg>
+                                        </button>
                                         <button class="action-btn edit-btn" onclick="editFund(@fund.Id, '@fund.Title.Replace("'", "\\'")', '@fund.Description.Replace("'", "\\'").Replace("\n", "\\n")', @fund.GoalAmount)" title="Edit">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -481,6 +493,36 @@
 
             if (data.success) {
                 document.querySelector(`tr[data-fund-id="${id}"]`).remove();
+                showToast(data.message);
+            } else {
+                showToast(data.message, true);
+            }
+        }
+
+        async function toggleVerified(id) {
+            const response = await fetch('/Admin/ToggleVerified', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${id}`
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const row = document.querySelector(`tr[data-fund-id="${id}"]`);
+                const badge = row.querySelector('.verified-badge-admin');
+                const btn = row.querySelector('.verify-btn');
+
+                if (data.isVerified) {
+                    badge.classList.add('verified');
+                    badge.textContent = 'Verified';
+                    btn.classList.add('active');
+                    btn.title = 'Remove Verification';
+                } else {
+                    badge.classList.remove('verified');
+                    badge.textContent = 'Unverified';
+                    btn.classList.remove('active');
+                    btn.title = 'Verify Fund';
+                }
                 showToast(data.message);
             } else {
                 showToast(data.message, true);
@@ -1020,5 +1062,34 @@
     .admin-toast.error {
         border-color: rgba(239, 68, 68, 0.3);
         color: #ef4444;
+    }
+
+    /* Verified Badge */
+    .verified-badge-admin {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-muted);
+    }
+
+    .verified-badge-admin.verified {
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+    }
+
+    /* Verify Button */
+    .verify-btn:hover {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.3);
+        color: #3b82f6;
+    }
+
+    .verify-btn.active {
+        background: rgba(59, 130, 246, 0.2);
+        border-color: rgba(59, 130, 246, 0.4);
+        color: #3b82f6;
     }
 </style>
