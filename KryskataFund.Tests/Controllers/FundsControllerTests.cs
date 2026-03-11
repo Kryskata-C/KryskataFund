@@ -5,6 +5,7 @@ using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Moq;
 
 namespace KryskataFund.Tests.Controllers
@@ -20,7 +21,9 @@ namespace KryskataFund.Tests.Controllers
             var mockEnv = new Mock<IWebHostEnvironment>();
             mockEnv.Setup(e => e.WebRootPath).Returns(Path.GetTempPath());
 
-            var controller = new FundsController(context, mockEnv.Object);
+            var mockConfig = new Mock<IConfiguration>();
+
+            var controller = new FundsController(context, mockEnv.Object, mockConfig.Object);
             TestHelper.SetupSession(controller, userId, email, isAdmin);
             return (controller, context);
         }
