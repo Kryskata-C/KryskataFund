@@ -235,10 +235,17 @@ namespace KryskataFund.Controllers
             var totalDonated = myDonations.Sum(d => d.Amount);
             var campaignsSupported = myDonations.Select(d => d.FundId).Distinct().Count();
 
+            // Get user's recurring donations
+            var recurringDonations = _context.RecurringDonations
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToList();
+
             ViewBag.MyDonations = myDonations;
             ViewBag.Funds = funds;
             ViewBag.TotalDonated = totalDonated;
             ViewBag.CampaignsSupported = campaignsSupported;
+            ViewBag.RecurringDonations = recurringDonations;
 
             return View();
         }
