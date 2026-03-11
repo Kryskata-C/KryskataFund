@@ -134,9 +134,17 @@ namespace KryskataFund.Controllers
 
             ViewBag.IsSignedIn = HttpContext.Session.GetString("IsSignedIn") == "true";
 
-            // Check if current user is the creator
+            // Check if current user is the creator or collaborator
             var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            ViewBag.IsCreator = fund.CreatorId == userId;
+            ViewBag.IsCreator = IsCreatorOrCollaborator(fund.CreatorId, userId, id);
+            ViewBag.IsOriginalCreator = fund.CreatorId == userId;
+
+            // Load collaborators with user emails
+            var collaborators = _context.FundCollaborators
+                .Where(c => c.FundId == id)
+                .Join(_context.Users, c => c.UserId, u => u.Id, (c, u) => new { c.Id, c.UserId, c.Role, c.AddedAt, u.Email })
+                .ToList();
+            ViewBag.Collaborators = collaborators;
 
             // Get all donations for this fund (for pagination)
             var recentDonations = _context.Donations
