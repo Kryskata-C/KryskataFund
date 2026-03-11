@@ -868,6 +868,151 @@
             }
         }
 
+
+            // Team modal functionality
+            const openTeamBtn = document.getElementById('openTeamModal');
+            const closeTeamBtn = document.getElementById('closeTeamModal');
+            const closeTeamFooterBtn = document.getElementById('closeTeamBtn');
+            const teamModal = document.getElementById('teamModal');
+            const teamBackdrop = document.getElementById('teamModalBackdrop');
+            const inviteBtn = document.getElementById('inviteCollab');
+            const collabEmail = document.getElementById('collabEmail');
+            const collabList = document.getElementById('collabList');
+            const collabEmpty = document.getElementById('collabEmpty');
+
+            function openTeamModal() {
+                if (teamModal) {
+                    teamModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeTeamModal() {
+                if (teamModal) {
+                    teamModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            if (openTeamBtn) openTeamBtn.addEventListener('click', openTeamModal);
+            if (closeTeamBtn) closeTeamBtn.addEventListener('click', closeTeamModal);
+            if (closeTeamFooterBtn) closeTeamFooterBtn.addEventListener('click', closeTeamModal);
+            if (teamBackdrop) teamBackdrop.addEventListener('click', closeTeamModal);
+
+            if (inviteBtn) {
+                inviteBtn.addEventListener('click', async function() {
+                    const email = collabEmail.value.trim();
+                    if (!email) {
+                        alert('Please enter an email address');
+                        return;
+                    }
+
+                    inviteBtn.disabled = true;
+                    inviteBtn.textContent = 'Inviting...';
+
+                    try {
+                        const response = await fetch('/Funds/AddCollaborator', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `fundId=${fundId}&email=${encodeURIComponent(email)}`
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            if (collabEmpty) collabEmpty.style.display = 'none';
+
+                            const itemHtml = `
+                                <div class="collab-item" data-id="${data.collaborator.id}">
+                                    <div class="collab-item-info">
+                                        <div class="collaborator-avatar"></div>
+                                        <span>${data.collaborator.email}</span>
+                                        <span class="collab-role">${data.collaborator.role}</span>
+                                    </div>
+                                    <button class="collab-remove-btn" data-id="${data.collaborator.id}">×</button>
+                                </div>
+                            `;
+                            collabList.insertAdjacentHTML('beforeend', itemHtml);
+
+                            // Add collaborator chip to the page
+                            const chipsContainer = document.querySelector('.collaborators-list');
+                            if (chipsContainer) {
+                                const chipHtml = `
+                                    <div class="collaborator-chip">
+                                        <div class="collaborator-avatar"></div>
+                                        <span>@${data.collaborator.email.split('@')[0]}</span>
+                                    </div>
+                                `;
+                                chipsContainer.insertAdjacentHTML('beforeend', chipHtml);
+                            } else {
+                                // Create the collaborators section if it doesn't exist
+                                const creatorDiv = document.querySelector('.fund-detail-creator');
+                                if (creatorDiv) {
+                                    const sectionHtml = `
+                                        <div class="fund-collaborators">
+                                            <span class="collaborators-label">Team:</span>
+                                            <div class="collaborators-list">
+                                                <div class="collaborator-chip">
+                                                    <div class="collaborator-avatar"></div>
+                                                    <span>@${data.collaborator.email.split('@')[0]}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                    creatorDiv.insertAdjacentHTML('afterend', sectionHtml);
+                                }
+                            }
+
+                            collabEmail.value = '';
+                        } else {
+                            alert(data.message || 'Failed to add collaborator');
+                        }
+                    } catch (error) {
+                        alert('An error occurred. Please try again.');
+                    }
+
+                    inviteBtn.disabled = false;
+                    inviteBtn.textContent = 'Invite';
+                });
+            }
+
+            // Remove collaborator (event delegation)
+            if (collabList) {
+                collabList.addEventListener('click', async function(e) {
+                    const removeBtn = e.target.closest('.collab-remove-btn');
+                    if (!removeBtn) return;
+
+                    const collabId = removeBtn.dataset.id;
+                    if (!confirm('Remove this collaborator?')) return;
+
+                    try {
+                        const response = await fetch('/Funds/RemoveCollaborator', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `collaboratorId=${collabId}`
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const item = collabList.querySelector(`.collab-item[data-id="${collabId}"]`);
+                            if (item) item.remove();
+
+                            if (!collabList.querySelector('.collab-item')) {
+                                if (collabEmpty) {
+                                    collabEmpty.style.display = '';
+                                } else {
+                                    collabList.innerHTML = '<div class="collab-empty" id="collabEmpty"><p>No collaborators yet</p></div>';
+                                }
+                            }
+                        } else {
+                            alert(data.message || 'Failed to remove collaborator');
+                        }
+                    } catch (error) {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            }
         /* Updates Section Styles */
         .updates-header {
             display: flex;
@@ -1397,6 +1542,159 @@
             font-size: 16px;
             font-weight: 700;
             color: #fff;
+        }
+
+        /* Fund Collaborators */
+        .fund-collaborators {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .collaborators-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .collaborators-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .collaborator-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px 4px 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .collaborator-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            flex-shrink: 0;
+        }
+
+        .btn-manage-team {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: rgba(70, 230, 164, 0.1);
+            border: 1px solid rgba(70, 230, 164, 0.3);
+            border-radius: 10px;
+            color: #46e6a4;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .btn-manage-team:hover {
+            background: rgba(70, 230, 164, 0.2);
+            border-color: rgba(70, 230, 164, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .collab-invite-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .collab-invite-row input {
+            flex: 1;
+        }
+
+        .collab-invite-row .btn-update-submit {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .collab-current {
+            margin-top: 8px;
+        }
+
+        .collab-current > label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .collab-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .collab-empty {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .collab-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            animation: fadeSlideIn 0.3s ease forwards;
+        }
+
+        .collab-item-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-main);
+        }
+
+        .collab-role {
+            padding: 2px 8px;
+            background: rgba(70, 230, 164, 0.15);
+            border-radius: 6px;
+            font-size: 11px;
+            color: #46e6a4;
+            font-weight: 500;
+        }
+
+        .collab-remove-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 50%;
+            color: #ef4444;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .collab-remove-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            transform: scale(1.1);
         }
     </style>
 }
