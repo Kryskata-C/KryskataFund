@@ -347,11 +347,11 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Fund not found" });
             }
 
-            // Only the creator can post updates
+            // Only the creator or collaborators can post updates
             var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            if (fund.CreatorId != userId)
+            if (!IsCreatorOrCollaborator(fund.CreatorId, userId, fundId))
             {
-                return Json(new { success = false, message = "Only the fund creator can post updates" });
+                return Json(new { success = false, message = "Only the fund creator or collaborators can post updates" });
             }
 
             var update = new FundUpdate
