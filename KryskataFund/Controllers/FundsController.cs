@@ -142,6 +142,11 @@ namespace KryskataFund.Controllers
                 .OrderBy(m => m.TargetAmount)
                 .ToList();
 
+            // Check for existing deadline extension
+            var extension = _context.DeadlineExtensions
+                .FirstOrDefault(e => e.FundId == id);
+            ViewBag.DeadlineExtension = extension;
+
             return View(fund);
         }
 
