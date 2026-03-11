@@ -197,6 +197,17 @@ namespace KryskataFund.Controllers
             fund.RaisedAmount += amount;
             fund.SupportersCount += 1;
 
+            // Auto-mark milestones as reached
+            var unreachedMilestones = _context.FundMilestones
+                .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
+                .ToList();
+
+            foreach (var milestone in unreachedMilestones)
+            {
+                milestone.IsReached = true;
+                milestone.ReachedAt = DateTime.UtcNow;
+            }
+
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Donation successful!" });
