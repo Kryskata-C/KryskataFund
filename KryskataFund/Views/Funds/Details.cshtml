@@ -20,6 +20,9 @@
     var fundUpdates = ViewBag.FundUpdates as List<KryskataFund.Models.FundUpdate> ?? new List<KryskataFund.Models.FundUpdate>();
     var milestones = ViewBag.Milestones as List<KryskataFund.Models.FundMilestone> ?? new List<KryskataFund.Models.FundMilestone>();
     var signInUrl = Url.Action("SignIn", "Account", new { returnUrl = Context.Request.Path });
+    var recurringCount = (int)(ViewBag.RecurringCount ?? 0);
+    var hasRecurring = (bool)(ViewBag.HasRecurring ?? false);
+    var recurringAmount = (decimal)(ViewBag.RecurringAmount ?? 0m);
 }
 
 <div class="page-root">
@@ -261,6 +264,13 @@
                                 <span class="fund-detail-stat-value">@(Model.DaysLeft == 0 ? "Ended" : Model.DaysLeft.ToString())</span>
                                 <span class="fund-detail-stat-label">@(Model.DaysLeft == 0 ? "" : "days left")</span>
                             </div>
+                            @if (recurringCount > 0)
+                            {
+                                <div class="fund-detail-stat">
+                                    <span class="fund-detail-stat-value">@recurringCount</span>
+                                    <span class="fund-detail-stat-label">monthly</span>
+                                </div>
+                            }
                         </div>
                     </div>
 
@@ -282,9 +292,30 @@
                             <span class="selected-amount-value">€<span id="animatedAmount">0</span></span>
                         </div>
 
+                        @if (hasRecurring)
+                        {
+                            <div class="recurring-active-badge">
+                                <span class="recurring-icon">🔄</span>
+                                <div class="recurring-active-info">
+                                    <span class="recurring-active-label">Monthly donation active</span>
+                                    <span class="recurring-active-amount">€@recurringAmount.ToString("N0")/month</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="monthly-toggle" id="monthlyToggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="monthlyCheckbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="monthly-toggle-label">Make it monthly</span>
+                            </div>
+                        }
+
                         <button class="btn-donate btn-donate--primary" id="donateBtn">
                             <span class="btn-donate-icon">💚</span>
-                            Donate now
+                            <span id="donateBtnText">Donate now</span>
                         </button>
 
                         <button class="btn-donate btn-donate--ghost">
