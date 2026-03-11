@@ -22,141 +22,59 @@
                 <span class="payment-amount-value">€@amount</span>
             </div>
 
-            <!-- Card Form -->
-            <form id="paymentForm" class="payment-form">
-                <div class="form-group">
-                    <label class="form-label">Cardholder Name</label>
-                    <input type="text" class="form-input" id="cardName" placeholder="Name on card" required>
-                </div>
+            <!-- Stripe Checkout Button -->
+            <div class="payment-form">
+                <p style="text-align: center; color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                    You will be redirected to Stripe's secure checkout page
+                </p>
 
-                <div class="form-group">
-                    <label class="form-label">Card Number</label>
-                    <div class="card-input-wrapper">
-                        <input type="text" class="form-input card-number-input" id="cardNumber"
-                               placeholder="1234 5678 9012 3456" maxlength="19" required>
-                        <div class="card-icons">
-                            <span class="card-icon card-visa"></span>
-                            <span class="card-icon card-mastercard"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Expiry Date</label>
-                        <input type="text" class="form-input" id="cardExpiry" placeholder="MM/YY" maxlength="5" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">CVV</label>
-                        <input type="text" class="form-input" id="cardCvv" placeholder="123" maxlength="4" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-pay" id="payBtn">
-                    <span class="btn-pay-text">Pay €@amount</span>
+                <button type="button" class="btn-pay" id="payBtn">
+                    <span class="btn-pay-text">Pay with Stripe — €@amount</span>
                     <div class="btn-pay-loader">
                         <div class="loader-spinner"></div>
                     </div>
-                    <div class="btn-pay-success">
-                        <svg class="checkmark" viewBox="0 0 52 52">
-                            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
-                            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                        </svg>
-                    </div>
                 </button>
-            </form>
+            </div>
 
             <!-- Security Note -->
             <div class="payment-security">
                 <span class="security-icon">🔒</span>
-                <span>Your payment information is secure and encrypted</span>
+                <span>Secure payment powered by Stripe</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Success Overlay -->
-<div class="payment-success-overlay" id="successOverlay">
-    <div class="success-content">
-        <div class="success-checkmark">
-            <svg viewBox="0 0 52 52">
-                <circle cx="26" cy="26" r="25" fill="none"/>
-                <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-            </svg>
-        </div>
-        <h2>Thank you!</h2>
-        <p>Your donation of €@amount has been received</p>
-        <a asp-controller="Home" asp-action="Index" class="btn-back-home">Back to campaigns</a>
-    </div>
-</div>
-
 @section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('paymentForm');
             const payBtn = document.getElementById('payBtn');
-            const successOverlay = document.getElementById('successOverlay');
-            const cardNumberInput = document.getElementById('cardNumber');
-            const cardExpiryInput = document.getElementById('cardExpiry');
-
             const fundId = @Model.Id;
-            const donationAmount = @amount;
+            const amount = @amount;
 
-            // Format card number with spaces
-            cardNumberInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
-                let formatted = value.match(/.{1,4}/g)?.join(' ') || value;
-                e.target.value = formatted;
-            });
-
-            // Format expiry date
-            cardExpiryInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length >= 2) {
-                    value = value.slice(0, 2) + '/' + value.slice(2, 4);
-                }
-                e.target.value = value;
-            });
-
-            // Handle form submit
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                // Start loading animation
-                payBtn.classList.add('loading');
+            payBtn.addEventListener('click', async function() {
                 payBtn.disabled = true;
+                payBtn.classList.add('loading');
 
                 try {
-                    // Process the donation
-                    const response = await fetch('/Funds/ProcessDonation', {
+                    const response = await fetch('/Funds/CreateCheckoutSession', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `fundId=${fundId}&amount=${donationAmount}`
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `fundId=${fundId}&amount=${amount}`
                     });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        // Show success state on button
-                        payBtn.classList.remove('loading');
-                        payBtn.classList.add('success');
-
-                        // After button animation, show overlay
-                        setTimeout(() => {
-                            successOverlay.classList.add('visible');
-                        }, 800);
+                    const data = await response.json();
+                    if (data.success) {
+                        window.location.href = data.sessionUrl;
                     } else {
-                        alert(result.message || 'Payment failed. Please try again.');
-                        payBtn.classList.remove('loading');
+                        alert(data.message || 'Error creating checkout session');
                         payBtn.disabled = false;
+                        payBtn.classList.remove('loading');
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('An error occurred. Please try again.');
-                    payBtn.classList.remove('loading');
+                    alert('An error occurred');
                     payBtn.disabled = false;
+                    payBtn.classList.remove('loading');
                 }
             });
         });

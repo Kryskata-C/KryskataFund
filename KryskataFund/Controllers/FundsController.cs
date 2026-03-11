@@ -8,6 +8,7 @@ namespace KryskataFund.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly IConfiguration _configuration;
 
         private static readonly Dictionary<string, string> CategoryColors = new()
         {
@@ -21,10 +22,11 @@ namespace KryskataFund.Controllers
             { "Community", "#ec4899" }
         };
 
-        public FundsController(ApplicationDbContext context, IWebHostEnvironment environment)
+        public FundsController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration configuration)
         {
             _context = context;
             _environment = environment;
+            _configuration = configuration;
         }
 
         private bool IsCreatorOrCollaborator(int fundCreatorId, int userId, int fundId)
@@ -204,7 +206,103 @@ namespace KryskataFund.Controllers
             }
 
             ViewBag.Amount = amount;
+            ViewBag.StripePublishableKey = _configuration["Stripe:PublishableKey"];
             return View(fund);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCheckoutSession(int fundId, decimal amount)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+                return Json(new { success = false, message = "Please sign in" });
+
+            var fund = await _context.Funds.FindAsync(fundId);
+            if (fund == null)
+                return Json(new { success = false, message = "Fund not found" });
+
+            var domain = $"{Request.Scheme}://{Request.Host}";
+
+            var options = new Stripe.Checkout.SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
+                {
+                    new()
+                    {
+                        PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(amount * 100),
+                            Currency = "eur",
+                            ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = $"Donation to: {fund.Title}",
+                                Description = $"Supporting {fund.CreatorName}'s campaign"
+                            }
+                        },
+                        Quantity = 1
+                    }
+                },
+                Mode = "payment",
+                SuccessUrl = $"{domain}/Funds/DonationSuccess?fundId={fundId}&amount={amount}&session_id={{CHECKOUT_SESSION_ID}}",
+                CancelUrl = $"{domain}/Funds/Details/{fundId}",
+                Metadata = new Dictionary<string, string>
+                {
+                    { "fundId", fundId.ToString() },
+                    { "amount", amount.ToString() }
+                }
+            };
+
+            var service = new Stripe.Checkout.SessionService();
+            var session = await service.CreateAsync(options);
+
+            return Json(new { success = true, sessionUrl = session.Url });
+        }
+
+        public async Task<IActionResult> DonationSuccess(int fundId, decimal amount, string session_id)
+        {
+            // Verify the session with Stripe
+            var service = new Stripe.Checkout.SessionService();
+            var session = await service.GetAsync(session_id);
+
+            if (session.PaymentStatus == "paid")
+            {
+                var fund = await _context.Funds.FindAsync(fundId);
+                if (fund != null)
+                {
+                    var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+                    var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+
+                    // Check if donation already recorded for this session
+                    var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
+                    if (existingDonation == null)
+                    {
+                        var donation = new Donation
+                        {
+                            FundId = fundId,
+                            UserId = userId,
+                            DonorName = "@" + userEmail.Split('@')[0],
+                            Amount = amount,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.Donations.Add(donation);
+                        fund.RaisedAmount += amount;
+                        fund.SupportersCount += 1;
+
+                        // Auto-mark milestones
+                        var unreachedMilestones = _context.FundMilestones
+                            .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount);
+                        foreach (var milestone in unreachedMilestones)
+                        {
+                            milestone.IsReached = true;
+                            milestone.ReachedAt = DateTime.UtcNow;
+                        }
+
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+
+            return RedirectToAction("Details", new { id = fundId });
         }
 
         [HttpPost]
