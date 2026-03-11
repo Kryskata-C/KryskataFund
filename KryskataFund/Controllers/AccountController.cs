@@ -307,6 +307,31 @@ namespace KryskataFund.Controllers
             return Json(new { success = true, isFollowing = isNowFollowing });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CancelRecurringDonation(int id)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Not signed in" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var recurring = _context.RecurringDonations
+                .FirstOrDefault(r => r.Id == id && r.UserId == userId && r.IsActive);
+
+            if (recurring == null)
+            {
+                return Json(new { success = false, message = "Recurring donation not found" });
+            }
+
+            recurring.IsActive = false;
+            recurring.CancelledAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Recurring donation cancelled" });
+        }
+
         private static string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
