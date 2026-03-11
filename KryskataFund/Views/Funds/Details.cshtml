@@ -1084,28 +1084,22 @@
                             // Add collaborator chip to the page
                             const chipsContainer = document.querySelector('.collaborators-list');
                             if (chipsContainer) {
-                                const chipHtml = `
-                                    <div class="collaborator-chip">
-                                        <div class="collaborator-avatar"></div>
-                                        <span>' + data.collaborator.email.split('@')[0] + '</span>
-                                    </div>
-                                `;
+                                const chipHtml = '<div class="collaborator-chip">'
+                                    + '<div class="collaborator-avatar"></div>'
+                                    + '<span>@@' + data.collaborator.email.split('@@')[0] + '</span>'
+                                    + '</div>';
                                 chipsContainer.insertAdjacentHTML('beforeend', chipHtml);
                             } else {
                                 // Create the collaborators section if it doesn't exist
                                 const creatorDiv = document.querySelector('.fund-detail-creator');
                                 if (creatorDiv) {
-                                    const sectionHtml = `
-                                        <div class="fund-collaborators">
-                                            <span class="collaborators-label">Team:</span>
-                                            <div class="collaborators-list">
-                                                <div class="collaborator-chip">
-                                                    <div class="collaborator-avatar"></div>
-                                                    <span>' + data.collaborator.email.split('@')[0] + '</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
+                                    const sectionHtml = '<div class="fund-collaborators">'
+                                        + '<span class="collaborators-label">Team:</span>'
+                                        + '<div class="collaborators-list">'
+                                        + '<div class="collaborator-chip">'
+                                        + '<div class="collaborator-avatar"></div>'
+                                        + '<span>@@' + data.collaborator.email.split('@@')[0] + '</span>'
+                                        + '</div></div></div>';
                                     creatorDiv.insertAdjacentHTML('afterend', sectionHtml);
                                 }
                             }
