@@ -23,6 +23,8 @@
     var recurringCount = (int)(ViewBag.RecurringCount ?? 0);
     var hasRecurring = (bool)(ViewBag.HasRecurring ?? false);
     var recurringAmount = (decimal)(ViewBag.RecurringAmount ?? 0m);
+    var isOriginalCreator = (bool)(ViewBag.IsOriginalCreator ?? false);
+    var collaborators = ViewBag.Collaborators as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
 }
 
 <div class="page-root">
@@ -59,6 +61,29 @@
                         <div class="fund-detail-avatar" style="background: linear-gradient(135deg, @Model.CategoryColor, #4da8ff);"></div>
                         <span>Created by <strong>@Model.CreatorName</strong></span>
                     </div>
+
+                    @if (collaborators.Any())
+                    {
+                        <div class="fund-collaborators">
+                            <span class="collaborators-label">Team:</span>
+                            <div class="collaborators-list">
+                                @foreach (var collab in collaborators)
+                                {
+                                    <div class="collaborator-chip">
+                                        <div class="collaborator-avatar"></div>
+                                        <span>@@@((string)collab.Email.Split('@@')[0])</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (isOriginalCreator)
+                    {
+                        <button class="btn-manage-team" id="openTeamModal">
+                            <span>👥</span> Manage Team
+                        </button>
+                    }
 
                     <div class="fund-detail-story">
                         <h2>About this campaign</h2>
@@ -387,6 +412,35 @@
                     </div>
                 </div>
             </aside>
+        </div>
+    </div>
+</div>
+
+<!-- Embed Code Modal -->
+<div class="update-modal" id="embedModal">
+    <div class="update-modal-backdrop" id="embedModalBackdrop"></div>
+    <div class="update-modal-content" style="max-width: 560px;">
+        <div class="update-modal-header">
+            <h3>&lt;/&gt; Embed this campaign</h3>
+            <button class="update-modal-close" id="closeEmbedModal">&times;</button>
+        </div>
+        <div class="update-modal-body">
+            <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
+                Copy the code below and paste it into your website's HTML to embed this campaign widget.
+            </p>
+            <div class="update-form-group">
+                <label for="embedCode">Embed code</label>
+                <textarea id="embedCode" rows="3" readonly style="font-family: monospace; font-size: 12px; cursor: text; resize: none;"></textarea>
+            </div>
+            <button class="btn-update-submit" id="copyEmbedCode" style="width: 100%; margin-bottom: 20px;">
+                Copy to clipboard
+            </button>
+            <div>
+                <label style="display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 10px;">Preview</label>
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; justify-content: center;">
+                    <iframe id="embedPreview" width="350" height="280" frameborder="0" style="border-radius: 12px; overflow: hidden; border: none;"></iframe>
+                </div>
+            </div>
         </div>
     </div>
 </div>
