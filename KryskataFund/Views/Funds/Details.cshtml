@@ -73,7 +73,7 @@
                                 {
                                     <div class="collaborator-chip">
                                         <div class="collaborator-avatar"></div>
-                                        <span>@@@((string)collab.Email.Split('@@')[0])</span>
+                                        <span>@@@collab.Email.Split("@@")[0]</span>
                                     </div>
                                 }
                             </div>
@@ -299,7 +299,24 @@
                                 </div>
                             }
                         </div>
+
+                        @if (deadlineExtension != null)
+                        {
+                            <div class="extension-badge">
+                                <span class="extension-badge-icon">+@deadlineExtension.ExtensionDays</span>
+                                <span class="extension-badge-text">Extended by @deadlineExtension.ExtensionDays days</span>
+                            </div>
+                        }
                     </div>
+
+                    @if (canExtend)
+                    {
+                        <div class="extension-section">
+                            <button class="btn-extend-deadline" id="openExtensionModal">
+                                <span>+</span> Extend Deadline
+                            </button>
+                        </div>
+                    }
 
                     <!-- Donation buttons -->
                     <div class="fund-detail-donate-section">
