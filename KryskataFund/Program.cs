@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
-using KryskataFund.Models;
-using System.Security.Cryptography;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,31 +21,12 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Ensure database is created and seed admin
+// Ensure database is created and seed initial data
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
-
-    // Seed admin account if not exists
-    const string adminEmail = "admin@kryskatafund.com";
-    const string adminPassword = "admin";
-
-    if (!db.Users.Any(u => u.Email == adminEmail))
-    {
-        using var sha256 = SHA256.Create();
-        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(adminPassword));
-        var passwordHash = Convert.ToBase64String(bytes);
-
-        db.Users.Add(new User
-        {
-            Email = adminEmail,
-            PasswordHash = passwordHash,
-            IsAdmin = true,
-            CreatedAt = DateTime.UtcNow
-        });
-        db.SaveChanges();
-    }
+    db.Database.EnsureCreated();
+    DbSeeder.Seed(db);
 }
 
 // Configure the HTTP request pipeline.
