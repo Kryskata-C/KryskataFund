@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
 using KryskataFund.Models;
+using Stripe;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -24,6 +25,9 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+
+// Configure Stripe
+StripeConfiguration.ApiKey = app.Configuration["Stripe:SecretKey"];
 
 // Ensure database is created and seed admin
 using (var scope = app.Services.CreateScope())
