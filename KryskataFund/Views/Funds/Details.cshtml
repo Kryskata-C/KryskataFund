@@ -25,6 +25,8 @@
     var recurringAmount = (decimal)(ViewBag.RecurringAmount ?? 0m);
     var isOriginalCreator = (bool)(ViewBag.IsOriginalCreator ?? false);
     var collaborators = ViewBag.Collaborators as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var deadlineExtension = ViewBag.DeadlineExtension as KryskataFund.Models.DeadlineExtension;
+    var canExtend = (bool)isCreator && deadlineExtension == null && (Model.EndDate - DateTime.UtcNow).TotalDays <= 7 && (Model.EndDate - DateTime.UtcNow).TotalDays >= -7;
 }
 
 <div class="page-root">
@@ -709,6 +711,57 @@
 
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Post Update';
+                });
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Embed modal functionality
+            const embedModal = document.getElementById('embedModal');
+            const embedModalBackdrop = document.getElementById('embedModalBackdrop');
+            const openEmbedBtn = document.getElementById('openEmbedModal');
+            const closeEmbedBtn = document.getElementById('closeEmbedModal');
+            const embedCodeTextarea = document.getElementById('embedCode');
+            const copyEmbedBtn = document.getElementById('copyEmbedCode');
+            const embedPreview = document.getElementById('embedPreview');
+
+            const fundId = @Model.Id;
+            const embedUrl = window.location.origin + '/Funds/Embed/' + fundId;
+            const iframeCode = '<iframe src="' + embedUrl + '" width="350" height="280" frameborder="0" style="border-radius:12px;overflow:hidden;"></iframe>';
+
+            function openEmbedModal() {
+                if (embedModal) {
+                    embedCodeTextarea.value = iframeCode;
+                    embedPreview.src = embedUrl;
+                    embedModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeEmbedModal() {
+                if (embedModal) {
+                    embedModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    embedPreview.src = '';
+                }
+            }
+
+            if (openEmbedBtn) openEmbedBtn.addEventListener('click', openEmbedModal);
+            if (closeEmbedBtn) closeEmbedBtn.addEventListener('click', closeEmbedModal);
+            if (embedModalBackdrop) embedModalBackdrop.addEventListener('click', closeEmbedModal);
+
+            if (copyEmbedBtn) {
+                copyEmbedBtn.addEventListener('click', function() {
+                    navigator.clipboard.writeText(iframeCode).then(function() {
+                        copyEmbedBtn.textContent = 'Copied!';
+                        copyEmbedBtn.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
+                        setTimeout(function() {
+                            copyEmbedBtn.textContent = 'Copy to clipboard';
+                            copyEmbedBtn.style.background = '';
+                        }, 2000);
+                    });
                 });
             }
         });
