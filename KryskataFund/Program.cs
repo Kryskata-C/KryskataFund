@@ -60,6 +60,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Allow iframe embedding for the embed widget
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/Funds/Embed"))
+    {
+        context.Response.Headers.Remove("X-Frame-Options");
+    }
+    await next();
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
