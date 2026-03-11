@@ -10,6 +10,166 @@
     <link rel="stylesheet" href="~/KryskataFund.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <style>
+        /* Nav Search Bar */
+        .nav-search-wrapper {
+            margin-left: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-search {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-search .search-icon {
+            position: absolute;
+            left: 10px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.5;
+        }
+
+        .nav-search .search-input {
+            width: 200px;
+            padding: 7px 12px 7px 32px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.04);
+            color: #f7f7ff;
+            font-size: 0.82rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .nav-search .search-input::placeholder {
+            color: rgba(160, 163, 196, 0.6);
+        }
+
+        .nav-search .search-input:focus {
+            width: 280px;
+            border-color: rgba(70, 230, 164, 0.4);
+            background: rgba(255, 255, 255, 0.07);
+            box-shadow: 0 0 0 3px rgba(70, 230, 164, 0.1);
+        }
+
+        /* Autocomplete Dropdown */
+        .search-autocomplete {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            min-width: 320px;
+            background: #12131f;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            z-index: 9999;
+            display: none;
+        }
+
+        .search-autocomplete.active {
+            display: block;
+        }
+
+        .search-ac-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .search-ac-item:hover {
+            background: rgba(70, 230, 164, 0.08);
+        }
+
+        .search-ac-thumb {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .search-ac-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-ac-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #f7f7ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-ac-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 2px;
+            font-size: 0.75rem;
+            color: #a0a3c4;
+        }
+
+        .search-ac-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 1px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.06);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .search-ac-badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .search-ac-progress {
+            width: 50px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 99px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .search-ac-progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #46e6a4, #38bdf8);
+        }
+
+        .search-ac-empty {
+            padding: 16px;
+            text-align: center;
+            color: #6d6f8c;
+            font-size: 0.82rem;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .nav-search-wrapper {
+                display: none;
+            }
+        }
+    </style>
     <div class="page-wrapper">
         <header class="site-nav">
             <div class="nav-container">
