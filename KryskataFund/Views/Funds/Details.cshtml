@@ -262,6 +262,41 @@
                         </div>
                     }
                 </div>
+
+                    <!-- Extend Deadline Modal (for creator only) -->
+                    @if (canExtend)
+                    {
+                        <div class="update-modal" id="extensionModal">
+                            <div class="update-modal-backdrop" id="extensionModalBackdrop"></div>
+                            <div class="update-modal-content">
+                                <div class="update-modal-header">
+                                    <h3>Extend Deadline</h3>
+                                    <button class="update-modal-close" id="closeExtensionModal">&times;</button>
+                                </div>
+                                <div class="update-modal-body">
+                                    <div class="update-form-group">
+                                        <label for="extensionDaysSlider">Extension days</label>
+                                        <div class="extension-slider-group">
+                                            <input type="range" id="extensionDaysSlider" min="1" max="30" value="7" class="extension-slider">
+                                            <div class="extension-days-display">
+                                                <input type="number" id="extensionDaysInput" min="1" max="30" value="7" class="extension-days-input">
+                                                <span class="extension-days-label">days</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="update-form-group">
+                                        <label for="extensionReason">Reason for extension</label>
+                                        <textarea id="extensionReason" rows="3" placeholder="Why do you need more time?" maxlength="500"></textarea>
+                                        <small class="extension-char-count"><span id="extensionCharCount">0</span>/500</small>
+                                    </div>
+                                </div>
+                                <div class="update-modal-footer">
+                                    <button class="btn-update-cancel" id="cancelExtension">Cancel</button>
+                                    <button class="btn-update-submit" id="submitExtension">Extend Deadline</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
             </section>
 
             <!-- Sidebar with donation -->
@@ -874,6 +909,114 @@
                     } catch (error) {
                         alert('An error occurred. Please try again.');
                     }
+                });
+            }
+
+
+            // Extension modal functionality
+            const extensionModal = document.getElementById('extensionModal');
+            const extensionBackdrop = document.getElementById('extensionModalBackdrop');
+            const openExtBtn = document.getElementById('openExtensionModal');
+            const closeExtBtn = document.getElementById('closeExtensionModal');
+            const cancelExtBtn = document.getElementById('cancelExtension');
+            const submitExtBtn = document.getElementById('submitExtension');
+            const extSlider = document.getElementById('extensionDaysSlider');
+            const extInput = document.getElementById('extensionDaysInput');
+            const extReason = document.getElementById('extensionReason');
+            const extCharCount = document.getElementById('extensionCharCount');
+
+            function openExtModal() {
+                if (extensionModal) {
+                    extensionModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeExtModal() {
+                if (extensionModal) {
+                    extensionModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            if (openExtBtn) openExtBtn.addEventListener('click', openExtModal);
+            if (closeExtBtn) closeExtBtn.addEventListener('click', closeExtModal);
+            if (cancelExtBtn) cancelExtBtn.addEventListener('click', closeExtModal);
+            if (extensionBackdrop) extensionBackdrop.addEventListener('click', closeExtModal);
+
+            if (extSlider && extInput) {
+                extSlider.addEventListener('input', function() {
+                    extInput.value = this.value;
+                });
+                extInput.addEventListener('input', function() {
+                    var val = parseInt(this.value) || 1;
+                    val = Math.max(1, Math.min(30, val));
+                    this.value = val;
+                    extSlider.value = val;
+                });
+            }
+
+            if (extReason) {
+                extReason.addEventListener('input', function() {
+                    if (extCharCount) extCharCount.textContent = this.value.length;
+                });
+            }
+
+            if (submitExtBtn) {
+                submitExtBtn.addEventListener('click', async function() {
+                    var days = parseInt(extInput ? extInput.value : 7);
+                    var reason = extReason ? extReason.value.trim() : '';
+
+                    if (!reason) {
+                        alert('Please provide a reason for the extension');
+                        return;
+                    }
+
+                    submitExtBtn.disabled = true;
+                    submitExtBtn.textContent = 'Extending...';
+
+                    try {
+                        var response = await fetch('/Funds/RequestExtension', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'fundId=' + fundId + '&extensionDays=' + days + '&reason=' + encodeURIComponent(reason)
+                        });
+
+                        var data = await response.json();
+
+                        if (data.success) {
+                            closeExtModal();
+
+                            // Update the days left stat
+                            var statValues = document.querySelectorAll('.fund-detail-stat-value');
+                            var statLabels = document.querySelectorAll('.fund-detail-stat-label');
+                            if (statValues.length >= 3 && statLabels.length >= 3) {
+                                statValues[2].textContent = data.daysLeft;
+                                statLabels[2].textContent = 'days left';
+                            }
+
+                            // Hide extend button, show badge
+                            if (openExtBtn) openExtBtn.closest('.extension-section').style.display = 'none';
+
+                            var progressSection = document.querySelector('.fund-detail-progress-section');
+                            if (progressSection) {
+                                var badge = document.createElement('div');
+                                badge.className = 'extension-badge';
+                                badge.innerHTML = '<span class="extension-badge-icon">+' + data.extensionDays + '</span>'
+                                    + '<span class="extension-badge-text">Extended by ' + data.extensionDays + ' days</span>';
+                                progressSection.appendChild(badge);
+                            }
+
+                            alert(data.message);
+                        } else {
+                            alert(data.message || 'Failed to extend deadline');
+                        }
+                    } catch (error) {
+                        alert('An error occurred. Please try again.');
+                    }
+
+                    submitExtBtn.disabled = false;
+                    submitExtBtn.textContent = 'Extend Deadline';
                 });
             }
 
