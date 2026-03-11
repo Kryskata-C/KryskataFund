@@ -342,5 +342,95 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        (function () {
+            const input = document.getElementById('navSearchInput');
+            const dropdown = document.getElementById('searchAutocomplete');
+            if (!input || !dropdown) return;
+
+            let debounceTimer = null;
+
+            input.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                const term = input.value.trim();
+
+                if (term.length < 2) {
+                    dropdown.classList.remove('active');
+                    dropdown.innerHTML = '';
+                    return;
+                }
+
+                debounceTimer = setTimeout(function () {
+                    fetch('/Search/Autocomplete?term=' + encodeURIComponent(term))
+                        .then(function (r) { return r.json(); })
+                        .then(function (results) {
+                            if (results.length === 0) {
+                                dropdown.innerHTML = '<div class="search-ac-empty">No results found</div>';
+                                dropdown.classList.add('active');
+                                return;
+                            }
+
+                            var html = '';
+                            for (var i = 0; i < results.length; i++) {
+                                var r = results[i];
+                                var thumbStyle = r.imageUrl
+                                    ? 'background-image: url(\'' + r.imageUrl + '\'); background-size: cover; background-position: center;'
+                                    : '';
+                                html += '<a class="search-ac-item" href="/Funds/Details/' + r.id + '">' +
+                                    '<div class="search-ac-thumb" style="' + thumbStyle + '"></div>' +
+                                    '<div class="search-ac-info">' +
+                                        '<div class="search-ac-title">' + escapeHtml(r.title) + '</div>' +
+                                        '<div class="search-ac-meta">' +
+                                            '<span class="search-ac-badge">' +
+                                                '<span class="search-ac-badge-dot" style="background:' + r.categoryColor + ';"></span>' +
+                                                escapeHtml(r.category) +
+                                            '</span>' +
+                                            '<span>$' + Number(r.raised).toLocaleString() + ' raised</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="search-ac-progress">' +
+                                        '<div class="search-ac-progress-fill" style="width:' + r.progress + '%;"></div>' +
+                                    '</div>' +
+                                '</a>';
+                            }
+                            dropdown.innerHTML = html;
+                            dropdown.classList.add('active');
+                        })
+                        .catch(function () {
+                            dropdown.classList.remove('active');
+                        });
+                }, 300);
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var term = input.value.trim();
+                    if (term.length > 0) {
+                        window.location.href = '/Search?q=' + encodeURIComponent(term);
+                    }
+                }
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.nav-search')) {
+                    dropdown.classList.remove('active');
+                }
+            });
+
+            input.addEventListener('focus', function () {
+                if (dropdown.innerHTML.trim() !== '' && input.value.trim().length >= 2) {
+                    dropdown.classList.add('active');
+                }
+            });
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.appendChild(document.createTextNode(text));
+                return div.innerHTML;
+            }
+        })();
+    </script>
 </body>
 </html>
