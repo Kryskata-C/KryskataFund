@@ -105,6 +105,18 @@ namespace KryskataFund.Controllers
             return RedirectToAction("Details", new { id = fund.Id });
         }
 
+        public IActionResult Embed(int id)
+        {
+            var fund = _context.Funds.FirstOrDefault(f => f.Id == id);
+
+            if (fund == null)
+            {
+                return NotFound();
+            }
+
+            return View(fund);
+        }
+
         public IActionResult Details(int id)
         {
             var fund = _context.Funds.FirstOrDefault(f => f.Id == id);
