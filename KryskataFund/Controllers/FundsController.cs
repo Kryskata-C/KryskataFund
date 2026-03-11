@@ -159,6 +159,19 @@ namespace KryskataFund.Controllers
                 .FirstOrDefault(e => e.FundId == id);
             ViewBag.DeadlineExtension = extension;
 
+            // Recurring donations count
+            ViewBag.RecurringCount = _context.RecurringDonations
+                .Count(r => r.FundId == id && r.IsActive);
+
+            // Check if current user has an active recurring donation
+            ViewBag.HasRecurring = userId > 0 && _context.RecurringDonations
+                .Any(r => r.FundId == id && r.UserId == userId && r.IsActive);
+
+            // Get user's active recurring donation amount for this fund
+            var userRecurring = _context.RecurringDonations
+                .FirstOrDefault(r => r.FundId == id && r.UserId == userId && r.IsActive);
+            ViewBag.RecurringAmount = userRecurring?.Amount ?? 0;
+
             return View(fund);
         }
 
