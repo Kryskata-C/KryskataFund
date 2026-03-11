@@ -27,6 +27,12 @@ namespace KryskataFund.Controllers
             _environment = environment;
         }
 
+        private bool IsCreatorOrCollaborator(int fundCreatorId, int userId, int fundId)
+        {
+            if (fundCreatorId == userId) return true;
+            return _context.FundCollaborators.Any(c => c.FundId == fundId && c.UserId == userId);
+        }
+
         public IActionResult Create()
         {
             // Must be signed in to create a fund
