@@ -16,6 +16,7 @@ namespace KryskataFund.Data
         public DbSet<FundUpdate> FundUpdates { get; set; }
         public DbSet<UserFollow> UserFollows { get; set; }
         public DbSet<FundMilestone> FundMilestones { get; set; }
+        public DbSet<DeadlineExtension> DeadlineExtensions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
