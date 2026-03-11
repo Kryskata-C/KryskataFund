@@ -18,6 +18,7 @@
     var isSignedIn = ViewBag.IsSignedIn ?? false;
     var isCreator = ViewBag.IsCreator ?? false;
     var fundUpdates = ViewBag.FundUpdates as List<KryskataFund.Models.FundUpdate> ?? new List<KryskataFund.Models.FundUpdate>();
+    var milestones = ViewBag.Milestones as List<KryskataFund.Models.FundMilestone> ?? new List<KryskataFund.Models.FundMilestone>();
     var signInUrl = Url.Action("SignIn", "Account", new { returnUrl = Context.Request.Path });
 }
 
@@ -104,6 +105,104 @@
                             }
                         </div>
                     </div>
+
+                    <!-- Milestones section -->
+                    <div class="fund-detail-milestones">
+                        <div class="milestones-header">
+                            <h2>Milestones <span class="milestones-count">(@milestones.Count)</span></h2>
+                            @if (isCreator)
+                            {
+                                <button class="btn-post-update" id="openMilestoneModal">
+                                    <span>+</span> Add Milestone
+                                </button>
+                            }
+                        </div>
+
+                        <div class="milestones-list" id="milestonesList">
+                            @if (milestones.Count == 0)
+                            {
+                                <div class="fund-detail-update-empty" id="emptyMilestones">
+                                    <span>🎯</span>
+                                    <p>No milestones yet</p>
+                                    @if (isCreator)
+                                    {
+                                        <small>Set sub-goals to show your supporters what you'll achieve!</small>
+                                    }
+                                    else
+                                    {
+                                        <small>The creator hasn't set any milestones.</small>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                @foreach (var milestone in milestones)
+                                {
+                                    var milestoneProgress = Model.GoalAmount > 0
+                                        ? (int)Math.Min(100, Math.Round(Model.RaisedAmount / milestone.TargetAmount * 100))
+                                        : 0;
+                                    <div class="milestone-item @(milestone.IsReached ? "milestone-reached" : "")" data-milestone-id="@milestone.Id">
+                                        <div class="milestone-header">
+                                            <div class="milestone-title-row">
+                                                <h3 class="milestone-title">@milestone.Title</h3>
+                                                @if (milestone.IsReached)
+                                                {
+                                                    <span class="milestone-badge">Reached!</span>
+                                                }
+                                            </div>
+                                            <div class="milestone-amount">€@milestone.TargetAmount.ToString("N0")</div>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(milestone.Description))
+                                        {
+                                            <p class="milestone-description">@milestone.Description</p>
+                                        }
+                                        <div class="milestone-progress-bar">
+                                            <div class="milestone-progress-fill" style="--milestone-progress: @Math.Min(100, milestoneProgress)%;"></div>
+                                        </div>
+                                        <div class="milestone-footer">
+                                            <span class="milestone-percent">@milestoneProgress% of milestone</span>
+                                            @if (isCreator)
+                                            {
+                                                <button class="milestone-delete-btn" data-milestone-id="@milestone.Id" title="Delete milestone">×</button>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Add Milestone Modal (for creator only) -->
+                    @if (isCreator)
+                    {
+                        <div class="update-modal" id="milestoneModal">
+                            <div class="update-modal-backdrop" id="milestoneModalBackdrop"></div>
+                            <div class="update-modal-content">
+                                <div class="update-modal-header">
+                                    <h3>🎯 Add a Milestone</h3>
+                                    <button class="update-modal-close" id="closeMilestoneModal">×</button>
+                                </div>
+                                <div class="update-modal-body">
+                                    <div class="update-form-group">
+                                        <label for="milestoneTitle">Title</label>
+                                        <input type="text" id="milestoneTitle" placeholder="e.g., Buy supplies" maxlength="200">
+                                    </div>
+                                    <div class="update-form-group">
+                                        <label for="milestoneAmount">Target Amount (€)</label>
+                                        <input type="number" id="milestoneAmount" placeholder="e.g., 500" min="1" step="1">
+                                    </div>
+                                    <div class="update-form-group">
+                                        <label for="milestoneDescription">Description (optional)</label>
+                                        <textarea id="milestoneDescription" rows="3" placeholder="What will you do when this milestone is reached?"></textarea>
+                                    </div>
+                                </div>
+                                <div class="update-modal-footer">
+                                    <button class="btn-update-cancel" id="cancelMilestone">Cancel</button>
+                                    <button class="btn-update-submit" id="submitMilestone">Add Milestone</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
 
                     <!-- Post Update Modal (for creator only) -->
                     @if (isCreator)
