@@ -3,6 +3,7 @@ using KryskataFund.Controllers;
 using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KryskataFund.Tests.Controllers
