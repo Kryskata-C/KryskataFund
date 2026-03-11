@@ -940,7 +940,7 @@
                                 const chipHtml = `
                                     <div class="collaborator-chip">
                                         <div class="collaborator-avatar"></div>
-                                        <span>@${data.collaborator.email.split('@')[0]}</span>
+                                        <span>' + data.collaborator.email.split('@')[0] + '</span>
                                     </div>
                                 `;
                                 chipsContainer.insertAdjacentHTML('beforeend', chipHtml);
@@ -954,7 +954,7 @@
                                             <div class="collaborators-list">
                                                 <div class="collaborator-chip">
                                                     <div class="collaborator-avatar"></div>
-                                                    <span>@${data.collaborator.email.split('@')[0]}</span>
+                                                    <span>' + data.collaborator.email.split('@')[0] + '</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1695,6 +1695,129 @@
         .collab-remove-btn:hover {
             background: rgba(239, 68, 68, 0.25);
             transform: scale(1.1);
+        }
+
+        /* Extension Badge */
+        .extension-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(70, 230, 164, 0.08);
+            border: 1px solid rgba(70, 230, 164, 0.2);
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+
+        .extension-badge-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #46e6a4 0%, #22d3ee 100%);
+            border-radius: 8px;
+            color: #050509;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .extension-badge-text {
+            font-size: 12px;
+            color: #46e6a4;
+            font-weight: 500;
+        }
+
+        /* Extension Section */
+        .extension-section {
+            padding: 0 0 4px 0;
+        }
+
+        .btn-extend-deadline {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            padding: 10px 16px;
+            background: rgba(70, 230, 164, 0.1);
+            border: 1px solid rgba(70, 230, 164, 0.3);
+            border-radius: 10px;
+            color: #46e6a4;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-extend-deadline:hover {
+            background: rgba(70, 230, 164, 0.2);
+            border-color: rgba(70, 230, 164, 0.5);
+            transform: translateY(-1px);
+        }
+
+        /* Extension Slider */
+        .extension-slider-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .extension-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .extension-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #46e6a4 0%, #22d3ee 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(70, 230, 164, 0.4);
+        }
+
+        .extension-days-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .extension-days-input {
+            width: 50px;
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .extension-days-input:focus {
+            outline: none;
+            border-color: rgba(70, 230, 164, 0.5);
+        }
+
+        .extension-days-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .extension-char-count {
+            display: block;
+            text-align: right;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
     </style>
 }
