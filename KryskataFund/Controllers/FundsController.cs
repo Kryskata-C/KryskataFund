@@ -136,6 +136,12 @@ namespace KryskataFund.Controllers
 
             ViewBag.FundUpdates = updates;
 
+            // Get all milestones for this fund
+            ViewBag.Milestones = _context.FundMilestones
+                .Where(m => m.FundId == id)
+                .OrderBy(m => m.TargetAmount)
+                .ToList();
+
             return View(fund);
         }
 
