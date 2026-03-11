@@ -28,6 +28,13 @@
                     {
                         <a asp-controller="Admin" asp-action="Dashboard" class="nav-item nav-item--admin">Admin Dashboard</a>
                     }
+                    <div class="nav-search-wrapper">
+                        <div class="nav-search">
+                            <span class="search-icon">&#128269;</span>
+                            <input type="text" class="search-input" id="navSearchInput" placeholder="Search campaigns..." autocomplete="off" />
+                            <div class="search-autocomplete" id="searchAutocomplete"></div>
+                        </div>
+                    </div>
                 </nav>
 
                 <div class="nav-right">
