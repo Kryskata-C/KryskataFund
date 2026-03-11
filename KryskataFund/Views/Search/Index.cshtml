@@ -1,0 +1,336 @@
+@{
+    ViewData["Title"] = "Search";
+    var query = ViewBag.Query as string ?? "";
+    var results = ViewBag.Results as List<KryskataFund.Models.Fund> ?? new List<KryskataFund.Models.Fund>();
+}
+
+<style>
+    :root {
+        --bg-main: #050509;
+        --bg-elevated: #0f1017;
+        --bg-elevated-soft: #141522;
+        --accent: #46e6a4;
+        --accent-soft: rgba(70, 230, 164, 0.18);
+        --text-main: #f7f7ff;
+        --text-muted: #a0a3c4;
+        --text-softer: #6d6f8c;
+        --border-subtle: #222437;
+        --radius-xl: 24px;
+        --radius-lg: 18px;
+        --radius-pill: 999px;
+        --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.7);
+        --transition-fast: 0.2s ease-out;
+        --transition-med: 0.35s ease-out;
+    }
+
+    .search-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 24px;
+    }
+
+    .search-header {
+        margin-bottom: 40px;
+    }
+
+    .search-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 16px;
+    }
+
+    .search-header h1 span {
+        color: var(--accent);
+    }
+
+    .search-form {
+        display: flex;
+        gap: 12px;
+        max-width: 600px;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 14px 20px;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-elevated);
+        color: var(--text-main);
+        font-size: 1rem;
+        outline: none;
+        transition: border-color var(--transition-fast);
+    }
+
+    .search-form input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .search-form button {
+        padding: 14px 28px;
+        border-radius: var(--radius-pill);
+        border: none;
+        background: var(--accent);
+        color: #050509;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: opacity var(--transition-fast);
+    }
+
+    .search-form button:hover {
+        opacity: 0.85;
+    }
+
+    .search-meta {
+        margin-bottom: 28px;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .search-meta strong {
+        color: var(--accent);
+    }
+
+    .search-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 28px;
+    }
+
+    .search-card {
+        border-radius: 20px;
+        background: rgba(12, 14, 25, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform var(--transition-med), box-shadow var(--transition-med), border-color var(--transition-med);
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        backdrop-filter: blur(10px);
+    }
+
+    .search-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(70, 230, 164, 0.05);
+        border-color: rgba(70, 230, 164, 0.3);
+    }
+
+    .search-card-media {
+        height: 180px;
+        background: linear-gradient(135deg, var(--bg-elevated-soft), var(--bg-elevated));
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+
+    .search-card-media-tag {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: var(--radius-pill);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(12px);
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.3px;
+    }
+
+    .search-card-media-tag-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .search-card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .search-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .search-card-desc {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin-bottom: 16px;
+        flex: 1;
+    }
+
+    .search-card-progress-track {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 99px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .search-card-progress-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, var(--accent), #38bdf8);
+        transition: width 0.6s ease;
+    }
+
+    .search-card-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    .search-card-stats .raised {
+        color: var(--accent);
+        font-weight: 700;
+    }
+
+    .search-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 12px;
+        margin-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 0.8rem;
+        color: var(--text-softer);
+    }
+
+    .search-card-footer .creator-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .search-card-footer .creator-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+    }
+
+    .search-empty {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .search-empty-icon {
+        font-size: 4rem;
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
+
+    .search-empty h2 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+    }
+
+    .search-empty p {
+        color: var(--text-softer);
+        font-size: 0.95rem;
+    }
+
+    @@media (max-width: 640px) {
+        .search-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-header h1 {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="search-page">
+    <div class="search-header">
+        @if (!string.IsNullOrEmpty(query))
+        {
+            <h1>Results for <span>"@query"</span></h1>
+        }
+        else
+        {
+            <h1>Search Campaigns</h1>
+        }
+        <form class="search-form" method="get" asp-controller="Search" asp-action="Index">
+            <input type="text" name="q" value="@query" placeholder="Search campaigns, categories, creators..." autofocus />
+            <button type="submit">Search</button>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrEmpty(query))
+    {
+        <div class="search-meta">
+            Found <strong>@results.Count</strong> campaign@(results.Count != 1 ? "s" : "") matching your search
+        </div>
+
+        @if (results.Count > 0)
+        {
+            <div class="search-grid">
+                @foreach (var fund in results)
+                {
+                    <a asp-controller="Funds" asp-action="Details" asp-route-id="@fund.Id" class="search-card">
+                        <div class="search-card-media" style="@(fund.ImageUrl != null ? $"background-image: url('{fund.ImageUrl}'); background-size: cover; background-position: center;" : "")">
+                            <div class="search-card-media-tag">
+                                <span class="search-card-media-tag-dot" style="background: @fund.CategoryColor; box-shadow: 0 0 10px @(fund.CategoryColor)cc;"></span>
+                                @fund.Category
+                            </div>
+                        </div>
+                        <div class="search-card-body">
+                            <h3 class="search-card-title">@fund.Title</h3>
+                            <p class="search-card-desc">
+                                @(fund.Description.Length > 120 ? fund.Description.Substring(0, 120) + "..." : fund.Description)
+                            </p>
+                            <div class="search-card-progress-track">
+                                <div class="search-card-progress-fill" style="width: @(fund.ProgressPercent)%;"></div>
+                            </div>
+                            <div class="search-card-stats">
+                                <span><span class="raised">$@fund.RaisedAmount.ToString("N0")</span> raised</span>
+                                <span>of $@fund.GoalAmount.ToString("N0")</span>
+                            </div>
+                            <div class="search-card-footer">
+                                <span>@(fund.DaysLeft > 0 ? $"{fund.DaysLeft} days left" : "Ended") · @fund.SupportersCount supporters</span>
+                                <div class="creator-info">
+                                    <div class="creator-avatar" style="background: linear-gradient(135deg, @fund.CategoryColor, #4f46e5);"></div>
+                                    <span>@fund.CreatorName</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="search-empty">
+                <div class="search-empty-icon">&#128270;</div>
+                <h2>No campaigns found matching your search</h2>
+                <p>Try different keywords or browse all campaigns on the home page</p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="search-empty">
+            <div class="search-empty-icon">&#128269;</div>
+            <h2>Start searching</h2>
+            <p>Enter a keyword to find campaigns, categories, or creators</p>
+        </div>
+    }
+</div>
