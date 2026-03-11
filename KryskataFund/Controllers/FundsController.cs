@@ -367,5 +367,47 @@ namespace KryskataFund.Controllers
                 }
             });
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateRecurringDonation(int fundId, decimal amount)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Please sign in to set up a recurring donation" });
+            }
+
+            var fund = await _context.Funds.FindAsync(fundId);
+            if (fund == null)
+            {
+                return Json(new { success = false, message = "Fund not found" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var donorName = "@" + userEmail.Split('@')[0];
+
+            // Check if user already has an active recurring donation for this fund
+            var existing = _context.RecurringDonations
+                .FirstOrDefault(r => r.FundId == fundId && r.UserId == userId && r.IsActive);
+
+            if (existing != null)
+            {
+                return Json(new { success = false, message = "You already have an active monthly donation for this fund" });
+            }
+
+            var recurring = new RecurringDonation
+            {
+                FundId = fundId,
+                UserId = userId,
+                DonorName = donorName,
+                Amount = amount,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+
+            _context.RecurringDonations.Add(recurring);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = $"Monthly donation of €{amount:N0} set up successfully!" });
+        }
     }
 }
