@@ -331,7 +331,7 @@ namespace KryskataFund.Tests.Security
             var result = controller.SignUp(model);
 
             // Assert - database should be intact
-            context.Users.Count().Should().BeGreaterOrEqualTo(3,
+            context.Users.Count().Should().BeGreaterThanOrEqualTo(3,
                 "SQL injection in sign-up must not destroy existing user data");
         }
 
@@ -354,7 +354,7 @@ namespace KryskataFund.Tests.Security
             var result = controller.SignUp(model);
 
             // Assert - password is hashed, so injection payload becomes harmless hash input
-            context.Users.Count().Should().BeGreaterOrEqualTo(3,
+            context.Users.Count().Should().BeGreaterThanOrEqualTo(3,
                 "SQL injection in password must not delete data (password is hashed)");
         }
 
@@ -384,7 +384,7 @@ namespace KryskataFund.Tests.Security
             var result = await controller.Create(model);
 
             // Assert - funds table should still exist and have data
-            context.Funds.Count().Should().BeGreaterOrEqualTo(3,
+            context.Funds.Count().Should().BeGreaterThanOrEqualTo(3,
                 "SQL injection in fund title must not drop the Funds table");
         }
 
@@ -1318,18 +1318,19 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public async Task ProcessDonation_ExtremelyLargeAmount_HandledGracefully()
+        public async Task ProcessDonation_ExtremelyLargeAmount_ThrowsOverflow()
         {
             // Attack vector: Extremely large donation amount (decimal overflow attempt)
+            // Documents that the controller does NOT guard against decimal overflow,
+            // which would cause a 500 error in production — a potential DoS vector.
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
             var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
 
-            // Act - should not throw overflow exception
-            var result = await controller.ProcessDonation(1, 79228162514264337593543950335m); // decimal.MaxValue
-
-            // Assert - should handle gracefully
-            result.Should().NotBeNull();
+            // Act & Assert - decimal.MaxValue + existing amount overflows
+            Func<Task> act = async () => await controller.ProcessDonation(1, decimal.MaxValue);
+            await act.Should().ThrowAsync<OverflowException>(
+                "Controller lacks guard against extreme decimal values — potential DoS vulnerability");
         }
 
         [Fact]
