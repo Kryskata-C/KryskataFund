@@ -163,6 +163,23 @@
             font-size: 0.82rem;
         }
 
+        /* Nav Badge for unread messages */
+        .nav-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            background: #46e6a4;
+            color: #050509;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 6px;
+            line-height: 1;
+        }
+
         /* Responsive */
         @@media (max-width: 768px) {
             .nav-search-wrapper {
@@ -184,6 +201,7 @@
                     <a asp-controller="Account" asp-action="MyFunds" class="nav-item">My Funds</a>
                     <a asp-controller="Account" asp-action="Following" class="nav-item">Following</a>
                     <a asp-controller="Home" asp-action="Leaderboard" class="nav-item">Leaderboard</a>
+                    <a asp-controller="Messages" asp-action="Inbox" class="nav-item">Messages</a>
                     @if (Context.Session.GetString("IsAdmin") == "True")
                     {
                         <a asp-controller="Admin" asp-action="Dashboard" class="nav-item nav-item--admin">Admin Dashboard</a>
@@ -430,6 +448,35 @@
                 div.appendChild(document.createTextNode(text));
                 return div.innerHTML;
             }
+        })();
+    </script>
+
+    <script>
+        // Poll for unread messages
+        (function() {
+            var messagesLink = document.querySelector('a[href*="Messages"]');
+            if (!messagesLink) return;
+
+            function checkUnread() {
+                fetch('/Messages/GetUnreadCount')
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var badge = messagesLink.querySelector('.nav-badge');
+                        if (data.count > 0) {
+                            if (!badge) {
+                                badge = document.createElement('span');
+                                badge.className = 'nav-badge';
+                                messagesLink.appendChild(badge);
+                            }
+                            badge.textContent = data.count;
+                        } else if (badge) {
+                            badge.remove();
+                        }
+                    })
+                    .catch(function() {});
+            }
+            checkUnread();
+            setInterval(checkUnread, 10000);
         })();
     </script>
 </body>
