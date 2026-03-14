@@ -44,6 +44,20 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.EnsureCreated();
+
+    // Create Messages table if it doesn't exist (EnsureCreated skips if DB already has tables)
+    db.Database.ExecuteSqlRaw(@"
+        CREATE TABLE IF NOT EXISTS ""Messages"" (
+            ""Id"" SERIAL PRIMARY KEY,
+            ""SenderId"" INTEGER NOT NULL,
+            ""ReceiverId"" INTEGER NOT NULL,
+            ""SenderName"" TEXT NOT NULL DEFAULT '',
+            ""ReceiverName"" TEXT NOT NULL DEFAULT '',
+            ""Content"" TEXT NOT NULL DEFAULT '',
+            ""SentAt"" TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+            ""IsRead"" BOOLEAN NOT NULL DEFAULT FALSE
+        )");
+
     DbSeeder.Seed(db);
 }
 
