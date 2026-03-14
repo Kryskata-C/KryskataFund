@@ -80,7 +80,7 @@
                             <div class="buddy-accessory buddy-mask" id="previewMask" data-current="@buddyMask"></div>
                         </div>
                         <div class="buddy-glow medium"></div>
-                        <div class="customize-hint">✨ Click to customize!</div>
+                        <div class="customize-hint">Click to customize!</div>
                     </div>
                 </div>
 
@@ -89,7 +89,7 @@
                     <p class="profile-email">@user?.Email</p>
                     <div class="profile-meta">
                         <span class="profile-badge">
-                            <span class="badge-icon">✨</span>
+                            <span class="badge-icon"></span>
                             Member since @memberSince
                         </span>
                     </div>
@@ -134,7 +134,7 @@
                 @if (createdFunds.Count == 0)
                 {
                     <div class="empty-section">
-                        <div class="empty-icon">🚀</div>
+                        <div class="empty-icon"></div>
                         <p>You haven't created any funds yet</p>
                         <a asp-controller="Funds" asp-action="Create" class="btn-empty">Create your first fund</a>
                     </div>
@@ -172,7 +172,7 @@
                 @if (donations.Count == 0)
                 {
                     <div class="empty-section">
-                        <div class="empty-icon">💚</div>
+                        <div class="empty-icon"></div>
                         <p>You haven't made any donations yet</p>
                         <a asp-controller="Home" asp-action="Index" class="btn-empty">Discover campaigns</a>
                     </div>
@@ -202,7 +202,7 @@
         <div class="customize-backdrop" id="customizeBackdrop"></div>
         <div class="customize-panel">
             <div class="customize-header">
-                <h2>✨ Customize Your Buddy</h2>
+                <h2>Customize Your Buddy</h2>
                 <button class="customize-close" id="customizeClose">×</button>
             </div>
 
@@ -352,7 +352,7 @@
 
             <div class="customize-actions">
                 <button class="btn-customize-reset" id="resetBtn">Reset All</button>
-                <button class="btn-customize-save" id="saveBtn">💾 Save Changes</button>
+                <button class="btn-customize-save" id="saveBtn">Save Changes</button>
             </div>
         </div>
     </div>
@@ -519,17 +519,17 @@
                     const data = await response.json();
                     if (data.success) {
                         applyCustomization();
-                        saveBtn.textContent = '✅ Saved!';
+                        saveBtn.textContent = 'Saved!';
                         setTimeout(() => {
                             closeModal();
-                            saveBtn.textContent = '💾 Save Changes';
+                            saveBtn.textContent = 'Save Changes';
                             saveBtn.disabled = false;
                         }, 800);
                     }
                 } catch (error) {
-                    saveBtn.textContent = '❌ Error';
+                    saveBtn.textContent = 'Error';
                     setTimeout(() => {
-                        saveBtn.textContent = '💾 Save Changes';
+                        saveBtn.textContent = 'Save Changes';
                         saveBtn.disabled = false;
                     }, 1500);
                 }
