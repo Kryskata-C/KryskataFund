@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
 
@@ -216,6 +217,9 @@ namespace KryskataFund.Controllers
             if (HttpContext.Session.GetString("IsSignedIn") != "true")
                 return Json(new { success = false, message = "Please sign in" });
 
+            if (amount <= 0)
+                return Json(new { success = false, message = "Amount must be greater than zero" });
+
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
                 return Json(new { success = false, message = "Fund not found" });
@@ -252,10 +256,16 @@ namespace KryskataFund.Controllers
                 }
             };
 
-            var service = new Stripe.Checkout.SessionService();
-            var session = await service.CreateAsync(options);
-
-            return Json(new { success = true, sessionUrl = session.Url });
+            try
+            {
+                var service = new Stripe.Checkout.SessionService();
+                var session = await service.CreateAsync(options);
+                return Json(new { success = true, sessionUrl = session.Url });
+            }
+            catch (StripeException ex)
+            {
+                return Json(new { success = false, message = "Payment service error. Please try again." });
+            }
         }
 
         public async Task<IActionResult> DonationSuccess(int fundId, decimal amount, string session_id)
@@ -276,28 +286,43 @@ namespace KryskataFund.Controllers
                     var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
                     if (existingDonation == null)
                     {
-                        var donation = new Donation
+                        using var transaction = await _context.Database.BeginTransactionAsync();
+                        try
                         {
-                            FundId = fundId,
-                            UserId = userId,
-                            DonorName = "@" + userEmail.Split('@')[0],
-                            Amount = amount,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        _context.Donations.Add(donation);
-                        fund.RaisedAmount += amount;
-                        fund.SupportersCount += 1;
+                            var donation = new Donation
+                            {
+                                FundId = fundId,
+                                UserId = userId,
+                                DonorName = "@" + userEmail.Split('@')[0],
+                                Amount = amount,
+                                CreatedAt = DateTime.UtcNow
+                            };
+                            _context.Donations.Add(donation);
+                            await _context.SaveChangesAsync();
 
-                        // Auto-mark milestones
-                        var unreachedMilestones = _context.FundMilestones
-                            .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount);
-                        foreach (var milestone in unreachedMilestones)
-                        {
-                            milestone.IsReached = true;
-                            milestone.ReachedAt = DateTime.UtcNow;
+                            // Use atomic SQL update instead of read-modify-write
+                            await _context.Database.ExecuteSqlRawAsync(
+                                "UPDATE Funds SET RaisedAmount = RaisedAmount + {0}, SupportersCount = SupportersCount + 1 WHERE Id = {1}",
+                                amount, fundId);
+
+                            // Auto-mark milestones - reload fund to get new amount
+                            await _context.Entry(fund).ReloadAsync();
+                            var unreachedMilestones = _context.FundMilestones
+                                .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
+                                .ToList();
+                            foreach (var milestone in unreachedMilestones)
+                            {
+                                milestone.IsReached = true;
+                                milestone.ReachedAt = DateTime.UtcNow;
+                            }
+
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
                         }
-
-                        await _context.SaveChangesAsync();
+                        catch
+                        {
+                            await transaction.RollbackAsync();
+                        }
                     }
                 }
             }
@@ -313,6 +338,9 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Please sign in to donate" });
             }
 
+            if (amount <= 0)
+                return Json(new { success = false, message = "Amount must be greater than zero" });
+
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
             {
@@ -323,36 +351,49 @@ namespace KryskataFund.Controllers
             var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
             var donorName = "@" + userEmail.Split('@')[0];
 
-            // Create the donation record
-            var donation = new Donation
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                FundId = fundId,
-                UserId = userId,
-                DonorName = donorName,
-                Amount = amount,
-                CreatedAt = DateTime.UtcNow
-            };
+                // Create the donation record
+                var donation = new Donation
+                {
+                    FundId = fundId,
+                    UserId = userId,
+                    DonorName = donorName,
+                    Amount = amount,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            _context.Donations.Add(donation);
+                _context.Donations.Add(donation);
+                await _context.SaveChangesAsync();
 
-            // Update the fund's raised amount and supporters count
-            fund.RaisedAmount += amount;
-            fund.SupportersCount += 1;
+                // Use atomic SQL update instead of read-modify-write
+                await _context.Database.ExecuteSqlRawAsync(
+                    "UPDATE Funds SET RaisedAmount = RaisedAmount + {0}, SupportersCount = SupportersCount + 1 WHERE Id = {1}",
+                    amount, fundId);
 
-            // Auto-mark milestones as reached
-            var unreachedMilestones = _context.FundMilestones
-                .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
-                .ToList();
+                // Auto-mark milestones - reload fund to get new amount
+                await _context.Entry(fund).ReloadAsync();
+                var unreachedMilestones = _context.FundMilestones
+                    .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
+                    .ToList();
 
-            foreach (var milestone in unreachedMilestones)
-            {
-                milestone.IsReached = true;
-                milestone.ReachedAt = DateTime.UtcNow;
+                foreach (var milestone in unreachedMilestones)
+                {
+                    milestone.IsReached = true;
+                    milestone.ReachedAt = DateTime.UtcNow;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Json(new { success = true, message = "Donation successful!" });
             }
-
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Donation successful!" });
+            catch
+            {
+                await transaction.RollbackAsync();
+                return Json(new { success = false, message = "An error occurred processing your donation" });
+            }
         }
 
         [HttpPost]
@@ -480,6 +521,9 @@ namespace KryskataFund.Controllers
             {
                 return Json(new { success = false, message = "Please sign in to set up a recurring donation" });
             }
+
+            if (amount <= 0)
+                return Json(new { success = false, message = "Amount must be greater than zero" });
 
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
