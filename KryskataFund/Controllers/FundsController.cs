@@ -289,7 +289,8 @@ namespace KryskataFund.Controllers
                         var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
                         if (existingDonation == null)
                         {
-                            using var transaction = await _context.Database.BeginTransactionAsync();
+                            var isRelational2 = _context.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory";
+                            var transaction2 = isRelational2 ? await _context.Database.BeginTransactionAsync() : null;
                             try
                             {
                                 var donation = new Donation
@@ -303,13 +304,19 @@ namespace KryskataFund.Controllers
                                 _context.Donations.Add(donation);
                                 await _context.SaveChangesAsync();
 
-                                // Use atomic SQL update instead of read-modify-write
-                                await _context.Database.ExecuteSqlRawAsync(
-                                    "UPDATE \"Funds\" SET \"RaisedAmount\" = \"RaisedAmount\" + {0}, \"SupportersCount\" = \"SupportersCount\" + 1 WHERE \"Id\" = {1}",
-                                    amount, fundId);
+                                if (isRelational2)
+                                {
+                                    await _context.Database.ExecuteSqlRawAsync(
+                                        "UPDATE \"Funds\" SET \"RaisedAmount\" = \"RaisedAmount\" + {0}, \"SupportersCount\" = \"SupportersCount\" + 1 WHERE \"Id\" = {1}",
+                                        amount, fundId);
+                                    await _context.Entry(fund).ReloadAsync();
+                                }
+                                else
+                                {
+                                    fund.RaisedAmount += amount;
+                                    fund.SupportersCount += 1;
+                                }
 
-                                // Auto-mark milestones - reload fund to get new amount
-                                await _context.Entry(fund).ReloadAsync();
                                 var unreachedMilestones = _context.FundMilestones
                                     .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
                                     .ToList();
@@ -320,11 +327,11 @@ namespace KryskataFund.Controllers
                                 }
 
                                 await _context.SaveChangesAsync();
-                                await transaction.CommitAsync();
+                                if (transaction2 != null) await transaction2.CommitAsync();
                             }
                             catch
                             {
-                                await transaction.RollbackAsync();
+                                if (transaction2 != null) await transaction2.RollbackAsync();
                             }
                         }
                     }
@@ -359,7 +366,9 @@ namespace KryskataFund.Controllers
             var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
             var donorName = "@" + userEmail.Split('@')[0];
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            var isRelational = _context.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory";
+
+            var transaction = isRelational ? await _context.Database.BeginTransactionAsync() : null;
             try
             {
                 // Create the donation record
@@ -375,13 +384,21 @@ namespace KryskataFund.Controllers
                 _context.Donations.Add(donation);
                 await _context.SaveChangesAsync();
 
-                // Use atomic SQL update instead of read-modify-write
-                await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE \"Funds\" SET \"RaisedAmount\" = \"RaisedAmount\" + {0}, \"SupportersCount\" = \"SupportersCount\" + 1 WHERE \"Id\" = {1}",
-                    amount, fundId);
+                if (isRelational)
+                {
+                    // Use atomic SQL update instead of read-modify-write
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "UPDATE \"Funds\" SET \"RaisedAmount\" = \"RaisedAmount\" + {0}, \"SupportersCount\" = \"SupportersCount\" + 1 WHERE \"Id\" = {1}",
+                        amount, fundId);
+                    await _context.Entry(fund).ReloadAsync();
+                }
+                else
+                {
+                    fund.RaisedAmount += amount;
+                    fund.SupportersCount += 1;
+                }
 
-                // Auto-mark milestones - reload fund to get new amount
-                await _context.Entry(fund).ReloadAsync();
+                // Auto-mark milestones
                 var unreachedMilestones = _context.FundMilestones
                     .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
                     .ToList();
@@ -393,13 +410,13 @@ namespace KryskataFund.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                if (transaction != null) await transaction.CommitAsync();
 
                 return Json(new { success = true, message = "Donation successful!" });
             }
             catch
             {
-                await transaction.RollbackAsync();
+                if (transaction != null) await transaction.RollbackAsync();
                 return Json(new { success = false, message = "An error occurred processing your donation" });
             }
         }
