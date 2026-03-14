@@ -1,0 +1,335 @@
+@{
+    ViewData["Title"] = "Something Went Wrong";
+}
+
+<style>
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .error-illustration {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        margin-bottom: 40px;
+    }
+
+    /* Broken gear */
+    .gear-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .gear {
+        width: 100px;
+        height: 100px;
+        position: relative;
+        animation: gearSpin 8s linear infinite;
+    }
+
+    .gear-center {
+        width: 100px;
+        height: 100px;
+        background: rgba(70, 230, 164, 0.08);
+        border: 2.5px solid rgba(70, 230, 164, 0.4);
+        border-radius: 50%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        box-shadow: inset 0 0 20px rgba(70, 230, 164, 0.05);
+    }
+
+    .gear-hole {
+        width: 30px;
+        height: 30px;
+        background: #050509;
+        border: 2px solid rgba(70, 230, 164, 0.3);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .gear-tooth {
+        position: absolute;
+        width: 20px;
+        height: 26px;
+        background: rgba(70, 230, 164, 0.15);
+        border: 2px solid rgba(70, 230, 164, 0.4);
+        border-radius: 4px;
+        top: 50%;
+        left: 50%;
+    }
+
+    .gear-tooth:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-58px); }
+    .gear-tooth:nth-child(2) { transform: translate(-50%, -50%) rotate(45deg) translateY(-58px); }
+    .gear-tooth:nth-child(3) { transform: translate(-50%, -50%) rotate(90deg) translateY(-58px); }
+    .gear-tooth:nth-child(4) { transform: translate(-50%, -50%) rotate(135deg) translateY(-58px); }
+    .gear-tooth:nth-child(5) { transform: translate(-50%, -50%) rotate(180deg) translateY(-58px); }
+    .gear-tooth:nth-child(6) { transform: translate(-50%, -50%) rotate(225deg) translateY(-58px); }
+    .gear-tooth:nth-child(7) { transform: translate(-50%, -50%) rotate(270deg) translateY(-58px); }
+    .gear-tooth:nth-child(8) { transform: translate(-50%, -50%) rotate(315deg) translateY(-58px); }
+
+    /* Broken tooth - flies away */
+    .gear-tooth.broken {
+        background: rgba(255, 92, 92, 0.2);
+        border-color: rgba(255, 92, 92, 0.5);
+        animation: toothBreak 4s ease-in-out infinite;
+    }
+
+    /* Small secondary gear */
+    .gear-small {
+        position: absolute;
+        top: -10px;
+        right: -30px;
+        width: 50px;
+        height: 50px;
+        animation: gearSpinReverse 5s linear infinite;
+    }
+
+    .gear-small .gear-center {
+        width: 50px;
+        height: 50px;
+        border-color: rgba(255, 92, 92, 0.3);
+        background: rgba(255, 92, 92, 0.05);
+    }
+
+    .gear-small .gear-hole {
+        width: 16px;
+        height: 16px;
+        border-color: rgba(255, 92, 92, 0.25);
+    }
+
+    .gear-small .gear-tooth {
+        width: 12px;
+        height: 16px;
+        background: rgba(255, 92, 92, 0.1);
+        border-color: rgba(255, 92, 92, 0.3);
+    }
+
+    .gear-small .gear-tooth:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translateY(-32px); }
+    .gear-small .gear-tooth:nth-child(2) { transform: translate(-50%, -50%) rotate(60deg) translateY(-32px); }
+    .gear-small .gear-tooth:nth-child(3) { transform: translate(-50%, -50%) rotate(120deg) translateY(-32px); }
+    .gear-small .gear-tooth:nth-child(4) { transform: translate(-50%, -50%) rotate(180deg) translateY(-32px); }
+    .gear-small .gear-tooth:nth-child(5) { transform: translate(-50%, -50%) rotate(240deg) translateY(-32px); }
+    .gear-small .gear-tooth:nth-child(6) { transform: translate(-50%, -50%) rotate(300deg) translateY(-32px); }
+
+    /* Sparks */
+    .spark {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: #ffb86c;
+        border-radius: 50%;
+        animation: sparkFly 2s ease-out infinite;
+    }
+
+    .spark:nth-child(1) { top: 40%; left: 55%; animation-delay: 0s; --spark-x: 40px; --spark-y: -30px; }
+    .spark:nth-child(2) { top: 45%; left: 50%; animation-delay: 0.4s; --spark-x: -35px; --spark-y: -40px; }
+    .spark:nth-child(3) { top: 50%; left: 60%; animation-delay: 0.8s; --spark-x: 50px; --spark-y: 20px; }
+    .spark:nth-child(4) { top: 55%; left: 45%; animation-delay: 1.2s; --spark-x: -45px; --spark-y: 15px; }
+    .spark:nth-child(5) { top: 42%; left: 52%; animation-delay: 1.6s; --spark-x: 30px; --spark-y: -50px; }
+
+    /* Smoke wisps */
+    .smoke {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle, rgba(160, 163, 196, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: smokeRise 4s ease-out infinite;
+    }
+
+    .smoke:nth-child(1) { bottom: 50%; left: 40%; animation-delay: 0s; }
+    .smoke:nth-child(2) { bottom: 50%; left: 55%; animation-delay: 1.3s; }
+    .smoke:nth-child(3) { bottom: 50%; left: 48%; animation-delay: 2.6s; }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #ffb86c 0%, #ff5c5c 50%, #ffb86c 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 4s ease-in-out infinite;
+        margin-bottom: 16px;
+        letter-spacing: -4px;
+    }
+
+    .error-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #f7f7ff;
+        margin-bottom: 12px;
+    }
+
+    .error-description {
+        font-size: 1.05rem;
+        color: #a0a3c4;
+        max-width: 480px;
+        margin: 0 auto 32px;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #46e6a4 0%, #38bdf8 100%);
+        color: #050509;
+        font-weight: 700;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(70, 230, 164, 0.3);
+    }
+
+    .error-btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(70, 230, 164, 0.4);
+        color: #050509;
+        text-decoration: none;
+    }
+
+    .error-btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: transparent;
+        color: #a0a3c4;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .error-btn-back:hover {
+        border-color: rgba(70, 230, 164, 0.3);
+        color: #f7f7ff;
+        text-decoration: none;
+    }
+
+    /* Animations */
+    @@keyframes gearSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @@keyframes gearSpinReverse {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(-360deg); }
+    }
+
+    @@keyframes toothBreak {
+        0%, 70%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(135deg) translateY(-58px); }
+        80% { opacity: 0.5; transform: translate(-50%, -50%) rotate(135deg) translateY(-70px) rotate(20deg); }
+        90% { opacity: 0; transform: translate(-50%, -50%) rotate(135deg) translateY(-90px) rotate(45deg); }
+    }
+
+    @@keyframes sparkFly {
+        0% { opacity: 1; transform: translate(0, 0) scale(1); }
+        100% { opacity: 0; transform: translate(var(--spark-x), var(--spark-y)) scale(0); }
+    }
+
+    @@keyframes smokeRise {
+        0% { opacity: 0; transform: translateY(0) scale(1); }
+        30% { opacity: 0.4; }
+        100% { opacity: 0; transform: translateY(-80px) scale(3); }
+    }
+
+    @@keyframes gradientShift {
+        0% { background-position: 0% center; }
+        50% { background-position: 100% center; }
+        100% { background-position: 0% center; }
+    }
+
+    @@media (max-width: 600px) {
+        .error-code { font-size: 5rem; }
+        .error-title { font-size: 1.4rem; }
+        .error-illustration { width: 180px; height: 180px; }
+    }
+</style>
+
+<div class="error-page">
+    <div class="error-illustration">
+        <div class="smoke"></div>
+        <div class="smoke"></div>
+        <div class="smoke"></div>
+
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+        <div class="spark"></div>
+
+        <div class="gear-container">
+            <div class="gear">
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth broken"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-center">
+                    <div class="gear-hole"></div>
+                </div>
+            </div>
+
+            <div class="gear-small">
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-tooth"></div>
+                <div class="gear-center">
+                    <div class="gear-hole"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-code">500</div>
+    <h1 class="error-title">Something Went Wrong</h1>
+    <p class="error-description">
+        Our servers hit an unexpected snag. We're already working on fixing it.
+        Please try again in a moment, or head back to the homepage.
+    </p>
+
+    <div class="error-actions">
+        <a asp-controller="Home" asp-action="Index" class="error-btn-home">
+            <span>&#8962;</span> Back to Home
+        </a>
+        <a href="javascript:location.reload()" class="error-btn-back">
+            <span>&#8635;</span> Try Again
+        </a>
+    </div>
+</div>
