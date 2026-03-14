@@ -263,7 +263,7 @@ namespace KryskataFund.Controllers
                 var session = await service.CreateAsync(options);
                 return Json(new { success = true, sessionUrl = session.Url });
             }
-            catch (StripeException ex)
+            catch (StripeException)
             {
                 return Json(new { success = false, message = "Payment service error. Please try again." });
             }
