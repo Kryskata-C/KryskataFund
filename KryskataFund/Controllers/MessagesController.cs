@@ -159,6 +159,27 @@ namespace KryskataFund.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> SearchUsers(string term)
+        {
+            if (!IsSignedIn())
+                return Json(new List<object>());
+
+            var currentUserId = GetCurrentUserId()!.Value;
+
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+                return Json(new List<object>());
+
+            var query = term.Trim().ToLower();
+            var users = await _context.Users
+                .Where(u => u.Id != currentUserId && u.Email.ToLower().Contains(query))
+                .Take(5)
+                .Select(u => new { u.Id, u.Email })
+                .ToListAsync();
+
+            return Json(users);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetUnreadCount()
         {
             if (!IsSignedIn())
