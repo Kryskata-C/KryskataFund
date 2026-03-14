@@ -305,7 +305,7 @@ namespace KryskataFund.Controllers
 
                                 // Use atomic SQL update instead of read-modify-write
                                 await _context.Database.ExecuteSqlRawAsync(
-                                    "UPDATE Funds SET RaisedAmount = RaisedAmount + {0}, SupportersCount = SupportersCount + 1 WHERE Id = {1}",
+                                    "UPDATE \"Funds\" SET \"RaisedAmount\" = \"RaisedAmount\" + {0}, \"SupportersCount\" = \"SupportersCount\" + 1 WHERE \"Id\" = {1}",
                                     amount, fundId);
 
                                 // Auto-mark milestones - reload fund to get new amount
@@ -377,7 +377,7 @@ namespace KryskataFund.Controllers
 
                 // Use atomic SQL update instead of read-modify-write
                 await _context.Database.ExecuteSqlRawAsync(
-                    "UPDATE Funds SET RaisedAmount = RaisedAmount + {0}, SupportersCount = SupportersCount + 1 WHERE Id = {1}",
+                    "UPDATE \"Funds\" SET \"RaisedAmount\" = \"RaisedAmount\" + {0}, \"SupportersCount\" = \"SupportersCount\" + 1 WHERE \"Id\" = {1}",
                     amount, fundId);
 
                 // Auto-mark milestones - reload fund to get new amount
