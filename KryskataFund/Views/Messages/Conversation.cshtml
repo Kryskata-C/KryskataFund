@@ -456,18 +456,18 @@
                 // Add message bubble
                 var wrap = document.createElement('div');
                 wrap.className = 'chat-bubble-wrap sent';
-                wrap.setAttribute('data-msg-id', data.message.Id);
+                wrap.setAttribute('data-msg-id', data.message.id);
                 wrap.innerHTML =
                     '<div class="chat-bubble">' +
                         '<div class="chat-bubble-actions">' +
-                            '<button class="chat-delete-btn" onclick="deleteMessage(' + data.message.Id + ', this)" title="Delete">' +
+                            '<button class="chat-delete-btn" onclick="deleteMessage(' + data.message.id + ', this)" title="Delete">' +
                                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">' +
                                     '<path d="M18 6L6 18M6 6l12 12"/>' +
                                 '</svg>' +
                             '</button>' +
                         '</div>' +
-                        '<div>' + escapeHtml(data.message.Content) + '</div>' +
-                        '<div class="chat-bubble-time">' + data.message.SentAt + '</div>' +
+                        '<div>' + escapeHtml(data.message.content) + '</div>' +
+                        '<div class="chat-bubble-time">' + data.message.sentAt + '</div>' +
                     '</div>';
                 chatMessages.appendChild(wrap);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
