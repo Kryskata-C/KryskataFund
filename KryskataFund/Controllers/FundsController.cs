@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
+using Stripe;
 
 namespace KryskataFund.Controllers
 {
@@ -270,61 +271,68 @@ namespace KryskataFund.Controllers
 
         public async Task<IActionResult> DonationSuccess(int fundId, decimal amount, string session_id)
         {
-            // Verify the session with Stripe
-            var service = new Stripe.Checkout.SessionService();
-            var session = await service.GetAsync(session_id);
-
-            if (session.PaymentStatus == "paid")
+            try
             {
-                var fund = await _context.Funds.FindAsync(fundId);
-                if (fund != null)
+                // Verify the session with Stripe
+                var service = new Stripe.Checkout.SessionService();
+                var session = await service.GetAsync(session_id);
+
+                if (session.PaymentStatus == "paid")
                 {
-                    var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-                    var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
-
-                    // Check if donation already recorded for this session
-                    var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
-                    if (existingDonation == null)
+                    var fund = await _context.Funds.FindAsync(fundId);
+                    if (fund != null)
                     {
-                        using var transaction = await _context.Database.BeginTransactionAsync();
-                        try
+                        var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+                        var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+
+                        // Check if donation already recorded for this session
+                        var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
+                        if (existingDonation == null)
                         {
-                            var donation = new Donation
+                            using var transaction = await _context.Database.BeginTransactionAsync();
+                            try
                             {
-                                FundId = fundId,
-                                UserId = userId,
-                                DonorName = "@" + userEmail.Split('@')[0],
-                                Amount = amount,
-                                CreatedAt = DateTime.UtcNow
-                            };
-                            _context.Donations.Add(donation);
-                            await _context.SaveChangesAsync();
+                                var donation = new Donation
+                                {
+                                    FundId = fundId,
+                                    UserId = userId,
+                                    DonorName = "@" + userEmail.Split('@')[0],
+                                    Amount = amount,
+                                    CreatedAt = DateTime.UtcNow
+                                };
+                                _context.Donations.Add(donation);
+                                await _context.SaveChangesAsync();
 
-                            // Use atomic SQL update instead of read-modify-write
-                            await _context.Database.ExecuteSqlRawAsync(
-                                "UPDATE Funds SET RaisedAmount = RaisedAmount + {0}, SupportersCount = SupportersCount + 1 WHERE Id = {1}",
-                                amount, fundId);
+                                // Use atomic SQL update instead of read-modify-write
+                                await _context.Database.ExecuteSqlRawAsync(
+                                    "UPDATE Funds SET RaisedAmount = RaisedAmount + {0}, SupportersCount = SupportersCount + 1 WHERE Id = {1}",
+                                    amount, fundId);
 
-                            // Auto-mark milestones - reload fund to get new amount
-                            await _context.Entry(fund).ReloadAsync();
-                            var unreachedMilestones = _context.FundMilestones
-                                .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
-                                .ToList();
-                            foreach (var milestone in unreachedMilestones)
-                            {
-                                milestone.IsReached = true;
-                                milestone.ReachedAt = DateTime.UtcNow;
+                                // Auto-mark milestones - reload fund to get new amount
+                                await _context.Entry(fund).ReloadAsync();
+                                var unreachedMilestones = _context.FundMilestones
+                                    .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
+                                    .ToList();
+                                foreach (var milestone in unreachedMilestones)
+                                {
+                                    milestone.IsReached = true;
+                                    milestone.ReachedAt = DateTime.UtcNow;
+                                }
+
+                                await _context.SaveChangesAsync();
+                                await transaction.CommitAsync();
                             }
-
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                        }
-                        catch
-                        {
-                            await transaction.RollbackAsync();
+                            catch
+                            {
+                                await transaction.RollbackAsync();
+                            }
                         }
                     }
                 }
+            }
+            catch (StripeException)
+            {
+                return RedirectToAction("Details", new { id = fundId });
             }
 
             return RedirectToAction("Details", new { id = fundId });
