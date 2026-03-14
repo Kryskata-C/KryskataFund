@@ -1879,7 +1879,7 @@
                     <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
                         @if (!string.IsNullOrEmpty(selectedCategory))
                         {
-                            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🔍</div>
+                            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></div>
                             <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-main);">No @selectedCategory funds yet</h3>
                             <p style="color: var(--text-muted); margin-bottom: 20px;">Be the first to create a fund in this category!</p>
                             <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
@@ -1889,7 +1889,7 @@
                         }
                         else
                         {
-                            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🚀</div>
+                            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></div>
                             <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-main);">No funds yet</h3>
                             <p style="color: var(--text-muted); margin-bottom: 20px;">Be the first to create a fund and start raising support!</p>
                             <a asp-controller="Funds" asp-action="Create" class="btn-primary">Create the first fund</a>
