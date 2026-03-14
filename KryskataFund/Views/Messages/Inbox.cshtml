@@ -1,0 +1,245 @@
+@{
+    ViewData["Title"] = "Messages";
+    var conversations = ViewBag.Conversations as IEnumerable<dynamic> ?? Enumerable.Empty<dynamic>();
+    var currentUserId = (int)ViewBag.CurrentUserId;
+}
+
+@functions {
+    string GetTimeAgo(DateTime dateTime)
+    {
+        var timeSpan = DateTime.UtcNow - dateTime;
+        if (timeSpan.TotalMinutes < 1) return "just now";
+        if (timeSpan.TotalMinutes < 60) return $"{(int)timeSpan.TotalMinutes}m ago";
+        if (timeSpan.TotalHours < 24) return $"{(int)timeSpan.TotalHours}h ago";
+        if (timeSpan.TotalDays < 7) return $"{(int)timeSpan.TotalDays}d ago";
+        if (timeSpan.TotalDays < 30) return $"{(int)(timeSpan.TotalDays / 7)}w ago";
+        return dateTime.ToString("MMM d");
+    }
+}
+
+<style>
+    .msg-page {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .msg-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+
+    .msg-header h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #f7f7ff;
+        margin: 0;
+    }
+
+    .msg-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .msg-convo {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        background: #0f1017;
+        border: 1px solid #222437;
+        border-radius: 18px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .msg-convo:hover {
+        background: #141522;
+        border-color: rgba(70, 230, 164, 0.25);
+        transform: translateY(-1px);
+    }
+
+    .msg-convo-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #46e6a4, #38bdf8);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #050509;
+        text-transform: uppercase;
+    }
+
+    .msg-convo-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .msg-convo-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 4px;
+    }
+
+    .msg-convo-name {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #f7f7ff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .msg-convo-time {
+        font-size: 0.75rem;
+        color: #6d6f8c;
+        flex-shrink: 0;
+    }
+
+    .msg-convo-preview {
+        font-size: 0.82rem;
+        color: #a0a3c4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .msg-convo-you {
+        color: #6d6f8c;
+        font-weight: 500;
+    }
+
+    .msg-convo-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .msg-unread-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        background: #46e6a4;
+        color: #050509;
+        font-size: 0.7rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .msg-empty {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .msg-empty-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #141522;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .msg-empty-icon svg {
+        width: 28px;
+        height: 28px;
+        opacity: 0.4;
+        color: #a0a3c4;
+    }
+
+    .msg-empty-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f7f7ff;
+        margin-bottom: 8px;
+    }
+
+    .msg-empty-text {
+        font-size: 0.85rem;
+        color: #6d6f8c;
+    }
+
+    .msg-convo.has-unread {
+        border-color: rgba(70, 230, 164, 0.15);
+    }
+
+    .msg-convo.has-unread .msg-convo-name {
+        color: #46e6a4;
+    }
+</style>
+
+<div class="msg-page">
+    <div class="msg-header">
+        <h1>Messages</h1>
+    </div>
+
+    @if (conversations.Any())
+    {
+        <div class="msg-list">
+            @foreach (var convo in conversations)
+            {
+                var name = (string)convo.OtherUserName;
+                var initial = !string.IsNullOrEmpty(name) ? name[0].ToString().ToUpper() : "?";
+                var hasUnread = (int)convo.UnreadCount > 0;
+
+                <a asp-action="Conversation" asp-route-userId="@convo.OtherUserId"
+                   class="msg-convo @(hasUnread ? "has-unread" : "")">
+                    <div class="msg-convo-avatar">@initial</div>
+                    <div class="msg-convo-body">
+                        <div class="msg-convo-top">
+                            <span class="msg-convo-name">@name</span>
+                        </div>
+                        <div class="msg-convo-preview">
+                            @if ((bool)convo.IsSentByMe)
+                            {
+                                <span class="msg-convo-you">You:</span>
+                            }
+                            <span>@convo.LastMessage</span>
+                        </div>
+                    </div>
+                    <div class="msg-convo-meta">
+                        <span class="msg-convo-time">@GetTimeAgo((DateTime)convo.SentAt)</span>
+                        @if (hasUnread)
+                        {
+                            <span class="msg-unread-badge">@convo.UnreadCount</span>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="msg-empty">
+            <div class="msg-empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+            </div>
+            <div class="msg-empty-title">No messages yet</div>
+            <div class="msg-empty-text">When you message a fund creator, your conversations will appear here.</div>
+        </div>
+    }
+</div>
