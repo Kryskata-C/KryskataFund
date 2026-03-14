@@ -1,0 +1,325 @@
+@{
+    ViewData["Title"] = "Page Not Found";
+}
+
+<style>
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .error-illustration {
+        position: relative;
+        width: 280px;
+        height: 220px;
+        margin-bottom: 40px;
+    }
+
+    /* Floating astronaut / lost in space theme */
+    .astronaut {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: astronautFloat 6s ease-in-out infinite;
+    }
+
+    .astronaut-body {
+        width: 80px;
+        height: 90px;
+        background: #f7f7ff;
+        border-radius: 40px 40px 30px 30px;
+        position: relative;
+        box-shadow: 0 0 40px rgba(70, 230, 164, 0.15);
+    }
+
+    .astronaut-helmet {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #1a1b2e 0%, #0f1017 100%);
+        border: 3px solid #f7f7ff;
+        border-radius: 50%;
+        position: absolute;
+        top: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        overflow: hidden;
+    }
+
+    .helmet-visor {
+        width: 40px;
+        height: 24px;
+        background: linear-gradient(135deg, #46e6a4 0%, #38bdf8 100%);
+        border-radius: 20px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        opacity: 0.9;
+        animation: visorGlow 3s ease-in-out infinite alternate;
+    }
+
+    .astronaut-arm {
+        width: 20px;
+        height: 50px;
+        background: #f7f7ff;
+        border-radius: 10px;
+        position: absolute;
+        top: 15px;
+    }
+
+    .astronaut-arm.left {
+        left: -16px;
+        transform: rotate(20deg);
+        animation: armWave 3s ease-in-out infinite;
+        transform-origin: top center;
+    }
+
+    .astronaut-arm.right {
+        right: -16px;
+        transform: rotate(-15deg);
+    }
+
+    .astronaut-leg {
+        width: 22px;
+        height: 40px;
+        background: #f7f7ff;
+        border-radius: 10px;
+        position: absolute;
+        bottom: -30px;
+    }
+
+    .astronaut-leg.left {
+        left: 12px;
+        transform: rotate(10deg);
+    }
+
+    .astronaut-leg.right {
+        right: 12px;
+        transform: rotate(-10deg);
+    }
+
+    /* Floating stars */
+    .star {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: #46e6a4;
+        border-radius: 50%;
+        animation: starTwinkle 2s ease-in-out infinite;
+    }
+
+    .star:nth-child(1) { top: 10px; left: 20px; animation-delay: 0s; }
+    .star:nth-child(2) { top: 40px; right: 30px; animation-delay: 0.5s; width: 3px; height: 3px; }
+    .star:nth-child(3) { bottom: 30px; left: 40px; animation-delay: 1s; }
+    .star:nth-child(4) { top: 70px; left: 10px; animation-delay: 1.5s; width: 5px; height: 5px; }
+    .star:nth-child(5) { bottom: 50px; right: 15px; animation-delay: 0.8s; }
+    .star:nth-child(6) { top: 20px; right: 60px; animation-delay: 1.2s; width: 3px; height: 3px; }
+    .star:nth-child(7) { bottom: 10px; right: 50px; animation-delay: 0.3s; }
+    .star:nth-child(8) { top: 100px; left: 60px; animation-delay: 1.8s; width: 5px; height: 5px; background: #38bdf8; }
+
+    /* Planet */
+    .planet {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0f1017 0%, #1a1b2e 50%, #0f1017 100%);
+        border: 2px solid rgba(70, 230, 164, 0.2);
+        overflow: hidden;
+    }
+
+    .planet-ring {
+        position: absolute;
+        width: 140px;
+        height: 30px;
+        border: 2px solid rgba(70, 230, 164, 0.25);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotateX(70deg);
+    }
+
+    .planet-crater {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(70, 230, 164, 0.08);
+        border: 1px solid rgba(70, 230, 164, 0.12);
+    }
+
+    .planet-crater:nth-child(1) { width: 20px; height: 20px; top: 20px; left: 15px; }
+    .planet-crater:nth-child(2) { width: 12px; height: 12px; top: 50px; right: 20px; }
+    .planet-crater:nth-child(3) { width: 16px; height: 16px; bottom: 15px; left: 35px; }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #46e6a4 0%, #38bdf8 50%, #46e6a4 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 4s ease-in-out infinite;
+        margin-bottom: 16px;
+        letter-spacing: -4px;
+    }
+
+    .error-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #f7f7ff;
+        margin-bottom: 12px;
+    }
+
+    .error-description {
+        font-size: 1.05rem;
+        color: #a0a3c4;
+        max-width: 480px;
+        margin: 0 auto 32px;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #46e6a4 0%, #38bdf8 100%);
+        color: #050509;
+        font-weight: 700;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(70, 230, 164, 0.3);
+    }
+
+    .error-btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(70, 230, 164, 0.4);
+        color: #050509;
+        text-decoration: none;
+    }
+
+    .error-btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: transparent;
+        color: #a0a3c4;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .error-btn-back:hover {
+        border-color: rgba(70, 230, 164, 0.3);
+        color: #f7f7ff;
+        text-decoration: none;
+    }
+
+    /* Animations */
+    @@keyframes astronautFloat {
+        0%, 100% { transform: translate(-50%, -50%) rotate(-5deg); }
+        25% { transform: translate(-50%, -60%) rotate(0deg); }
+        50% { transform: translate(-50%, -45%) rotate(5deg); }
+        75% { transform: translate(-50%, -55%) rotate(2deg); }
+    }
+
+    @@keyframes visorGlow {
+        0% { opacity: 0.7; }
+        100% { opacity: 1; box-shadow: 0 0 15px rgba(70, 230, 164, 0.4); }
+    }
+
+    @@keyframes armWave {
+        0%, 100% { transform: rotate(20deg); }
+        50% { transform: rotate(-30deg); }
+    }
+
+    @@keyframes starTwinkle {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.5); }
+    }
+
+    @@keyframes gradientShift {
+        0% { background-position: 0% center; }
+        50% { background-position: 100% center; }
+        100% { background-position: 0% center; }
+    }
+
+    @@media (max-width: 600px) {
+        .error-code { font-size: 5rem; }
+        .error-title { font-size: 1.4rem; }
+        .error-illustration { width: 200px; height: 160px; }
+    }
+</style>
+
+<div class="error-page">
+    <div class="error-illustration">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+
+        <div class="astronaut">
+            <div class="astronaut-helmet">
+                <div class="helmet-visor"></div>
+            </div>
+            <div class="astronaut-body">
+                <div class="astronaut-arm left"></div>
+                <div class="astronaut-arm right"></div>
+                <div class="astronaut-leg left"></div>
+                <div class="astronaut-leg right"></div>
+            </div>
+        </div>
+
+        <div class="planet">
+            <div class="planet-crater"></div>
+            <div class="planet-crater"></div>
+            <div class="planet-crater"></div>
+            <div class="planet-ring"></div>
+        </div>
+    </div>
+
+    <div class="error-code">404</div>
+    <h1 class="error-title">Lost in Space</h1>
+    <p class="error-description">
+        The page you're looking for has drifted into the void.
+        It may have been moved, deleted, or never existed in the first place.
+    </p>
+
+    <div class="error-actions">
+        <a asp-controller="Home" asp-action="Index" class="error-btn-home">
+            <span>&#8962;</span> Back to Home
+        </a>
+        <a href="javascript:history.back()" class="error-btn-back">
+            <span>&#8592;</span> Go Back
+        </a>
+    </div>
+</div>
