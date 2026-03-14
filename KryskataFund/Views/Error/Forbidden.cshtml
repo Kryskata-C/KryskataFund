@@ -1,0 +1,312 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<style>
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .error-illustration {
+        position: relative;
+        width: 220px;
+        height: 220px;
+        margin-bottom: 40px;
+    }
+
+    /* Shield with lock */
+    .shield {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation: shieldPulse 3s ease-in-out infinite;
+    }
+
+    .shield-body {
+        width: 120px;
+        height: 140px;
+        background: linear-gradient(180deg, rgba(70, 230, 164, 0.1) 0%, rgba(70, 230, 164, 0.03) 100%);
+        border: 2.5px solid rgba(70, 230, 164, 0.5);
+        border-radius: 60px 60px 70px 70px / 30px 30px 100px 100px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 40px rgba(70, 230, 164, 0.1), inset 0 0 30px rgba(70, 230, 164, 0.05);
+    }
+
+    .lock {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .lock-shackle {
+        width: 32px;
+        height: 22px;
+        border: 3px solid #46e6a4;
+        border-bottom: none;
+        border-radius: 16px 16px 0 0;
+        margin-bottom: -2px;
+        animation: shackleShake 4s ease-in-out infinite;
+        transform-origin: bottom center;
+    }
+
+    .lock-body {
+        width: 40px;
+        height: 30px;
+        background: linear-gradient(135deg, #46e6a4 0%, #2bc48a 100%);
+        border-radius: 6px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lock-keyhole {
+        width: 8px;
+        height: 8px;
+        background: #050509;
+        border-radius: 50%;
+        position: relative;
+    }
+
+    .lock-keyhole::after {
+        content: '';
+        position: absolute;
+        width: 4px;
+        height: 8px;
+        background: #050509;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 0 0 2px 2px;
+    }
+
+    /* Scanning lines effect */
+    .scan-lines {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        border-radius: 60px 60px 70px 70px / 30px 30px 100px 100px;
+        pointer-events: none;
+    }
+
+    .scan-line {
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #46e6a4 50%, transparent 100%);
+        opacity: 0.3;
+        animation: scanDown 3s linear infinite;
+    }
+
+    /* Ripple rings */
+    .ripple {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 1px solid rgba(70, 230, 164, 0.3);
+        border-radius: 50%;
+        animation: rippleExpand 3s ease-out infinite;
+    }
+
+    .ripple:nth-child(1) { animation-delay: 0s; }
+    .ripple:nth-child(2) { animation-delay: 1s; }
+    .ripple:nth-child(3) { animation-delay: 2s; }
+
+    /* Warning dots */
+    .warning-dot {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #ff5c5c;
+        border-radius: 50%;
+        animation: warningBlink 1.5s ease-in-out infinite;
+    }
+
+    .warning-dot:nth-child(1) { top: 10px; left: 30px; animation-delay: 0s; }
+    .warning-dot:nth-child(2) { top: 30px; right: 20px; animation-delay: 0.3s; }
+    .warning-dot:nth-child(3) { bottom: 40px; left: 15px; animation-delay: 0.6s; }
+    .warning-dot:nth-child(4) { bottom: 20px; right: 35px; animation-delay: 0.9s; }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #ff5c5c 0%, #ff8a5c 50%, #ff5c5c 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 4s ease-in-out infinite;
+        margin-bottom: 16px;
+        letter-spacing: -4px;
+    }
+
+    .error-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #f7f7ff;
+        margin-bottom: 12px;
+    }
+
+    .error-description {
+        font-size: 1.05rem;
+        color: #a0a3c4;
+        max-width: 480px;
+        margin: 0 auto 32px;
+        line-height: 1.6;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .error-btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: linear-gradient(135deg, #46e6a4 0%, #38bdf8 100%);
+        color: #050509;
+        font-weight: 700;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(70, 230, 164, 0.3);
+    }
+
+    .error-btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(70, 230, 164, 0.4);
+        color: #050509;
+        text-decoration: none;
+    }
+
+    .error-btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 28px;
+        background: transparent;
+        color: #a0a3c4;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .error-btn-back:hover {
+        border-color: rgba(70, 230, 164, 0.3);
+        color: #f7f7ff;
+        text-decoration: none;
+    }
+
+    /* Animations */
+    @@keyframes shieldPulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.05); }
+    }
+
+    @@keyframes shackleShake {
+        0%, 100% { transform: rotate(0deg); }
+        10% { transform: rotate(-5deg); }
+        20% { transform: rotate(5deg); }
+        30% { transform: rotate(-3deg); }
+        40% { transform: rotate(0deg); }
+    }
+
+    @@keyframes scanDown {
+        0% { top: -2px; opacity: 0; }
+        10% { opacity: 0.3; }
+        90% { opacity: 0.3; }
+        100% { top: 100%; opacity: 0; }
+    }
+
+    @@keyframes rippleExpand {
+        0% { width: 120px; height: 120px; opacity: 0.4; }
+        100% { width: 280px; height: 280px; opacity: 0; }
+    }
+
+    @@keyframes warningBlink {
+        0%, 100% { opacity: 0.2; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 10px rgba(255, 92, 92, 0.5); }
+    }
+
+    @@keyframes gradientShift {
+        0% { background-position: 0% center; }
+        50% { background-position: 100% center; }
+        100% { background-position: 0% center; }
+    }
+
+    @@media (max-width: 600px) {
+        .error-code { font-size: 5rem; }
+        .error-title { font-size: 1.4rem; }
+        .error-illustration { width: 180px; height: 180px; }
+    }
+</style>
+
+<div class="error-page">
+    <div class="error-illustration">
+        <div class="ripple"></div>
+        <div class="ripple"></div>
+        <div class="ripple"></div>
+
+        <div class="warning-dot"></div>
+        <div class="warning-dot"></div>
+        <div class="warning-dot"></div>
+        <div class="warning-dot"></div>
+
+        <div class="shield">
+            <div class="shield-body">
+                <div class="scan-lines">
+                    <div class="scan-line"></div>
+                </div>
+                <div class="lock">
+                    <div class="lock-shackle"></div>
+                    <div class="lock-body">
+                        <div class="lock-keyhole"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-code">403</div>
+    <h1 class="error-title">Access Denied</h1>
+    <p class="error-description">
+        You don't have permission to access this page.
+        If you believe this is a mistake, please sign in with an authorized account or contact support.
+    </p>
+
+    <div class="error-actions">
+        <a asp-controller="Home" asp-action="Index" class="error-btn-home">
+            <span>&#8962;</span> Back to Home
+        </a>
+        <a asp-controller="Account" asp-action="SignIn" class="error-btn-back">
+            <span>&#8594;</span> Sign In
+        </a>
+    </div>
+</div>
