@@ -1,25 +1,430 @@
-﻿@model ErrorViewModel
+@model ErrorViewModel
 @{
     ViewData["Title"] = "Error";
+
+    var statusCode = Model?.StatusCode ?? 500;
+    var errorTitle = Model?.ErrorTitle ?? (statusCode switch
+    {
+        400 => "Bad Request",
+        401 => "Unauthorized",
+        403 => "Forbidden",
+        404 => "Page Not Found",
+        408 => "Request Timeout",
+        429 => "Too Many Requests",
+        500 => "Internal Server Error",
+        502 => "Bad Gateway",
+        503 => "Service Unavailable",
+        _ => "Something Went Wrong"
+    });
+    var errorMessage = Model?.ErrorMessage ?? (statusCode switch
+    {
+        400 => "The server could not understand your request. Please check and try again.",
+        401 => "You need to sign in to access this page.",
+        403 => "You don't have permission to access this resource.",
+        404 => "The page you're looking for doesn't exist or has been moved.",
+        408 => "The server timed out waiting for your request.",
+        429 => "You've made too many requests. Please slow down and try again later.",
+        500 => "An unexpected error occurred on our end. We're working to fix it.",
+        502 => "We received an invalid response from the upstream server.",
+        503 => "The service is temporarily unavailable. Please try again later.",
+        _ => "An unexpected error occurred while processing your request."
+    });
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<style>
+    /* ── Error Page Styles ── */
+    .error-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        padding: 60px 24px;
+        text-align: center;
+    }
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    /* ── Animated Warning Icon ── */
+    .error-icon-wrapper {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin-bottom: 40px;
+    }
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+    .error-icon-glow {
+        position: absolute;
+        inset: -20px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 73, 118, 0.15) 0%, transparent 70%);
+        animation: error-pulse 3s ease-in-out infinite;
+    }
+
+    .error-icon {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: error-float 4s ease-in-out infinite;
+    }
+
+    .error-triangle {
+        width: 0;
+        height: 0;
+        border-left: 60px solid transparent;
+        border-right: 60px solid transparent;
+        border-bottom: 104px solid rgba(255, 73, 118, 0.12);
+        position: relative;
+        filter: drop-shadow(0 0 30px rgba(255, 73, 118, 0.2));
+    }
+
+    .error-triangle::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -60px;
+        width: 0;
+        height: 0;
+        border-left: 60px solid transparent;
+        border-right: 60px solid transparent;
+        border-bottom: 104px solid transparent;
+        border-bottom-color: transparent;
+        background: none;
+    }
+
+    .error-triangle-border {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -38%);
+        width: 0;
+        height: 0;
+        border-left: 64px solid transparent;
+        border-right: 64px solid transparent;
+        border-bottom: 110px solid rgba(255, 73, 118, 0.3);
+        z-index: -1;
+        filter: blur(1px);
+    }
+
+    .error-triangle-inner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -38%);
+        width: 0;
+        height: 0;
+        border-left: 60px solid transparent;
+        border-right: 60px solid transparent;
+        border-bottom: 104px solid rgba(255, 73, 118, 0.1);
+    }
+
+    .error-exclamation {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -20%);
+        font-size: 48px;
+        font-weight: 800;
+        color: #ff4976;
+        line-height: 1;
+        text-shadow: 0 0 20px rgba(255, 73, 118, 0.5);
+        animation: error-exclamation-pulse 2s ease-in-out infinite;
+    }
+
+    /* ── Orbiting Particles ── */
+    .error-particles {
+        position: absolute;
+        inset: 0;
+        animation: error-rotate 12s linear infinite;
+    }
+
+    .error-particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #ff4976;
+        box-shadow: 0 0 8px rgba(255, 73, 118, 0.6);
+    }
+
+    .error-particle:nth-child(1) { top: 0; left: 50%; animation: error-particle-fade 2s ease-in-out infinite; }
+    .error-particle:nth-child(2) { top: 25%; right: 5%; animation: error-particle-fade 2s ease-in-out 0.4s infinite; }
+    .error-particle:nth-child(3) { bottom: 10%; right: 15%; animation: error-particle-fade 2s ease-in-out 0.8s infinite; }
+    .error-particle:nth-child(4) { bottom: 5%; left: 20%; animation: error-particle-fade 2s ease-in-out 1.2s infinite; }
+    .error-particle:nth-child(5) { top: 20%; left: 5%; animation: error-particle-fade 2s ease-in-out 1.6s infinite; }
+
+    /* ── Status Code ── */
+    .error-status-code {
+        font-size: 6rem;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, #ff4976 0%, #ff6b8a 50%, #ff4976 100%);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: error-gradient-shift 4s ease-in-out infinite;
+        letter-spacing: -3px;
+    }
+
+    .error-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #f7f7ff;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+    }
+
+    .error-message {
+        font-size: 1rem;
+        color: #a0a3c4;
+        max-width: 480px;
+        line-height: 1.7;
+        margin-bottom: 36px;
+    }
+
+    /* ── Request ID Block ── */
+    .error-request-id {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        margin-bottom: 36px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        font-size: 0.78rem;
+        color: #6d6f8c;
+        font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    .error-request-id-label {
+        color: #a0a3c4;
+        font-weight: 600;
+        font-family: inherit;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-size: 0.68rem;
+    }
+
+    .error-request-id-value {
+        color: #6d6f8c;
+        word-break: break-all;
+    }
+
+    /* ── Action Buttons ── */
+    .error-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .error-btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #46e6a4 0%, #38bdf8 100%);
+        color: #050509;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border-radius: 14px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(70, 230, 164, 0.25);
+        letter-spacing: -0.01em;
+    }
+
+    .error-btn-home:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(70, 230, 164, 0.35);
+        color: #050509;
+        text-decoration: none;
+    }
+
+    .error-btn-home:active {
+        transform: translateY(0);
+    }
+
+    .error-btn-home svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .error-link-support {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 14px 24px;
+        color: #a0a3c4;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border-radius: 14px;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        transition: all 0.3s ease;
+    }
+
+    .error-link-support:hover {
+        color: #f7f7ff;
+        border-color: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.06);
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .error-link-support svg {
+        width: 15px;
+        height: 15px;
+        opacity: 0.7;
+    }
+
+    /* ── Decorative Separator ── */
+    .error-separator {
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, rgba(255, 73, 118, 0.4), transparent);
+        border-radius: 99px;
+        margin: 0 auto 28px;
+    }
+
+    /* ── Animations ── */
+    @@keyframes error-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    @@keyframes error-pulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    @@keyframes error-exclamation-pulse {
+        0%, 100% { opacity: 0.9; }
+        50% { opacity: 1; text-shadow: 0 0 30px rgba(255, 73, 118, 0.7); }
+    }
+
+    @@keyframes error-rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @@keyframes error-particle-fade {
+        0%, 100% { opacity: 0.3; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    @@keyframes error-gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 600px) {
+        .error-status-code {
+            font-size: 4rem;
+        }
+
+        .error-title {
+            font-size: 1.3rem;
+        }
+
+        .error-icon-wrapper {
+            width: 110px;
+            height: 110px;
+            margin-bottom: 30px;
+        }
+
+        .error-icon {
+            width: 110px;
+            height: 110px;
+        }
+
+        .error-triangle {
+            border-left-width: 45px;
+            border-right-width: 45px;
+            border-bottom-width: 78px;
+        }
+
+        .error-triangle-border {
+            border-left-width: 48px;
+            border-right-width: 48px;
+            border-bottom-width: 83px;
+        }
+
+        .error-triangle-inner {
+            border-left-width: 45px;
+            border-right-width: 45px;
+            border-bottom-width: 78px;
+        }
+
+        .error-exclamation {
+            font-size: 36px;
+        }
+
+        .error-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<section class="error-page">
+    <!-- Animated Warning Icon -->
+    <div class="error-icon-wrapper">
+        <div class="error-icon-glow"></div>
+        <div class="error-icon">
+            <div class="error-triangle-border"></div>
+            <div class="error-triangle-inner"></div>
+            <div class="error-triangle"></div>
+            <span class="error-exclamation">!</span>
+            <div class="error-particles">
+                <div class="error-particle"></div>
+                <div class="error-particle"></div>
+                <div class="error-particle"></div>
+                <div class="error-particle"></div>
+                <div class="error-particle"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Code -->
+    <div class="error-status-code">@statusCode</div>
+
+    <!-- Separator -->
+    <div class="error-separator"></div>
+
+    <!-- Title & Message -->
+    <h1 class="error-title">@errorTitle</h1>
+    <p class="error-message">@errorMessage</p>
+
+    <!-- Request ID -->
+    @if (Model?.ShowRequestId == true)
+    {
+        <div class="error-request-id">
+            <span class="error-request-id-label">Request ID</span>
+            <span class="error-request-id-value">@Model.RequestId</span>
+        </div>
+    }
+
+    <!-- Actions -->
+    <div class="error-actions">
+        <a asp-controller="Home" asp-action="Index" class="error-btn-home">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+            </svg>
+            Back to Home
+        </a>
+        <a href="mailto:support@kryskatafund.com" class="error-link-support">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Contact Support
+        </a>
+    </div>
+</section>
