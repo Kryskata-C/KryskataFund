@@ -81,6 +81,18 @@ namespace KryskataFund.Controllers
             var userDonations = _context.Donations.Where(d => d.UserId == id);
             _context.Donations.RemoveRange(userDonations);
 
+            // Delete user's collaborator entries
+            var userCollabs = _context.FundCollaborators.Where(c => c.UserId == id);
+            _context.FundCollaborators.RemoveRange(userCollabs);
+
+            // Delete user's recurring donations
+            var userRecurring = _context.RecurringDonations.Where(r => r.UserId == id);
+            _context.RecurringDonations.RemoveRange(userRecurring);
+
+            // Delete user's follows
+            var userFollows = _context.UserFollows.Where(f => f.UserId == id);
+            _context.UserFollows.RemoveRange(userFollows);
+
             // Delete user's funds and their donations
             var userFunds = _context.Funds.Where(f => f.CreatorId == id).ToList();
             foreach (var fund in userFunds)
@@ -90,6 +102,26 @@ namespace KryskataFund.Controllers
 
                 var fundUpdates = _context.FundUpdates.Where(u => u.FundId == fund.Id);
                 _context.FundUpdates.RemoveRange(fundUpdates);
+
+                // Delete fund's milestones
+                var fundMilestones = _context.FundMilestones.Where(m => m.FundId == fund.Id);
+                _context.FundMilestones.RemoveRange(fundMilestones);
+
+                // Delete fund's collaborators
+                var fundCollaborators = _context.FundCollaborators.Where(c => c.FundId == fund.Id);
+                _context.FundCollaborators.RemoveRange(fundCollaborators);
+
+                // Delete fund's deadline extensions
+                var fundExtensions = _context.DeadlineExtensions.Where(e => e.FundId == fund.Id);
+                _context.DeadlineExtensions.RemoveRange(fundExtensions);
+
+                // Delete fund's recurring donations
+                var fundRecurring = _context.RecurringDonations.Where(r => r.FundId == fund.Id);
+                _context.RecurringDonations.RemoveRange(fundRecurring);
+
+                // Delete fund's follows
+                var fundFollows = _context.UserFollows.Where(f => f.FundId == fund.Id);
+                _context.UserFollows.RemoveRange(fundFollows);
             }
             _context.Funds.RemoveRange(userFunds);
 
@@ -147,6 +179,26 @@ namespace KryskataFund.Controllers
             // Delete fund's updates
             var fundUpdates = _context.FundUpdates.Where(u => u.FundId == id);
             _context.FundUpdates.RemoveRange(fundUpdates);
+
+            // Delete fund's milestones
+            var fundMilestones = _context.FundMilestones.Where(m => m.FundId == id);
+            _context.FundMilestones.RemoveRange(fundMilestones);
+
+            // Delete fund's collaborators
+            var fundCollaborators = _context.FundCollaborators.Where(c => c.FundId == id);
+            _context.FundCollaborators.RemoveRange(fundCollaborators);
+
+            // Delete fund's deadline extensions
+            var fundExtensions = _context.DeadlineExtensions.Where(e => e.FundId == id);
+            _context.DeadlineExtensions.RemoveRange(fundExtensions);
+
+            // Delete fund's recurring donations
+            var fundRecurring = _context.RecurringDonations.Where(r => r.FundId == id);
+            _context.RecurringDonations.RemoveRange(fundRecurring);
+
+            // Delete fund's follows
+            var fundFollows = _context.UserFollows.Where(f => f.FundId == id);
+            _context.UserFollows.RemoveRange(fundFollows);
 
             _context.Funds.Remove(fund);
             _context.SaveChanges();
