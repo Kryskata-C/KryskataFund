@@ -406,6 +406,13 @@
                             <span class="btn-donate-icon">&lt;/&gt;</span>
                             Get embed code
                         </button>
+
+                        @if (isSignedIn && !isCreator)
+                        {
+                            <a asp-controller="Messages" asp-action="Conversation" asp-route-userId="@Model.CreatorId" class="btn-donate btn-donate--ghost">
+                                Message Creator
+                            </a>
+                        }
                     </div>
 
                     <!-- Recent supporters -->
