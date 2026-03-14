@@ -188,11 +188,164 @@
     .msg-convo.has-unread .msg-convo-name {
         color: #46e6a4;
     }
+
+    .msg-new-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #46e6a4, #27c385);
+        color: #050509;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .msg-new-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(70, 230, 164, 0.3);
+    }
+
+    .msg-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .msg-modal-overlay.active { display: flex; }
+
+    .msg-modal {
+        background: #0f1017;
+        border: 1px solid #222437;
+        border-radius: 18px;
+        padding: 28px;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+    }
+
+    .msg-modal h2 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #f7f7ff;
+        margin: 0 0 20px;
+    }
+
+    .msg-modal-close {
+        position: absolute;
+        top: 16px; right: 18px;
+        background: none;
+        border: none;
+        color: #6d6f8c;
+        font-size: 1.3rem;
+        cursor: pointer;
+    }
+
+    .msg-search-wrap {
+        position: relative;
+    }
+
+    .msg-search-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: #141522;
+        border: 1px solid #222437;
+        border-radius: 12px;
+        color: #f7f7ff;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .msg-search-input:focus {
+        border-color: rgba(70, 230, 164, 0.4);
+    }
+
+    .msg-search-input::placeholder { color: #6d6f8c; }
+
+    .msg-search-results {
+        margin-top: 8px;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .msg-search-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.15s;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .msg-search-item:hover { background: rgba(70, 230, 164, 0.08); }
+
+    .msg-search-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #46e6a4, #38bdf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #050509;
+        text-transform: uppercase;
+        flex-shrink: 0;
+    }
+
+    .msg-search-email {
+        font-size: 0.88rem;
+        color: #f7f7ff;
+        font-weight: 500;
+    }
+
+    .msg-search-empty {
+        text-align: center;
+        padding: 20px;
+        color: #6d6f8c;
+        font-size: 0.85rem;
+    }
+
+    .msg-search-hint {
+        text-align: center;
+        padding: 20px;
+        color: #6d6f8c;
+        font-size: 0.82rem;
+    }
 </style>
 
 <div class="msg-page">
     <div class="msg-header">
         <h1>Messages</h1>
+        <button class="msg-new-btn" id="openNewMsg">+ New Message</button>
+    </div>
+
+    <!-- New Message Modal -->
+    <div class="msg-modal-overlay" id="newMsgModal">
+        <div class="msg-modal">
+            <button class="msg-modal-close" id="closeNewMsg">&times;</button>
+            <h2>New Message</h2>
+            <div class="msg-search-wrap">
+                <input type="text" class="msg-search-input" id="userSearch" placeholder="Search by email..." autocomplete="off" />
+                <div class="msg-search-results" id="userResults">
+                    <div class="msg-search-hint">Type at least 2 characters to search</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if (conversations.Any())
@@ -243,3 +396,73 @@
         </div>
     }
 </div>
+
+<script>
+(function() {
+    var openBtn = document.getElementById('openNewMsg');
+    var closeBtn = document.getElementById('closeNewMsg');
+    var modal = document.getElementById('newMsgModal');
+    var input = document.getElementById('userSearch');
+    var results = document.getElementById('userResults');
+    var debounce = null;
+
+    openBtn.addEventListener('click', function() {
+        modal.classList.add('active');
+        setTimeout(function() { input.focus(); }, 100);
+    });
+
+    closeBtn.addEventListener('click', function() {
+        modal.classList.remove('active');
+        input.value = '';
+        results.innerHTML = '<div class="msg-search-hint">Type at least 2 characters to search</div>';
+    });
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            input.value = '';
+            results.innerHTML = '<div class="msg-search-hint">Type at least 2 characters to search</div>';
+        }
+    });
+
+    input.addEventListener('input', function() {
+        clearTimeout(debounce);
+        var term = input.value.trim();
+
+        if (term.length < 2) {
+            results.innerHTML = '<div class="msg-search-hint">Type at least 2 characters to search</div>';
+            return;
+        }
+
+        debounce = setTimeout(function() {
+            fetch('/Messages/SearchUsers?term=' + encodeURIComponent(term))
+                .then(function(r) { return r.json(); })
+                .then(function(users) {
+                    if (users.length === 0) {
+                        results.innerHTML = '<div class="msg-search-empty">No users found</div>';
+                        return;
+                    }
+                    var html = '';
+                    for (var i = 0; i < users.length; i++) {
+                        var u = users[i];
+                        var initial = u.email.charAt(0).toUpperCase();
+                        html += '<a class="msg-search-item" href="/Messages/Conversation?userId=' + u.id + '">' +
+                            '<div class="msg-search-avatar">' + initial + '</div>' +
+                            '<span class="msg-search-email">' + escapeHtml(u.email) + '</span>' +
+                            '</a>';
+                    }
+                    results.innerHTML = html;
+                })
+                .catch(function() {
+                    results.innerHTML = '<div class="msg-search-empty">Search failed</div>';
+                });
+        }, 300);
+    });
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(text));
+        return div.innerHTML;
+    }
+})();
+</script>
