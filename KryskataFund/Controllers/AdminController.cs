@@ -296,6 +296,16 @@ namespace KryskataFund.Controllers
             return Json(new { success = true, isVerified = fund.IsVerified, message = fund.IsVerified ? "Fund verified" : "Verification removed" });
         }
 
+        public IActionResult Criteria()
+        {
+            if (!IsAdmin())
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View();
+        }
+
         public IActionResult GetStats()
         {
             if (!IsAdmin())
