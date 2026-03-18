@@ -402,11 +402,6 @@
                             Share campaign
                         </button>
 
-                        <button class="btn-donate btn-donate--ghost" id="openEmbedModal">
-                            <span class="btn-donate-icon">&lt;/&gt;</span>
-                            Get embed code
-                        </button>
-
                         @if (isSignedIn && !isCreator)
                         {
                             <a asp-controller="Messages" asp-action="Conversation" asp-route-userId="@Model.CreatorId" class="btn-donate btn-donate--ghost">
@@ -473,35 +468,6 @@
                     </div>
                 </div>
             </aside>
-        </div>
-    </div>
-</div>
-
-<!-- Embed Code Modal -->
-<div class="update-modal" id="embedModal">
-    <div class="update-modal-backdrop" id="embedModalBackdrop"></div>
-    <div class="update-modal-content" style="max-width: 560px;">
-        <div class="update-modal-header">
-            <h3>&lt;/&gt; Embed this campaign</h3>
-            <button class="update-modal-close" id="closeEmbedModal">&times;</button>
-        </div>
-        <div class="update-modal-body">
-            <p style="font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
-                Copy the code below and paste it into your website's HTML to embed this campaign widget.
-            </p>
-            <div class="update-form-group">
-                <label for="embedCode">Embed code</label>
-                <textarea id="embedCode" rows="3" readonly style="font-family: monospace; font-size: 12px; cursor: text; resize: none;"></textarea>
-            </div>
-            <button class="btn-update-submit" id="copyEmbedCode" style="width: 100%; margin-bottom: 20px;">
-                Copy to clipboard
-            </button>
-            <div>
-                <label style="display: block; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 10px;">Preview</label>
-                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px; display: flex; justify-content: center;">
-                    <iframe id="embedPreview" width="350" height="280" frameborder="0" style="border-radius: 12px; overflow: hidden; border: none;"></iframe>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -1027,57 +993,6 @@
                 });
             }
 
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Embed modal functionality
-            const embedModal = document.getElementById('embedModal');
-            const embedModalBackdrop = document.getElementById('embedModalBackdrop');
-            const openEmbedBtn = document.getElementById('openEmbedModal');
-            const closeEmbedBtn = document.getElementById('closeEmbedModal');
-            const embedCodeTextarea = document.getElementById('embedCode');
-            const copyEmbedBtn = document.getElementById('copyEmbedCode');
-            const embedPreview = document.getElementById('embedPreview');
-
-            const fundId = @Model.Id;
-            const embedUrl = window.location.origin + '/Funds/Embed/' + fundId;
-            const iframeCode = '<iframe src="' + embedUrl + '" width="350" height="280" frameborder="0" style="border-radius:12px;overflow:hidden;"></iframe>';
-
-            function openEmbedModal() {
-                if (embedModal) {
-                    embedCodeTextarea.value = iframeCode;
-                    embedPreview.src = embedUrl;
-                    embedModal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                }
-            }
-
-            function closeEmbedModal() {
-                if (embedModal) {
-                    embedModal.classList.remove('active');
-                    document.body.style.overflow = '';
-                    embedPreview.src = '';
-                }
-            }
-
-            if (openEmbedBtn) openEmbedBtn.addEventListener('click', openEmbedModal);
-            if (closeEmbedBtn) closeEmbedBtn.addEventListener('click', closeEmbedModal);
-            if (embedModalBackdrop) embedModalBackdrop.addEventListener('click', closeEmbedModal);
-
-            if (copyEmbedBtn) {
-                copyEmbedBtn.addEventListener('click', function() {
-                    navigator.clipboard.writeText(iframeCode).then(function() {
-                        copyEmbedBtn.textContent = 'Copied!';
-                        copyEmbedBtn.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
-                        setTimeout(function() {
-                            copyEmbedBtn.textContent = 'Copy to clipboard';
-                            copyEmbedBtn.style.background = '';
-                        }, 2000);
-                    });
-                });
-            }
         });
     </script>
 
