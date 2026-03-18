@@ -103,7 +103,8 @@ namespace KryskataFund.Tests.Security
             var mockConfig = new Mock<IConfiguration>();
             mockConfig.Setup(c => c["Stripe:PublishableKey"]).Returns("pk_test_fake");
 
-            var controller = new FundsController(context, mockEnv.Object, mockConfig.Object);
+            var mockEmailService = new Mock<KryskataFund.Services.Interfaces.IEmailService>();
+            var controller = new FundsController(context, mockEnv.Object, mockConfig.Object, mockEmailService.Object);
             TestHelper.SetupSession(controller, userId: userId, email: email);
             return controller;
         }

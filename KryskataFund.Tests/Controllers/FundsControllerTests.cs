@@ -23,7 +23,8 @@ namespace KryskataFund.Tests.Controllers
 
             var mockConfig = new Mock<IConfiguration>();
 
-            var controller = new FundsController(context, mockEnv.Object, mockConfig.Object);
+            var mockEmailService = new Mock<KryskataFund.Services.Interfaces.IEmailService>();
+            var controller = new FundsController(context, mockEnv.Object, mockConfig.Object, mockEmailService.Object);
             TestHelper.SetupSession(controller, userId, email, isAdmin);
             return (controller, context);
         }

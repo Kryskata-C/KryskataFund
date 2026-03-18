@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
+using KryskataFund.Services.Interfaces;
 using Stripe;
 
 namespace KryskataFund.Controllers
@@ -11,6 +12,7 @@ namespace KryskataFund.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         private static readonly Dictionary<string, string> CategoryColors = new()
         {
@@ -24,11 +26,12 @@ namespace KryskataFund.Controllers
             { "Community", "#ec4899" }
         };
 
-        public FundsController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration configuration)
+        public FundsController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration configuration, IEmailService emailService)
         {
             _context = context;
             _environment = environment;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         private bool IsCreatorOrCollaborator(int fundCreatorId, int userId, int fundId)
@@ -328,6 +331,16 @@ namespace KryskataFund.Controllers
 
                                 await _context.SaveChangesAsync();
                                 if (transaction2 != null) await transaction2.CommitAsync();
+
+                                // Send email to donor
+                                await _emailService.SendDonationConfirmationAsync(userEmail, fund.Title, amount);
+
+                                // Send email to fund creator
+                                var creator = await _context.Users.FindAsync(fund.CreatorId);
+                                if (creator != null)
+                                {
+                                    await _emailService.SendDonationReceivedAsync(creator.Email, "@" + userEmail.Split('@')[0], fund.Title, amount);
+                                }
                             }
                             catch
                             {

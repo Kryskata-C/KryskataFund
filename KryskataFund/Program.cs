@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
+using KryskataFund.Services;
+using KryskataFund.Services.Interfaces;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,9 @@ else
 }
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+// Add email service
+builder.Services.AddSingleton<IEmailService, EmailService>();
 
 // Add session support
 builder.Services.AddDistributedMemoryCache();
