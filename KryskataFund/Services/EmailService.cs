@@ -22,7 +22,7 @@ namespace KryskataFund.Services
             {
                 var payload = new
                 {
-                    from = "KryskataFund <onboarding@resend.dev>",
+                    from = "KryskataFund <noreply@kryskatafund.com>",
                     to = new[] { to },
                     subject,
                     html = htmlBody
