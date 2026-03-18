@@ -482,14 +482,18 @@
             const donateBtn = document.getElementById('donateBtn');
 
             let currentAmount = 0;
-            let isAnimating = false;
+            let displayedAmount = 0;
+            let animationId = null;
 
             // Count up animation function
             function animateCountUp(targetAmount, duration = 600) {
-                if (isAnimating) return;
-                isAnimating = true;
+                // Cancel any running animation
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
 
-                const startAmount = 0;
+                const startAmount = displayedAmount;
                 const startTime = performance.now();
 
                 // Show the display with animation
@@ -502,18 +506,19 @@
                     // Easing function (ease out cubic)
                     const easeProgress = 1 - Math.pow(1 - progress, 3);
 
-                    const currentValue = Math.floor(startAmount + (targetAmount - startAmount) * easeProgress);
-                    animatedAmountSpan.textContent = currentValue;
+                    displayedAmount = Math.round(startAmount + (targetAmount - startAmount) * easeProgress);
+                    animatedAmountSpan.textContent = Math.max(0, displayedAmount);
 
                     if (progress < 1) {
-                        requestAnimationFrame(updateCount);
+                        animationId = requestAnimationFrame(updateCount);
                     } else {
+                        displayedAmount = targetAmount;
                         animatedAmountSpan.textContent = targetAmount;
-                        isAnimating = false;
+                        animationId = null;
                     }
                 }
 
-                requestAnimationFrame(updateCount);
+                animationId = requestAnimationFrame(updateCount);
             }
 
             // Handle quick amount button clicks
