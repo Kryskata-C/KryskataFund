@@ -256,7 +256,9 @@ namespace KryskataFund.Controllers
                 Metadata = new Dictionary<string, string>
                 {
                     { "fundId", fundId.ToString() },
-                    { "amount", amount.ToString() }
+                    { "amount", amount.ToString() },
+                    { "userId", HttpContext.Session.GetString("UserId") ?? "0" },
+                    { "userEmail", HttpContext.Session.GetString("UserEmail") ?? "" }
                 }
             };
 
@@ -285,8 +287,29 @@ namespace KryskataFund.Controllers
                     var fund = await _context.Funds.FindAsync(fundId);
                     if (fund != null)
                     {
+                        // Try session first, fall back to Stripe metadata
                         var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-                        var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+                        var userEmail = HttpContext.Session.GetString("UserEmail") ?? "";
+
+                        if (userId == 0 || string.IsNullOrEmpty(userEmail))
+                        {
+                            userId = int.Parse(session.Metadata.GetValueOrDefault("userId", "0"));
+                            userEmail = session.Metadata.GetValueOrDefault("userEmail", "");
+                        }
+
+                        // Restore session if it was lost during Stripe redirect
+                        if (HttpContext.Session.GetString("IsSignedIn") != "true" && userId > 0)
+                        {
+                            var user = await _context.Users.FindAsync(userId);
+                            if (user != null)
+                            {
+                                HttpContext.Session.SetString("IsSignedIn", "true");
+                                HttpContext.Session.SetString("UserId", user.Id.ToString());
+                                HttpContext.Session.SetString("UserEmail", user.Email);
+                                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
+                                userEmail = user.Email;
+                            }
+                        }
 
                         // Check if donation already recorded for this session
                         var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
