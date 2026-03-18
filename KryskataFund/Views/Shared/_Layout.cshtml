@@ -196,15 +196,19 @@
                     </a>
                 </div>
 
+                @{
+                    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+                    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+                }
                 <nav class="nav-center">
-                    <a asp-controller="Home" asp-action="Index" class="nav-item nav-item--active">Discover</a>
-                    <a asp-controller="Account" asp-action="MyFunds" class="nav-item">My Funds</a>
-                    <a asp-controller="Account" asp-action="Following" class="nav-item">Following</a>
-                    <a asp-controller="Home" asp-action="Leaderboard" class="nav-item">Leaderboard</a>
-                    <a asp-controller="Messages" asp-action="Inbox" class="nav-item">Messages</a>
+                    <a asp-controller="Home" asp-action="Index" class="nav-item @(currentController == "Home" && currentAction == "Index" ? "nav-item--active" : "")">Discover</a>
+                    <a asp-controller="Account" asp-action="MyFunds" class="nav-item @(currentController == "Account" && currentAction == "MyFunds" ? "nav-item--active" : "")">My Funds</a>
+                    <a asp-controller="Account" asp-action="Following" class="nav-item @(currentController == "Account" && currentAction == "Following" ? "nav-item--active" : "")">Following</a>
+                    <a asp-controller="Home" asp-action="Leaderboard" class="nav-item @(currentController == "Home" && currentAction == "Leaderboard" ? "nav-item--active" : "")">Leaderboard</a>
+                    <a asp-controller="Messages" asp-action="Inbox" class="nav-item @(currentController == "Messages" ? "nav-item--active" : "")">Messages</a>
                     @if (Context.Session.GetString("IsAdmin") == "True")
                     {
-                        <a asp-controller="Admin" asp-action="Dashboard" class="nav-item nav-item--admin">Admin Dashboard</a>
+                        <a asp-controller="Admin" asp-action="Dashboard" class="nav-item nav-item--admin @(currentController == "Admin" ? "nav-item--active" : "")">Admin Dashboard</a>
                     }
                     <div class="nav-search-wrapper">
                         <div class="nav-search">
