@@ -73,6 +73,24 @@
                             <span>@fund.SupportersCount supporters</span>
                             <span>@fund.DaysLeft days left</span>
                         </div>
+                        <div class="my-fund-actions">
+                            <span class="my-fund-action-btn" onclick="event.preventDefault(); event.stopPropagation(); window.location='/Funds/Analytics/@fund.Id'" title="View Analytics">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                    <path d="M18 20V10"></path>
+                                    <path d="M12 20V4"></path>
+                                    <path d="M6 20v-6"></path>
+                                </svg>
+                                Analytics
+                            </span>
+                            <span class="my-fund-action-btn" onclick="event.preventDefault(); event.stopPropagation(); window.location='/Funds/ExportDonors/@fund.Id'" title="Export Donors">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Export
+                            </span>
+                        </div>
                     </div>
                 </a>
             }
@@ -256,6 +274,35 @@
         justify-content: space-between;
         font-size: 13px;
         color: var(--text-muted);
+    }
+
+    .my-fund-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .my-fund-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #46e6a4;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 8px;
+        background: rgba(70, 230, 164, 0.08);
+        border: 1px solid rgba(70, 230, 164, 0.15);
+        transition: all 0.2s ease;
+    }
+
+    .my-fund-action-btn:hover {
+        background: rgba(70, 230, 164, 0.18);
+        border-color: rgba(70, 230, 164, 0.35);
     }
 
     .btn-primary {
