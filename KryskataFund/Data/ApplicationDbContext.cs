@@ -20,6 +20,7 @@ namespace KryskataFund.Data
         public DbSet<FundCollaborator> FundCollaborators { get; set; }
         public DbSet<RecurringDonation> RecurringDonations { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<FundComment> FundComments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
