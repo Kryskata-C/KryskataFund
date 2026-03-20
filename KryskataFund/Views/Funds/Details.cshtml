@@ -1423,6 +1423,30 @@
         .fund-detail-supporter {
             opacity: 0;
             animation: fadeSlideIn 0.3s ease forwards;
+            position: relative;
+        }
+
+        .btn-refund-supporter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            background: rgba(249, 115, 22, 0.1);
+            color: #f97316;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            margin-left: 6px;
+            padding: 0;
+        }
+
+        .btn-refund-supporter:hover {
+            background: rgba(249, 115, 22, 0.25);
+            border-color: rgba(249, 115, 22, 0.5);
+            color: #fb923c;
         }
 
         @@keyframes fadeSlideIn {
