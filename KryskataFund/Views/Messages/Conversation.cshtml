@@ -5,6 +5,7 @@
     var otherUserId = (int)ViewBag.OtherUserId;
     var otherUserEmail = (string)ViewBag.OtherUserEmail;
     var otherInitial = !string.IsNullOrEmpty(otherUserEmail) ? otherUserEmail[0].ToString().ToUpper() : "?";
+    var sharedFunds = ViewBag.SharedFunds as Dictionary<int, KryskataFund.Models.Fund> ?? new Dictionary<int, KryskataFund.Models.Fund>();
 }
 
 <style>
@@ -321,6 +322,84 @@
     .chat-char-count.at-limit {
         color: #ef4444;
     }
+
+    .shared-fund-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #1a1b2e;
+        border: 1px solid #2a2d45;
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin-top: 8px;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s ease;
+        max-width: 320px;
+        cursor: pointer;
+    }
+
+    .shared-fund-card:hover {
+        border-color: rgba(70, 230, 164, 0.3);
+    }
+
+    .shared-fund-card-img {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: #141522;
+    }
+
+    .shared-fund-card-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .shared-fund-card-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #f7f7ff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+    }
+
+    .shared-fund-card-bar {
+        width: 100%;
+        height: 4px;
+        background: #222437;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 3px;
+    }
+
+    .shared-fund-card-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #46e6a4, #38bdf8);
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+
+    .shared-fund-card-stats {
+        font-size: 0.7rem;
+        color: #a0a3c4;
+    }
+
+    .shared-fund-card-stats span {
+        color: #46e6a4;
+        font-weight: 600;
+    }
+
+    .chat-bubble-wrap.sent .shared-fund-card-title {
+        color: #f7f7ff;
+    }
+
+    .chat-bubble-wrap.sent .shared-fund-card-stats {
+        color: #a0a3c4;
+    }
 </style>
 
 <div class="chat-page">
@@ -374,6 +453,22 @@
                             </div>
                         }
                         <div>@msg.Content</div>
+                        @if (msg.SharedFundId.HasValue && sharedFunds.ContainsKey(msg.SharedFundId.Value))
+                        {
+                            var fund = sharedFunds[msg.SharedFundId.Value];
+                            <a href="/Funds/Details/@fund.Id" class="shared-fund-card" onclick="event.stopPropagation();">
+                                <img class="shared-fund-card-img" src="@(fund.ImageUrl ?? "/images/placeholder.png")" alt="@fund.Title" />
+                                <div class="shared-fund-card-info">
+                                    <div class="shared-fund-card-title">@fund.Title</div>
+                                    <div class="shared-fund-card-bar">
+                                        <div class="shared-fund-card-bar-fill" style="width: @(fund.ProgressPercent)%"></div>
+                                    </div>
+                                    <div class="shared-fund-card-stats">
+                                        <span>@fund.RaisedAmount.ToString("C0")</span> / @fund.GoalAmount.ToString("C0") (@fund.ProgressPercent%)
+                                    </div>
+                                </div>
+                            </a>
+                        }
                         <div class="chat-bubble-time">@msg.SentAt.ToString("h:mm tt")</div>
                     </div>
                 </div>
@@ -403,6 +498,7 @@
     var charCount = document.getElementById('charCount');
     var receiverId = @otherUserId;
     var sending = false;
+    window.currentSharedFundId = null;
 
     // Auto-scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -434,6 +530,27 @@
 
     chatSendBtn.addEventListener('click', sendMessage);
 
+    function buildFundCardHtml(data) {
+        var img = data.message.sharedFundImage || '/images/placeholder.png';
+        var title = escapeHtml(data.message.sharedFundTitle || '');
+        var progress = data.message.sharedFundProgress || 0;
+        var raised = parseFloat(data.message.sharedFundRaised || 0);
+        var goal = parseFloat(data.message.sharedFundGoal || 0);
+        var fundId = data.message.sharedFundId;
+        return '<a href="/Funds/Details/' + fundId + '" class="shared-fund-card" onclick="event.stopPropagation();">' +
+            '<img class="shared-fund-card-img" src="' + escapeHtml(img) + '" alt="' + title + '" />' +
+            '<div class="shared-fund-card-info">' +
+                '<div class="shared-fund-card-title">' + title + '</div>' +
+                '<div class="shared-fund-card-bar">' +
+                    '<div class="shared-fund-card-bar-fill" style="width: ' + progress + '%"></div>' +
+                '</div>' +
+                '<div class="shared-fund-card-stats">' +
+                    '<span>$' + raised.toFixed(0) + '</span> / $' + goal.toFixed(0) + ' (' + progress + '%)' +
+                '</div>' +
+            '</div>' +
+        '</a>';
+    }
+
     function sendMessage() {
         var content = chatInput.value.trim();
         if (!content || content.length > 1000 || sending) return;
@@ -441,10 +558,15 @@
         sending = true;
         chatSendBtn.disabled = true;
 
+        var bodyParts = 'receiverId=' + receiverId + '&content=' + encodeURIComponent(content);
+        if (window.currentSharedFundId) {
+            bodyParts += '&sharedFundId=' + window.currentSharedFundId;
+        }
+
         fetch('/Messages/Send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'receiverId=' + receiverId + '&content=' + encodeURIComponent(content)
+            body: bodyParts
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -452,6 +574,12 @@
                 // Remove empty state if present
                 var emptyEl = document.getElementById('chatEmpty');
                 if (emptyEl) emptyEl.remove();
+
+                // Build fund card HTML if shared fund is present
+                var fundCardHtml = '';
+                if (data.message.sharedFundId && data.message.sharedFundTitle) {
+                    fundCardHtml = buildFundCardHtml(data);
+                }
 
                 // Add message bubble
                 var wrap = document.createElement('div');
@@ -467,6 +595,7 @@
                             '</button>' +
                         '</div>' +
                         '<div>' + escapeHtml(data.message.content) + '</div>' +
+                        fundCardHtml +
                         '<div class="chat-bubble-time">' + data.message.sentAt + '</div>' +
                     '</div>';
                 chatMessages.appendChild(wrap);
@@ -476,6 +605,7 @@
                 chatInput.style.height = 'auto';
                 charCount.textContent = '';
                 charCount.className = 'chat-char-count';
+                window.currentSharedFundId = null;
             }
         })
         .catch(function() {})
