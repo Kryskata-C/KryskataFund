@@ -53,6 +53,12 @@
                             Goal reached!
                         </div>
                     }
+                    @if (Model.DaysLeft == 0 && !isOverfunded)
+                    {
+                        <div class="fund-detail-badge fund-detail-badge--ended">
+                            Campaign Ended
+                        </div>
+                    }
                 </div>
 
                 <!-- Title and story -->
@@ -199,6 +205,38 @@
                                     </div>
                                 }
                             }
+                        </div>
+                    </div>
+
+                    <!-- Comments section -->
+                    <div class="fund-detail-comments" id="commentsSection">
+                        <div class="comments-header">
+                            <h2>Comments <span class="comments-count" id="commentsCount">(0)</span></h2>
+                        </div>
+
+                        @if (isSignedIn)
+                        {
+                            <div class="comment-form">
+                                <div class="comment-form-row">
+                                    <textarea id="commentInput" class="comment-input" placeholder="Leave a comment..." rows="2" maxlength="1000"></textarea>
+                                </div>
+                                <div class="comment-form-actions">
+                                    <span class="comment-char-count" id="commentCharCount">0/1000</span>
+                                    <button class="btn-post-comment" id="submitComment" disabled>Post Comment</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="comment-signin-prompt">
+                                <a href="@signInUrl">Sign in</a> to leave a comment.
+                            </div>
+                        }
+
+                        <div class="comments-list" id="commentsList">
+                            <div class="comments-empty" id="emptyComments">
+                                <p>No comments yet. Be the first to share your thoughts!</p>
+                            </div>
                         </div>
                     </div>
 
@@ -397,10 +435,38 @@
                             <span id="donateBtnText">Donate now</span>
                         </button>
 
-                        <button class="btn-donate btn-donate--ghost">
+                        <button class="btn-donate btn-donate--ghost" id="shareBtn" onclick="document.getElementById('shareModal').style.display='flex'">
                             <span class="btn-donate-icon"></span>
                             Share campaign
                         </button>
+
+                        <!-- Share Modal -->
+                        <div id="shareModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);" onclick="if(event.target===this)this.style.display='none'">
+                            <div class="share-modal">
+                                <div class="share-modal-header">
+                                    <h3 class="share-modal-title">Share campaign</h3>
+                                    <button class="share-modal-close" onclick="document.getElementById('shareModal').style.display='none'">&times;</button>
+                                </div>
+
+                                <div class="share-modal-section">
+                                    <label class="share-modal-label">Copy link</label>
+                                    <div class="share-modal-link-row">
+                                        <input type="text" class="share-modal-link-input" id="shareLinkInput" readonly value="@Context.Request.Scheme://@Context.Request.Host/Funds/Details/@Model.Id" />
+                                        <button class="share-modal-copy-btn" id="shareCopyBtn" onclick="copyShareLink()">Copy</button>
+                                    </div>
+                                </div>
+
+                                @if (isSignedIn)
+                                {
+                                    <div class="share-modal-section" id="shareContactsSection">
+                                        <label class="share-modal-label">Share with contacts</label>
+                                        <div id="shareContactsList" class="share-contacts-list">
+                                            <div class="share-contacts-loading">Loading contacts...</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
 
                         @if (isSignedIn && !isCreator)
                         {
@@ -997,6 +1063,120 @@
                     submitExtBtn.textContent = 'Extend Deadline';
                 });
             }
+
+            // === Comments Section ===
+            const commentsList = document.getElementById('commentsList');
+            const emptyComments = document.getElementById('emptyComments');
+            const commentsCount = document.getElementById('commentsCount');
+            const commentInput = document.getElementById('commentInput');
+            const submitCommentBtn = document.getElementById('submitComment');
+            const commentCharCount = document.getElementById('commentCharCount');
+            const fundId = @Model.Id;
+            const isSignedIn = @(isSignedIn ? "true" : "false");
+
+            function timeAgo(dateStr) {
+                const now = new Date();
+                const date = new Date(dateStr);
+                const seconds = Math.floor((now - date) / 1000);
+                if (seconds < 60) return 'just now';
+                const minutes = Math.floor(seconds / 60);
+                if (minutes < 60) return minutes + ' min ago';
+                const hours = Math.floor(minutes / 60);
+                if (hours < 24) return hours + (hours === 1 ? ' hour ago' : ' hours ago');
+                const days = Math.floor(hours / 24);
+                if (days < 7) return days + (days === 1 ? ' day ago' : ' days ago');
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+
+            function renderComment(c) {
+                const initial = (c.userName || '?')[0].toUpperCase();
+                const deleteBtn = c.isOwner
+                    ? `<button class="comment-delete-btn" data-comment-id="${c.id}" title="Delete comment">&times;</button>`
+                    : '';
+                return `<div class="comment-item" data-comment-id="${c.id}">
+                    <div class="comment-avatar">${initial}</div>
+                    <div class="comment-body">
+                        <div class="comment-meta">
+                            <span class="comment-username">${c.userName}</span>
+                            <span class="comment-time">${timeAgo(c.createdAt)}</span>
+                            ${deleteBtn}
+                        </div>
+                        <div class="comment-text">${c.content}</div>
+                    </div>
+                </div>`;
+            }
+
+            function loadComments() {
+                fetch(`/Funds/GetComments?fundId=${fundId}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        commentsCount.textContent = `(${data.length})`;
+                        if (data.length === 0) {
+                            emptyComments.style.display = '';
+                            return;
+                        }
+                        emptyComments.style.display = 'none';
+                        const html = data.map(renderComment).join('');
+                        commentsList.innerHTML = html + emptyComments.outerHTML;
+                        emptyComments.style.display = 'none';
+                        attachDeleteHandlers();
+                    })
+                    .catch(() => {});
+            }
+
+            function attachDeleteHandlers() {
+                document.querySelectorAll('.comment-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.commentId;
+                        if (!confirm('Delete this comment?')) return;
+                        fetch('/Funds/DeleteComment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ commentId: parseInt(id) })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) loadComments();
+                        });
+                    });
+                });
+            }
+
+            if (commentInput) {
+                commentInput.addEventListener('input', function() {
+                    const len = this.value.trim().length;
+                    commentCharCount.textContent = `${this.value.length}/1000`;
+                    submitCommentBtn.disabled = len === 0;
+                });
+            }
+
+            if (submitCommentBtn) {
+                submitCommentBtn.addEventListener('click', function() {
+                    const content = commentInput.value.trim();
+                    if (!content) return;
+                    submitCommentBtn.disabled = true;
+                    submitCommentBtn.textContent = 'Posting...';
+                    fetch('/Funds/AddComment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ fundId: fundId, content: content })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            commentInput.value = '';
+                            commentCharCount.textContent = '0/1000';
+                            loadComments();
+                        }
+                    })
+                    .finally(() => {
+                        submitCommentBtn.disabled = false;
+                        submitCommentBtn.textContent = 'Post Comment';
+                    });
+                });
+            }
+
+            loadComments();
 
         });
     </script>
