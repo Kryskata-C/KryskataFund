@@ -1152,8 +1152,8 @@
                         if (!confirm('Delete this comment?')) return;
                         fetch('/Funds/DeleteComment', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ commentId: parseInt(id) })
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'commentId=' + id
                         })
                         .then(r => r.json())
                         .then(data => {
@@ -1179,8 +1179,8 @@
                     submitCommentBtn.textContent = 'Posting...';
                     fetch('/Funds/AddComment', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ fundId: fundId, content: content })
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'fundId=' + fundId + '&content=' + encodeURIComponent(content)
                     })
                     .then(r => r.json())
                     .then(data => {
