@@ -393,47 +393,61 @@
 
                     <!-- Donation buttons -->
                     <div class="fund-detail-donate-section">
-                        <div class="fund-detail-quick-amounts">
-                            <button class="btn-quick-amount" data-amount="10">€10</button>
-                            <button class="btn-quick-amount" data-amount="25">€25</button>
-                            <button class="btn-quick-amount" data-amount="50">€50</button>
-                            <button class="btn-quick-amount" data-amount="100">€100</button>
-                            <div class="btn-custom-amount">
-                                <span class="custom-amount-label">€</span>
-                                <input type="number" class="custom-amount-input" placeholder="Custom" min="1" id="customAmount">
-                            </div>
-                        </div>
-
-                        <div class="selected-amount-display" id="selectedAmountDisplay">
-                            <span class="selected-amount-label">Your donation</span>
-                            <span class="selected-amount-value">€<span id="animatedAmount">0</span></span>
-                        </div>
-
-                        @if (hasRecurring)
+                        @if (Model.DaysLeft == 0)
                         {
-                            <div class="recurring-active-badge">
-                                <span class="recurring-icon">🔄</span>
-                                <div class="recurring-active-info">
-                                    <span class="recurring-active-label">Monthly donation active</span>
-                                    <span class="recurring-active-amount">€@recurringAmount.ToString("N0")/month</span>
-                                </div>
+                            <div class="campaign-ended-notice">
+                                <div class="campaign-ended-icon">⏱</div>
+                                <p class="campaign-ended-text">This campaign has ended</p>
+                                <p class="campaign-ended-date">Ended on @Model.EndDate.ToString("MMMM d, yyyy")</p>
                             </div>
+                            <button class="btn-donate btn-donate--disabled" disabled>
+                                <span>Campaign Ended</span>
+                            </button>
                         }
                         else
                         {
-                            <div class="monthly-toggle" id="monthlyToggle">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="monthlyCheckbox">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                                <span class="monthly-toggle-label">Make it monthly</span>
+                            <div class="fund-detail-quick-amounts">
+                                <button class="btn-quick-amount" data-amount="10">€10</button>
+                                <button class="btn-quick-amount" data-amount="25">€25</button>
+                                <button class="btn-quick-amount" data-amount="50">€50</button>
+                                <button class="btn-quick-amount" data-amount="100">€100</button>
+                                <div class="btn-custom-amount">
+                                    <span class="custom-amount-label">€</span>
+                                    <input type="number" class="custom-amount-input" placeholder="Custom" min="1" id="customAmount">
+                                </div>
                             </div>
-                        }
 
-                        <button class="btn-donate btn-donate--primary" id="donateBtn">
-                            <span class="btn-donate-icon"></span>
-                            <span id="donateBtnText">Donate now</span>
-                        </button>
+                            <div class="selected-amount-display" id="selectedAmountDisplay">
+                                <span class="selected-amount-label">Your donation</span>
+                                <span class="selected-amount-value">€<span id="animatedAmount">0</span></span>
+                            </div>
+
+                            @if (hasRecurring)
+                            {
+                                <div class="recurring-active-badge">
+                                    <span class="recurring-icon">🔄</span>
+                                    <div class="recurring-active-info">
+                                        <span class="recurring-active-label">Monthly donation active</span>
+                                        <span class="recurring-active-amount">€@recurringAmount.ToString("N0")/month</span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="monthly-toggle" id="monthlyToggle">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="monthlyCheckbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="monthly-toggle-label">Make it monthly</span>
+                                </div>
+                            }
+
+                            <button class="btn-donate btn-donate--primary" id="donateBtn">
+                                <span class="btn-donate-icon"></span>
+                                <span id="donateBtnText">Donate now</span>
+                            </button>
+                        }
 
                         <button class="btn-donate btn-donate--ghost" id="shareBtn" onclick="document.getElementById('shareModal').style.display='flex'">
                             <span class="btn-donate-icon"></span>
@@ -1184,6 +1198,50 @@
             }
 
             loadComments();
+
+            // Refund donation (creator only)
+            window.refundDonation = async function(donationId, btnElement) {
+                if (!confirm('Are you sure you want to refund this donation?')) return;
+
+                btnElement.disabled = true;
+                btnElement.style.opacity = '0.5';
+
+                try {
+                    const response = await fetch('/Funds/RefundDonation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `donationId=${donationId}`
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const supporterEl = btnElement.closest('.fund-detail-supporter');
+                        const amount = parseFloat(supporterEl.dataset.donationAmount) || 0;
+
+                        // Animate removal
+                        supporterEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        supporterEl.style.opacity = '0';
+                        supporterEl.style.transform = 'translateX(20px)';
+                        setTimeout(() => supporterEl.remove(), 300);
+
+                        // Update raised amount display
+                        const raisedEl = document.querySelector('.fund-detail-raised');
+                        if (raisedEl) {
+                            const currentRaised = parseInt(raisedEl.textContent.replace(/[^0-9]/g, '')) || 0;
+                            const newRaised = Math.max(0, currentRaised - amount);
+                            raisedEl.textContent = '\u20AC' + newRaised.toLocaleString('en-US', { maximumFractionDigits: 0 });
+                        }
+                    } else {
+                        alert(data.message || 'Refund failed');
+                        btnElement.disabled = false;
+                        btnElement.style.opacity = '1';
+                    }
+                } catch (e) {
+                    alert('An error occurred while processing the refund');
+                    btnElement.disabled = false;
+                    btnElement.style.opacity = '1';
+                }
+            };
 
         });
     </script>
@@ -2422,6 +2480,140 @@
             color: #f7f7ff;
             line-height: 1.5;
             word-break: break-word;
+        }
+
+        /* Share Modal */
+        .share-modal {
+            background: #0f1017;
+            border: 1px solid #222437;
+            border-radius: 18px;
+            width: 90%;
+            max-width: 440px;
+            padding: 28px;
+            position: relative;
+            color: #f7f7ff;
+        }
+        .share-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+        .share-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #f7f7ff;
+            margin: 0;
+        }
+        .share-modal-close {
+            background: none;
+            border: none;
+            color: #6d6f8c;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .share-modal-close:hover { color: #f7f7ff; }
+        .share-modal-section { margin-bottom: 20px; }
+        .share-modal-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6d6f8c;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .share-modal-link-row { display: flex; gap: 8px; }
+        .share-modal-link-input {
+            flex: 1;
+            background: #181a24;
+            border: 1px solid #222437;
+            border-radius: 10px;
+            color: #f7f7ff;
+            padding: 10px 14px;
+            font-size: 13px;
+            outline: none;
+            min-width: 0;
+        }
+        .share-modal-link-input:focus { border-color: rgba(70, 230, 164, 0.5); }
+        .share-modal-copy-btn {
+            background: #46e6a4;
+            color: #0f1017;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .share-modal-copy-btn:hover { background: #35d494; }
+        .share-contacts-list { display: flex; flex-direction: column; gap: 6px; }
+        .share-contacts-loading {
+            color: #6d6f8c;
+            font-size: 13px;
+            padding: 12px 0;
+            text-align: center;
+        }
+        .share-contact-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: #181a24;
+            border-radius: 12px;
+            border: 1px solid #222437;
+        }
+        .share-contact-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #222437;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #46e6a4;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+        .share-contact-info { flex: 1; min-width: 0; }
+        .share-contact-email {
+            font-size: 13px;
+            color: #f7f7ff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .share-contact-send-btn {
+            background: transparent;
+            border: 1px solid #46e6a4;
+            color: #46e6a4;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .share-contact-send-btn:hover { background: rgba(70, 230, 164, 0.1); }
+        .share-contact-send-btn.sent {
+            background: rgba(70, 230, 164, 0.15);
+            border-color: #46e6a4;
+            color: #46e6a4;
+            cursor: default;
+            pointer-events: none;
+        }
+        .share-no-contacts {
+            color: #6d6f8c;
+            font-size: 13px;
+            padding: 12px 0;
+            text-align: center;
         }
     </style>
 }
