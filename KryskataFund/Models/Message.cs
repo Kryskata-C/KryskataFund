@@ -10,5 +10,6 @@ namespace KryskataFund.Models
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
         public bool IsRead { get; set; }
+        public int? SharedFundId { get; set; }
     }
 }
