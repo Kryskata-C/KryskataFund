@@ -277,6 +277,7 @@
                             <th>Amount</th>
                             <th>Campaign</th>
                             <th>Date</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -294,11 +295,20 @@
                                         <a href="/Funds/Details/@donation.FundId" target="_blank">@(fund?.Title ?? "Unknown")</a>
                                     </td>
                                     <td class="date-cell">@donation.CreatedAt.ToString("MMM d, yyyy HH:mm")</td>
+                                    <td class="status-cell">
+                                        <span class="donation-status donation-status--active">Active</span>
+                                    </td>
                                     <td class="actions-cell">
-                                        <button class="action-btn refund-btn" onclick="refundDonation(@donation.Id)" title="Refund & Delete">
+                                        <button class="action-btn stripe-refund-btn" onclick="stripeRefundDonation(@donation.Id)" title="Refund Donation">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                                                 <polyline points="1 4 1 10 7 10"></polyline>
                                                 <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="action-btn refund-btn" onclick="refundDonation(@donation.Id)" title="Delete Donation">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                             </svg>
                                         </button>
                                     </td>
@@ -537,8 +547,37 @@
         }
 
         // Donation actions
+        async function stripeRefundDonation(id) {
+            if (!confirm('Are you sure you want to refund this donation? The amount will be deducted from the fund.')) return;
+
+            const row = document.querySelector(`tr[data-donation-id="${id}"]`);
+            const btn = row.querySelector('.stripe-refund-btn');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+
+            const response = await fetch('/Funds/RefundDonation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `donationId=${id}`
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                const statusCell = row.querySelector('.donation-status');
+                statusCell.textContent = 'Refunded';
+                statusCell.classList.remove('donation-status--active');
+                statusCell.classList.add('donation-status--refunded');
+                row.querySelector('.stripe-refund-btn').remove();
+                showToast('Donation refunded successfully');
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                showToast(data.message || 'Refund failed', true);
+            }
+        }
+
         async function refundDonation(id) {
-            if (!confirm('Are you sure you want to refund and delete this donation?')) return;
+            if (!confirm('Are you sure you want to delete this donation?')) return;
 
             const response = await fetch('/Admin/DeleteDonation', {
                 method: 'POST',
@@ -883,6 +922,35 @@
         background: rgba(239, 68, 68, 0.15);
         border-color: rgba(239, 68, 68, 0.3);
         color: #ef4444;
+    }
+
+    .stripe-refund-btn {
+        color: #f97316;
+    }
+
+    .stripe-refund-btn:hover {
+        background: rgba(249, 115, 22, 0.15);
+        border-color: rgba(249, 115, 22, 0.3);
+        color: #f97316;
+    }
+
+    .donation-status {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .donation-status--active {
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+    }
+
+    .donation-status--refunded {
+        background: rgba(249, 115, 22, 0.15);
+        color: #f97316;
     }
 
     .toggle-admin-btn:hover {
