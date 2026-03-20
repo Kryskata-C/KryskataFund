@@ -63,6 +63,19 @@ using (var scope = app.Services.CreateScope())
             ""IsRead"" BOOLEAN NOT NULL DEFAULT FALSE
         )");
 
+    db.Database.ExecuteSqlRaw(@"
+        CREATE TABLE IF NOT EXISTS ""FundComments"" (
+            ""Id"" SERIAL PRIMARY KEY,
+            ""FundId"" INTEGER NOT NULL,
+            ""UserId"" INTEGER NOT NULL,
+            ""UserName"" TEXT NOT NULL DEFAULT '',
+            ""Content"" TEXT NOT NULL DEFAULT '',
+            ""CreatedAt"" TIMESTAMP WITHOUT TIME ZONE NOT NULL
+        )");
+
+    db.Database.ExecuteSqlRaw(@"
+        ALTER TABLE ""Messages"" ADD COLUMN IF NOT EXISTS ""SharedFundId"" INTEGER NULL");
+
     DbSeeder.Seed(db);
 }
 
