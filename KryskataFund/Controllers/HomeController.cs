@@ -65,6 +65,13 @@ namespace KryskataFund.Controllers
             }
             ViewBag.FollowedFundIds = followedFundIds;
 
+            // Get expired fund IDs (EndDate has passed)
+            var expiredFundIds = allFunds
+                .Where(f => f.EndDate < DateTime.UtcNow)
+                .Select(f => f.Id)
+                .ToList();
+            ViewBag.ExpiredFundIds = expiredFundIds;
+
             return View(funds);
         }
 
