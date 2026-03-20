@@ -100,16 +100,32 @@ namespace KryskataFund.Controllers
             if (otherUser == null)
                 return RedirectToAction("Inbox");
 
+            // Load shared funds referenced in messages
+            var sharedFundIds = messages
+                .Where(m => m.SharedFundId.HasValue)
+                .Select(m => m.SharedFundId!.Value)
+                .Distinct()
+                .ToList();
+
+            var sharedFunds = new Dictionary<int, Fund>();
+            if (sharedFundIds.Any())
+            {
+                sharedFunds = await _context.Funds
+                    .Where(f => sharedFundIds.Contains(f.Id))
+                    .ToDictionaryAsync(f => f.Id);
+            }
+
             ViewBag.Messages = messages;
             ViewBag.CurrentUserId = currentUserId;
             ViewBag.OtherUserId = userId;
             ViewBag.OtherUserEmail = otherUser.Email;
+            ViewBag.SharedFunds = sharedFunds;
 
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Send(int receiverId, string content)
+        public async Task<IActionResult> Send(int receiverId, string content, int? sharedFundId)
         {
             if (!IsSignedIn())
                 return Json(new { success = false, error = "Not signed in" });
@@ -136,11 +152,32 @@ namespace KryskataFund.Controllers
                 ReceiverName = receiver.Email,
                 Content = content.Trim(),
                 SentAt = DateTime.UtcNow,
-                IsRead = false
+                IsRead = false,
+                SharedFundId = sharedFundId
             };
 
             _context.Messages.Add(message);
             await _context.SaveChangesAsync();
+
+            // Load shared fund data if present
+            string? sharedFundTitle = null;
+            string? sharedFundImage = null;
+            int sharedFundProgress = 0;
+            decimal sharedFundRaised = 0;
+            decimal sharedFundGoal = 0;
+
+            if (sharedFundId.HasValue)
+            {
+                var fund = await _context.Funds.FindAsync(sharedFundId.Value);
+                if (fund != null)
+                {
+                    sharedFundTitle = fund.Title;
+                    sharedFundImage = fund.ImageUrl;
+                    sharedFundProgress = fund.ProgressPercent;
+                    sharedFundRaised = fund.RaisedAmount;
+                    sharedFundGoal = fund.GoalAmount;
+                }
+            }
 
             return Json(new
             {
@@ -153,7 +190,13 @@ namespace KryskataFund.Controllers
                     message.SenderName,
                     message.ReceiverName,
                     message.Content,
-                    SentAt = message.SentAt.ToString("MMM d, h:mm tt")
+                    message.SharedFundId,
+                    SentAt = message.SentAt.ToString("MMM d, h:mm tt"),
+                    sharedFundTitle,
+                    sharedFundImage,
+                    sharedFundProgress,
+                    sharedFundRaised,
+                    sharedFundGoal
                 }
             });
         }
