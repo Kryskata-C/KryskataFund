@@ -10,6 +10,7 @@
     var avgSupport = ViewBag.AvgSupport ?? 0m;
     var topCategory = ViewBag.TopCategory as string ?? "None";
     var followedFundIds = ViewBag.FollowedFundIds as List<int> ?? new List<int>();
+    var expiredFundIds = ViewBag.ExpiredFundIds as List<int> ?? new List<int>();
     var isSignedIn = Context.Session.GetString("IsSignedIn") == "true";
 
     // Define all possible categories
