@@ -4,6 +4,7 @@ using KryskataFund.Models;
 using KryskataFund.Data;
 using KryskataFund.Services.Interfaces;
 using Stripe;
+using System.Text;
 
 namespace KryskataFund.Controllers
 {
@@ -786,6 +787,244 @@ namespace KryskataFund.Controllers
                 daysLeft = fund.DaysLeft,
                 extensionDays = extensionDays
             });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddComment(int fundId, string content)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Please sign in" });
+            }
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return Json(new { success = false, message = "Comment cannot be empty" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var userName = "@" + userEmail.Split('@')[0];
+
+            var comment = new FundComment
+            {
+                FundId = fundId,
+                UserId = userId,
+                UserName = userName,
+                Content = content,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.FundComments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                comment = new
+                {
+                    id = comment.Id,
+                    userName = comment.UserName,
+                    content = comment.Content,
+                    createdAt = comment.CreatedAt.ToString("MMM d, yyyy h:mm tt")
+                }
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteComment(int commentId)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Please sign in" });
+            }
+
+            var comment = await _context.FundComments.FindAsync(commentId);
+            if (comment == null)
+            {
+                return Json(new { success = false, message = "Comment not found" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var fund = await _context.Funds.FindAsync(comment.FundId);
+
+            if (comment.UserId != userId && (fund == null || fund.CreatorId != userId))
+            {
+                return Json(new { success = false, message = "You can only delete your own comments" });
+            }
+
+            _context.FundComments.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public IActionResult GetComments(int fundId)
+        {
+            var comments = _context.FundComments
+                .Where(c => c.FundId == fundId)
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    userName = c.UserName,
+                    content = c.Content,
+                    userId = c.UserId,
+                    createdAt = c.CreatedAt.ToString("MMM d, yyyy h:mm tt")
+                })
+                .ToList();
+
+            return Json(comments);
+        }
+
+        [HttpGet]
+        public IActionResult GetRecentContacts()
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new List<object>());
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+
+            var recentContacts = _context.Messages
+                .Where(m => m.SenderId == userId || m.ReceiverId == userId)
+                .OrderByDescending(m => m.SentAt)
+                .Select(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
+                .Distinct()
+                .Take(5)
+                .ToList();
+
+            var contacts = _context.Users
+                .Where(u => recentContacts.Contains(u.Id))
+                .Select(u => new { id = u.Id, email = u.Email })
+                .ToList()
+                .OrderBy(u => recentContacts.IndexOf(u.id))
+                .ToList();
+
+            return Json(contacts);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportDonors(int id)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", "Account");
+            }
+
+            var fund = await _context.Funds.FindAsync(id);
+            if (fund == null)
+            {
+                return NotFound();
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            if (!IsCreatorOrCollaborator(fund.CreatorId, userId, id))
+            {
+                return Forbid();
+            }
+
+            var donations = _context.Donations
+                .Where(d => d.FundId == id)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("Donor Name,Amount,Date");
+
+            foreach (var donation in donations)
+            {
+                sb.AppendLine($"{donation.DonorName},{donation.Amount},{donation.CreatedAt:yyyy-MM-dd}");
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            return File(bytes, "text/csv", $"donors-{fund.Title.Replace(" ", "-")}.csv");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RefundDonation(int donationId)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return Json(new { success = false, message = "Please sign in" });
+            }
+
+            var donation = await _context.Donations.FindAsync(donationId);
+            if (donation == null)
+            {
+                return Json(new { success = false, message = "Donation not found" });
+            }
+
+            var fund = await _context.Funds.FindAsync(donation.FundId);
+            if (fund == null)
+            {
+                return Json(new { success = false, message = "Fund not found" });
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            if (fund.CreatorId != userId)
+            {
+                return Json(new { success = false, message = "Only the fund creator can refund donations" });
+            }
+
+            fund.RaisedAmount -= donation.Amount;
+            fund.SupportersCount = Math.Max(0, fund.SupportersCount - 1);
+
+            _context.Donations.Remove(donation);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Analytics(int id)
+        {
+            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            {
+                return RedirectToAction("SignIn", "Account");
+            }
+
+            var fund = await _context.Funds.FindAsync(id);
+            if (fund == null)
+            {
+                return NotFound();
+            }
+
+            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            if (!IsCreatorOrCollaborator(fund.CreatorId, userId, id))
+            {
+                return Forbid();
+            }
+
+            var donations = _context.Donations
+                .Where(d => d.FundId == id)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            var dailyTotals = donations
+                .GroupBy(d => d.CreatedAt.Date)
+                .OrderBy(g => g.Key)
+                .Select(g => new { date = g.Key.ToString("MMM d"), total = g.Sum(d => d.Amount) })
+                .ToList();
+
+            var topDonors = donations
+                .GroupBy(d => d.DonorName)
+                .Select(g => new { name = g.Key, total = g.Sum(d => d.Amount) })
+                .OrderByDescending(d => d.total)
+                .Take(10)
+                .ToList();
+
+            var uniqueDonors = donations.Select(d => d.UserId).Distinct().Count();
+
+            ViewBag.Fund = fund;
+            ViewBag.Donations = donations;
+            ViewBag.DailyTotals = dailyTotals;
+            ViewBag.TopDonors = topDonors;
+            ViewBag.UniqueDonors = uniqueDonors;
+
+            return View(fund);
         }
     }
 }
