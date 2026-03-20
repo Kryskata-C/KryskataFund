@@ -862,6 +862,8 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public IActionResult GetComments(int fundId)
         {
+            var currentUserId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+
             var comments = _context.FundComments
                 .Where(c => c.FundId == fundId)
                 .OrderByDescending(c => c.CreatedAt)
@@ -871,7 +873,8 @@ namespace KryskataFund.Controllers
                     userName = c.UserName,
                     content = c.Content,
                     userId = c.UserId,
-                    createdAt = c.CreatedAt.ToString("MMM d, yyyy h:mm tt")
+                    createdAt = c.CreatedAt.ToString("MMM d, yyyy h:mm tt"),
+                    isOwner = c.UserId == currentUserId
                 })
                 .ToList();
 
