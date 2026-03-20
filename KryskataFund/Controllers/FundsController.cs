@@ -1009,13 +1009,13 @@ namespace KryskataFund.Controllers
             var dailyTotals = donations
                 .GroupBy(d => d.CreatedAt.Date)
                 .OrderBy(g => g.Key)
-                .Select(g => new { date = g.Key.ToString("MMM d"), total = g.Sum(d => d.Amount) })
+                .Select(g => new { Date = g.Key.ToString("MMM d"), Amount = g.Sum(d => d.Amount) })
                 .ToList();
 
             var topDonors = donations
                 .GroupBy(d => d.DonorName)
-                .Select(g => new { name = g.Key, total = g.Sum(d => d.Amount) })
-                .OrderByDescending(d => d.total)
+                .Select(g => new { DonorName = g.Key, TotalAmount = g.Sum(d => d.Amount), DonationCount = g.Count() })
+                .OrderByDescending(d => d.TotalAmount)
                 .Take(10)
                 .ToList();
 
