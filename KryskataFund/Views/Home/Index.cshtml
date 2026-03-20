@@ -1914,6 +1914,10 @@
                                     <span class="fund-media-tag-dot" style="background: @fund.CategoryColor; box-shadow: 0 0 10px @(fund.CategoryColor)cc;"></span>
                                     @fund.Category
                                 </div>
+                                @if (expiredFundIds.Contains(fund.Id))
+                                {
+                                    <div class="fund-ended-badge">Ended</div>
+                                }
                                 @if (fund.IsVerified)
                                 {
                                     <div class="fund-verified-badge">
