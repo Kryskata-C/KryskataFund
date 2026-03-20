@@ -1246,6 +1246,112 @@
         });
     </script>
 
+    <script>
+        // Share modal functionality
+        function copyShareLink() {
+            var input = document.getElementById('shareLinkInput');
+            var btn = document.getElementById('shareCopyBtn');
+            navigator.clipboard.writeText(input.value).then(function() {
+                btn.textContent = 'Copied!';
+                btn.classList.add('copied');
+                setTimeout(function() {
+                    btn.textContent = 'Copy';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Load contacts when modal opens
+        (function() {
+            var shareBtn = document.getElementById('shareBtn');
+            var contactsLoaded = false;
+
+            if (shareBtn) {
+                shareBtn.addEventListener('click', function() {
+                    var contactsList = document.getElementById('shareContactsList');
+                    if (!contactsList || contactsLoaded) return;
+                    contactsLoaded = true;
+
+                    fetch('/Funds/GetRecentContacts')
+                        .then(function(r) { return r.json(); })
+                        .then(function(contacts) {
+                            if (!contacts || contacts.length === 0) {
+                                contactsList.innerHTML = '<div class="share-no-contacts">No recent contacts</div>';
+                                return;
+                            }
+                            contactsList.innerHTML = '';
+                            contacts.forEach(function(c) {
+                                var letter = (c.email || '?')[0];
+                                var row = document.createElement('div');
+                                row.className = 'share-contact-row';
+                                row.innerHTML =
+                                    '<div class="share-contact-avatar">' + letter + '</div>' +
+                                    '<div class="share-contact-info"><div class="share-contact-email">' + c.email + '</div></div>' +
+                                    '<button class="share-contact-send-btn" data-uid="' + c.id + '">Send</button>';
+                                contactsList.appendChild(row);
+                            });
+                        })
+                        .catch(function() {
+                            contactsList.innerHTML = '<div class="share-no-contacts">Could not load contacts</div>';
+                        });
+                });
+            }
+
+            // Handle send button clicks via delegation
+            document.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('share-contact-send-btn')) return;
+                if (e.target.classList.contains('sent')) return;
+
+                var btn = e.target;
+                var receiverId = btn.getAttribute('data-uid');
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+
+                var fundTitle = document.querySelector('.fund-detail-title')
+                    ? document.querySelector('.fund-detail-title').textContent.trim()
+                    : 'this campaign';
+
+                var formData = new FormData();
+                formData.append('receiverId', receiverId);
+                formData.append('content', 'Check out this campaign: ' + fundTitle);
+                formData.append('sharedFundId', '@Model.Id');
+
+                fetch('/Messages/Send', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')
+                            ? document.querySelector('input[name="__RequestVerificationToken"]').value
+                            : ''
+                    }
+                })
+                .then(function(r) {
+                    if (r.ok) {
+                        btn.textContent = '\u2713 Sent';
+                        btn.classList.add('sent');
+                    } else {
+                        btn.textContent = 'Failed';
+                        btn.disabled = false;
+                        setTimeout(function() { btn.textContent = 'Send'; }, 2000);
+                    }
+                })
+                .catch(function() {
+                    btn.textContent = 'Failed';
+                    btn.disabled = false;
+                    setTimeout(function() { btn.textContent = 'Send'; }, 2000);
+                });
+            });
+
+            // Close modal on Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    var modal = document.getElementById('shareModal');
+                    if (modal) modal.style.display = 'none';
+                }
+            });
+        })();
+    </script>
+
     <style>
         .supporters-expand-section {
             display: flex;
