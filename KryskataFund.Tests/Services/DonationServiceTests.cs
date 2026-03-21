@@ -146,101 +146,101 @@ namespace KryskataFund.Tests.Services
             context.Donations.Count().Should().Be(1);
         }
 
-        // --- GetByFundId ---
+        // --- GetByFundIdAsync ---
 
         [Fact]
-        public void GetByFundId_FundWithDonations_ReturnsDonations()
+        public async Task GetByFundId_FundWithDonations_ReturnsDonations()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByFundId(1).ToList();
+            var result = (await service.GetByFundIdAsync(1)).ToList();
 
             result.Should().HaveCount(2);
             result.Should().AllSatisfy(d => d.FundId.Should().Be(1));
         }
 
         [Fact]
-        public void GetByFundId_FundWithNoDonations_ReturnsEmpty()
+        public async Task GetByFundId_FundWithNoDonations_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByFundId(2).ToList();
+            var result = (await service.GetByFundIdAsync(2)).ToList();
 
             result.Should().BeEmpty();
         }
 
         [Fact]
-        public void GetByFundId_NonExistingFund_ReturnsEmpty()
+        public async Task GetByFundId_NonExistingFund_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByFundId(999).ToList();
+            var result = (await service.GetByFundIdAsync(999)).ToList();
 
             result.Should().BeEmpty();
         }
 
-        // --- GetByUserId ---
+        // --- GetByUserIdAsync ---
 
         [Fact]
-        public void GetByUserId_UserWithDonations_ReturnsDonations()
+        public async Task GetByUserId_UserWithDonations_ReturnsDonations()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByUserId(2).ToList();
+            var result = (await service.GetByUserIdAsync(2)).ToList();
 
             result.Should().HaveCount(2);
             result.Should().AllSatisfy(d => d.UserId.Should().Be(2));
         }
 
         [Fact]
-        public void GetByUserId_UserWithNoDonations_ReturnsEmpty()
+        public async Task GetByUserId_UserWithNoDonations_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByUserId(1).ToList();
+            var result = (await service.GetByUserIdAsync(1)).ToList();
 
             result.Should().BeEmpty();
         }
 
         [Fact]
-        public void GetByUserId_NonExistingUser_ReturnsEmpty()
+        public async Task GetByUserId_NonExistingUser_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByUserId(999).ToList();
+            var result = (await service.GetByUserIdAsync(999)).ToList();
 
             result.Should().BeEmpty();
         }
 
-        // --- GetTotalDonated ---
+        // --- GetTotalDonatedAsync ---
 
         [Fact]
-        public void GetTotalDonated_UserWithDonations_ReturnsSum()
+        public async Task GetTotalDonated_UserWithDonations_ReturnsSum()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTotalDonated(2);
+            var result = await service.GetTotalDonatedAsync(2);
 
             // Donation 1: 100, Donation 2: 50 => Total: 150
             result.Should().Be(150);
         }
 
         [Fact]
-        public void GetTotalDonated_UserWithNoDonations_ReturnsZero()
+        public async Task GetTotalDonated_UserWithNoDonations_ReturnsZero()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTotalDonated(1);
+            var result = await service.GetTotalDonatedAsync(1);
 
             result.Should().Be(0);
         }
 
         [Fact]
-        public void GetTotalDonated_NonExistingUser_ReturnsZero()
+        public async Task GetTotalDonated_NonExistingUser_ReturnsZero()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTotalDonated(999);
+            var result = await service.GetTotalDonatedAsync(999);
 
             result.Should().Be(0);
         }

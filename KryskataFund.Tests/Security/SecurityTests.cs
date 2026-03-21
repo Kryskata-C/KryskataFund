@@ -641,8 +641,9 @@ namespace KryskataFund.Tests.Security
 
             // Assert
             result.Should().NotBeNull();
-            ((string)result!.ViewData["Query"]!).Should().Be(xssPayload,
-                "ViewBag.Query stores the raw value; Razor auto-encodes on render");
+            var storedQuery = (string)result!.ViewData["Query"]!;
+            storedQuery.Should().Be(System.Net.WebUtility.HtmlEncode(xssPayload),
+                "ViewBag.Query should be HTML-encoded to prevent reflected XSS");
             var results = result.ViewData["Results"] as List<Fund>;
             results.Should().NotBeNull();
         }
@@ -1285,9 +1286,10 @@ namespace KryskataFund.Tests.Security
         #region Boundary Values - Admin Fund Manipulation
 
         [Fact]
-        public void AdminAddFunds_NegativeAmount_ReducesFundBalance()
+        public void AdminAddFunds_NegativeAmount_IsRejected()
         {
             // Attack vector: Admin using negative amount to reduce fund balance
+            // Fix: Controller now validates amount > 0
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
             var controller = CreateAdminController(context, userId: 3, isAdmin: true);
@@ -1297,9 +1299,9 @@ namespace KryskataFund.Tests.Security
             // Act
             var result = controller.AddFundsToFund(1, -999999m);
 
-            // Assert - documents that negative amounts are accepted (potential issue)
+            // Assert - negative amounts are now rejected, fund balance unchanged
             var fund = context.Funds.First(f => f.Id == 1);
-            fund.RaisedAmount.Should().Be(originalAmount - 999999m);
+            fund.RaisedAmount.Should().Be(originalAmount);
         }
 
         #endregion

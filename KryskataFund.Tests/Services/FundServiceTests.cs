@@ -23,14 +23,14 @@ namespace KryskataFund.Tests.Services
             return (service, context);
         }
 
-        // --- GetById ---
+        // --- GetByIdAsync ---
 
         [Fact]
-        public void GetById_ExistingId_ReturnsFund()
+        public async Task GetById_ExistingId_ReturnsFund()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetById(1);
+            var result = await service.GetByIdAsync(1);
 
             result.Should().NotBeNull();
             result!.Title.Should().Be("Test Fund 1");
@@ -38,141 +38,141 @@ namespace KryskataFund.Tests.Services
         }
 
         [Fact]
-        public void GetById_NonExistingId_ReturnsNull()
+        public async Task GetById_NonExistingId_ReturnsNull()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetById(999);
+            var result = await service.GetByIdAsync(999);
 
             result.Should().BeNull();
         }
 
         [Fact]
-        public void GetById_EmptyDatabase_ReturnsNull()
+        public async Task GetById_EmptyDatabase_ReturnsNull()
         {
             var (service, _) = CreateService();
 
-            var result = service.GetById(1);
+            var result = await service.GetByIdAsync(1);
 
             result.Should().BeNull();
         }
 
-        // --- GetAll ---
+        // --- GetAllAsync ---
 
         [Fact]
-        public void GetAll_WithSeededData_ReturnsAllFunds()
+        public async Task GetAll_WithSeededData_ReturnsAllFunds()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetAll().ToList();
+            var result = (await service.GetAllAsync()).ToList();
 
             result.Should().HaveCount(3);
         }
 
         [Fact]
-        public void GetAll_EmptyDatabase_ReturnsEmptyCollection()
+        public async Task GetAll_EmptyDatabase_ReturnsEmptyCollection()
         {
             var (service, _) = CreateService();
 
-            var result = service.GetAll().ToList();
+            var result = (await service.GetAllAsync()).ToList();
 
             result.Should().BeEmpty();
         }
 
-        // --- GetByCategory ---
+        // --- GetByCategoryAsync ---
 
         [Fact]
-        public void GetByCategory_ExistingCategory_ReturnsMatchingFunds()
+        public async Task GetByCategory_ExistingCategory_ReturnsMatchingFunds()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByCategory("Education").ToList();
+            var result = (await service.GetByCategoryAsync("Education")).ToList();
 
             result.Should().HaveCount(1);
             result.First().Title.Should().Be("Test Fund 1");
         }
 
         [Fact]
-        public void GetByCategory_CaseInsensitive_ReturnsMatchingFunds()
+        public async Task GetByCategory_CaseInsensitive_ReturnsMatchingFunds()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByCategory("education").ToList();
+            var result = (await service.GetByCategoryAsync("education")).ToList();
 
             result.Should().HaveCount(1);
         }
 
         [Fact]
-        public void GetByCategory_NonExistingCategory_ReturnsEmpty()
+        public async Task GetByCategory_NonExistingCategory_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByCategory("Technology").ToList();
+            var result = (await service.GetByCategoryAsync("Technology")).ToList();
 
             result.Should().BeEmpty();
         }
 
         [Fact]
-        public void GetByCategory_HealthCategory_ReturnsSingleFund()
+        public async Task GetByCategory_HealthCategory_ReturnsSingleFund()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetByCategory("Health").ToList();
+            var result = (await service.GetByCategoryAsync("Health")).ToList();
 
             result.Should().HaveCount(1);
             result.First().GoalAmount.Should().Be(5000);
         }
 
-        // --- Search ---
+        // --- SearchAsync ---
 
         [Fact]
-        public void Search_ByTitle_ReturnsMatchingFunds()
+        public async Task Search_ByTitle_ReturnsMatchingFunds()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.Search("Test Fund 1").ToList();
+            var result = (await service.SearchAsync("Test Fund 1")).ToList();
 
             result.Should().HaveCount(1);
             result.First().Id.Should().Be(1);
         }
 
         [Fact]
-        public void Search_ByDescription_ReturnsMatchingFunds()
+        public async Task Search_ByDescription_ReturnsMatchingFunds()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.Search("has ended").ToList();
+            var result = (await service.SearchAsync("has ended")).ToList();
 
             result.Should().HaveCount(1);
             result.First().Id.Should().Be(3);
         }
 
         [Fact]
-        public void Search_PartialMatch_ReturnsAllMatching()
+        public async Task Search_PartialMatch_ReturnsAllMatching()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.Search("Test").ToList();
+            var result = (await service.SearchAsync("Test")).ToList();
 
             result.Should().HaveCountGreaterThanOrEqualTo(2); // Funds with "Test" in title/description
         }
 
         [Fact]
-        public void Search_NoMatch_ReturnsEmpty()
+        public async Task Search_NoMatch_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.Search("xyz_nonexistent").ToList();
+            var result = (await service.SearchAsync("xyz_nonexistent")).ToList();
 
             result.Should().BeEmpty();
         }
 
         [Fact]
-        public void Search_CaseInsensitive_ReturnsResults()
+        public async Task Search_CaseInsensitive_ReturnsResults()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.Search("test fund").ToList();
+            var result = (await service.SearchAsync("test fund")).ToList();
 
             result.Should().HaveCountGreaterThan(0);
         }
@@ -229,13 +229,13 @@ namespace KryskataFund.Tests.Services
         public async Task UpdateAsync_ExistingFund_UpdatesValues()
         {
             var (service, context) = CreateServiceWithSeededData();
-            var fund = service.GetById(1)!;
+            var fund = (await service.GetByIdAsync(1))!;
             fund.Title = "Updated Title";
             fund.GoalAmount = 9999;
 
             await service.UpdateAsync(fund);
 
-            var updated = service.GetById(1);
+            var updated = await service.GetByIdAsync(1);
             updated!.Title.Should().Be("Updated Title");
             updated.GoalAmount.Should().Be(9999);
         }
@@ -244,12 +244,12 @@ namespace KryskataFund.Tests.Services
         public async Task UpdateAsync_ChangeCategory_Persists()
         {
             var (service, _) = CreateServiceWithSeededData();
-            var fund = service.GetById(2)!;
+            var fund = (await service.GetByIdAsync(2))!;
             fund.Category = "Sports";
 
             await service.UpdateAsync(fund);
 
-            var updated = service.GetById(2);
+            var updated = await service.GetByIdAsync(2);
             updated!.Category.Should().Be("Sports");
         }
 
@@ -263,7 +263,7 @@ namespace KryskataFund.Tests.Services
             await service.DeleteAsync(1);
 
             context.Funds.Should().HaveCount(2);
-            service.GetById(1).Should().BeNull();
+            (await service.GetByIdAsync(1)).Should().BeNull();
         }
 
         [Fact]
@@ -277,70 +277,70 @@ namespace KryskataFund.Tests.Services
             context.Funds.Should().HaveCount(3);
         }
 
-        // --- GetTotalRaised ---
+        // --- GetTotalRaisedAsync ---
 
         [Fact]
-        public void GetTotalRaised_WithSeededData_ReturnsSumOfRaisedAmounts()
+        public async Task GetTotalRaised_WithSeededData_ReturnsSumOfRaisedAmounts()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTotalRaised();
+            var result = await service.GetTotalRaisedAsync();
 
             // Fund 1: 500, Fund 2: 0, Fund 3: 1500 => Total: 2000
             result.Should().Be(2000);
         }
 
         [Fact]
-        public void GetTotalRaised_EmptyDatabase_ReturnsZero()
+        public async Task GetTotalRaised_EmptyDatabase_ReturnsZero()
         {
             var (service, _) = CreateService();
 
-            var result = service.GetTotalRaised();
+            var result = await service.GetTotalRaisedAsync();
 
             result.Should().Be(0);
         }
 
-        // --- GetActiveCampaignCount ---
+        // --- GetActiveCampaignCountAsync ---
 
         [Fact]
-        public void GetActiveCampaignCount_WithSeededData_ReturnsCountOfActiveFunds()
+        public async Task GetActiveCampaignCount_WithSeededData_ReturnsCountOfActiveFunds()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetActiveCampaignCount();
+            var result = await service.GetActiveCampaignCountAsync();
 
             // Fund 1: +30 days, Fund 2: +60 days, Fund 3: -1 day (ended)
             result.Should().Be(2);
         }
 
         [Fact]
-        public void GetActiveCampaignCount_EmptyDatabase_ReturnsZero()
+        public async Task GetActiveCampaignCount_EmptyDatabase_ReturnsZero()
         {
             var (service, _) = CreateService();
 
-            var result = service.GetActiveCampaignCount();
+            var result = await service.GetActiveCampaignCountAsync();
 
             result.Should().Be(0);
         }
 
-        // --- GetTopFunded ---
+        // --- GetTopFundedAsync ---
 
         [Fact]
-        public void GetTopFunded_ReturnsRequestedCount()
+        public async Task GetTopFunded_ReturnsRequestedCount()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTopFunded(2).ToList();
+            var result = (await service.GetTopFundedAsync(2)).ToList();
 
             result.Should().HaveCount(2);
         }
 
         [Fact]
-        public void GetTopFunded_OrderedByRaisedAmountDescending()
+        public async Task GetTopFunded_OrderedByRaisedAmountDescending()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTopFunded(3).ToList();
+            var result = (await service.GetTopFundedAsync(3)).ToList();
 
             result[0].RaisedAmount.Should().Be(1500); // Fund 3
             result[1].RaisedAmount.Should().Be(500);  // Fund 1
@@ -348,31 +348,31 @@ namespace KryskataFund.Tests.Services
         }
 
         [Fact]
-        public void GetTopFunded_RequestMoreThanExist_ReturnsAll()
+        public async Task GetTopFunded_RequestMoreThanExist_ReturnsAll()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTopFunded(10).ToList();
+            var result = (await service.GetTopFundedAsync(10)).ToList();
 
             result.Should().HaveCount(3);
         }
 
         [Fact]
-        public void GetTopFunded_EmptyDatabase_ReturnsEmpty()
+        public async Task GetTopFunded_EmptyDatabase_ReturnsEmpty()
         {
             var (service, _) = CreateService();
 
-            var result = service.GetTopFunded(5).ToList();
+            var result = (await service.GetTopFundedAsync(5)).ToList();
 
             result.Should().BeEmpty();
         }
 
         [Fact]
-        public void GetTopFunded_ZeroCount_ReturnsEmpty()
+        public async Task GetTopFunded_ZeroCount_ReturnsEmpty()
         {
             var (service, _) = CreateServiceWithSeededData();
 
-            var result = service.GetTopFunded(0).ToList();
+            var result = (await service.GetTopFundedAsync(0)).ToList();
 
             result.Should().BeEmpty();
         }

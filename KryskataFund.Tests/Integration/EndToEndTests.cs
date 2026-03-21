@@ -27,7 +27,7 @@ namespace KryskataFund.Tests.Integration
             var creator = await userService.CreateAsync(new User
             {
                 Email = "creator@flow.com",
-                PasswordHash = userService.HashPassword("Pass123")
+                PasswordHash = TestHelper.HashPassword("Pass123")
             });
             creator.Id.Should().BeGreaterThan(0);
 
@@ -48,7 +48,7 @@ namespace KryskataFund.Tests.Integration
             var donor = await userService.CreateAsync(new User
             {
                 Email = "donor@flow.com",
-                PasswordHash = userService.HashPassword("Pass456")
+                PasswordHash = TestHelper.HashPassword("Pass456")
             });
 
             // Step 4: Donor makes a donation
@@ -66,11 +66,11 @@ namespace KryskataFund.Tests.Integration
             await fundService.UpdateAsync(fund);
 
             // Verify
-            var updatedFund = fundService.GetById(fund.Id);
+            var updatedFund = await fundService.GetByIdAsync(fund.Id);
             updatedFund!.RaisedAmount.Should().Be(200);
             updatedFund.SupportersCount.Should().Be(1);
 
-            var donorDonations = donationService.GetByUserId(donor.Id).ToList();
+            var donorDonations = (await donationService.GetByUserIdAsync(donor.Id)).ToList();
             donorDonations.Should().HaveCount(1);
             donorDonations.First().Amount.Should().Be(200);
         }
@@ -86,7 +86,7 @@ namespace KryskataFund.Tests.Integration
             var creator = await userService.CreateAsync(new User
             {
                 Email = "owner@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             var fund = await fundService.CreateAsync(new Fund
@@ -106,7 +106,7 @@ namespace KryskataFund.Tests.Integration
                 var donor = await userService.CreateAsync(new User
                 {
                     Email = $"donor{i}@test.com",
-                    PasswordHash = userService.HashPassword($"Pass{i}")
+                    PasswordHash = TestHelper.HashPassword($"Pass{i}")
                 });
 
                 await donationService.CreateAsync(new Donation
@@ -123,7 +123,7 @@ namespace KryskataFund.Tests.Integration
 
             await fundService.UpdateAsync(fund);
 
-            var updatedFund = fundService.GetById(fund.Id);
+            var updatedFund = await fundService.GetByIdAsync(fund.Id);
             updatedFund!.RaisedAmount.Should().Be(600); // 100 + 200 + 300
             updatedFund.SupportersCount.Should().Be(3);
         }
@@ -141,7 +141,7 @@ namespace KryskataFund.Tests.Integration
             var creator = await userService.CreateAsync(new User
             {
                 Email = "milestone_creator@test.com",
-                PasswordHash = userService.HashPassword("Pass123")
+                PasswordHash = TestHelper.HashPassword("Pass123")
             });
 
             var fund = await fundService.CreateAsync(new Fund
@@ -170,7 +170,7 @@ namespace KryskataFund.Tests.Integration
             var donor = await userService.CreateAsync(new User
             {
                 Email = "big_donor@test.com",
-                PasswordHash = userService.HashPassword("Pass456")
+                PasswordHash = TestHelper.HashPassword("Pass456")
             });
 
             await donationService.CreateAsync(new Donation
@@ -208,7 +208,7 @@ namespace KryskataFund.Tests.Integration
             var creator = await userService.CreateAsync(new User
             {
                 Email = "multi_mile@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             var fund = await fundService.CreateAsync(new Fund
@@ -262,7 +262,7 @@ namespace KryskataFund.Tests.Integration
             var user = await userService.CreateAsync(new User
             {
                 Email = "doomed@test.com",
-                PasswordHash = userService.HashPassword("Pass123")
+                PasswordHash = TestHelper.HashPassword("Pass123")
             });
 
             var fund = await fundService.CreateAsync(new Fund
@@ -285,17 +285,17 @@ namespace KryskataFund.Tests.Integration
             });
 
             // Verify data exists
-            fundService.GetAll().Should().HaveCount(1);
-            donationService.GetByUserId(user.Id).Should().HaveCount(1);
+            (await fundService.GetAllAsync()).Should().HaveCount(1);
+            (await donationService.GetByUserIdAsync(user.Id)).Should().HaveCount(1);
 
             // Admin deletes user's donations and funds, then user
-            var userDonations = donationService.GetByUserId(user.Id).ToList();
+            var userDonations = (await donationService.GetByUserIdAsync(user.Id)).ToList();
             foreach (var d in userDonations)
             {
                 await donationService.DeleteAsync(d.Id);
             }
 
-            var userFunds = fundService.GetAll().Where(f => f.CreatorId == user.Id).ToList();
+            var userFunds = (await fundService.GetAllAsync()).Where(f => f.CreatorId == user.Id).ToList();
             foreach (var f in userFunds)
             {
                 await fundService.DeleteAsync(f.Id);
@@ -304,9 +304,9 @@ namespace KryskataFund.Tests.Integration
             await userService.DeleteAsync(user.Id);
 
             // Verify everything is cleaned up
-            userService.GetById(user.Id).Should().BeNull();
-            fundService.GetAll().Should().BeEmpty();
-            donationService.GetByUserId(user.Id).Should().BeEmpty();
+            (await userService.GetByIdAsync(user.Id)).Should().BeNull();
+            (await fundService.GetAllAsync()).Should().BeEmpty();
+            (await donationService.GetByUserIdAsync(user.Id)).Should().BeEmpty();
         }
 
         [Fact]
@@ -318,19 +318,19 @@ namespace KryskataFund.Tests.Integration
             var user1 = await userService.CreateAsync(new User
             {
                 Email = "keep@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             var user2 = await userService.CreateAsync(new User
             {
                 Email = "delete@test.com",
-                PasswordHash = userService.HashPassword("Pass2")
+                PasswordHash = TestHelper.HashPassword("Pass2")
             });
 
             await userService.DeleteAsync(user2.Id);
 
-            userService.GetById(user1.Id).Should().NotBeNull();
-            userService.GetById(user2.Id).Should().BeNull();
+            (await userService.GetByIdAsync(user1.Id)).Should().NotBeNull();
+            (await userService.GetByIdAsync(user2.Id)).Should().BeNull();
         }
 
         // --- Workflow 4: User follows fund -> unfollows ---
@@ -345,7 +345,7 @@ namespace KryskataFund.Tests.Integration
             var user = await userService.CreateAsync(new User
             {
                 Email = "follower@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             var fund = await fundService.CreateAsync(new Fund
@@ -404,7 +404,7 @@ namespace KryskataFund.Tests.Integration
                 var follower = await userService.CreateAsync(new User
                 {
                     Email = $"follower{i}@test.com",
-                    PasswordHash = userService.HashPassword($"Pass{i}")
+                    PasswordHash = TestHelper.HashPassword($"Pass{i}")
                 });
 
                 context.UserFollows.Add(new UserFollow
@@ -429,7 +429,7 @@ namespace KryskataFund.Tests.Integration
             var user = await userService.CreateAsync(new User
             {
                 Email = "multifollower@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             for (int i = 0; i < 3; i++)
@@ -469,7 +469,7 @@ namespace KryskataFund.Tests.Integration
             var user = await userService.CreateAsync(new User
             {
                 Email = "recurring@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             var fund = await fundService.CreateAsync(new Fund
@@ -520,7 +520,7 @@ namespace KryskataFund.Tests.Integration
             var user = await userService.CreateAsync(new User
             {
                 Email = "multirecur@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
             var fund1 = await fundService.CreateAsync(new Fund
@@ -583,7 +583,7 @@ namespace KryskataFund.Tests.Integration
                 EndDate = DateTime.UtcNow.AddDays(30)
             });
 
-            var results = fundService.Search("Butterfly").ToList();
+            var results = (await fundService.SearchAsync("Butterfly")).ToList();
 
             results.Should().HaveCount(1);
             results.First().Title.Should().Contain("Butterfly");
@@ -607,12 +607,12 @@ namespace KryskataFund.Tests.Integration
                 EndDate = DateTime.UtcNow.AddDays(30)
             });
 
-            fundService.GetTotalRaised().Should().Be(0);
+            (await fundService.GetTotalRaisedAsync()).Should().Be(0);
 
             fund.RaisedAmount = 1500;
             await fundService.UpdateAsync(fund);
 
-            fundService.GetTotalRaised().Should().Be(1500);
+            (await fundService.GetTotalRaisedAsync()).Should().Be(1500);
         }
 
         [Fact]
@@ -635,7 +635,7 @@ namespace KryskataFund.Tests.Integration
                 EndDate = DateTime.UtcNow.AddDays(-5)
             });
 
-            fundService.GetActiveCampaignCount().Should().Be(1);
+            (await fundService.GetActiveCampaignCountAsync()).Should().Be(1);
         }
 
         [Fact]
@@ -657,11 +657,11 @@ namespace KryskataFund.Tests.Integration
                 FundId = fund.Id, UserId = 1, DonorName = "@user", Amount = 100
             });
 
-            donationService.GetByFundId(fund.Id).Should().HaveCount(1);
+            (await donationService.GetByFundIdAsync(fund.Id)).Should().HaveCount(1);
 
             await fundService.DeleteAsync(fund.Id);
 
-            fundService.GetById(fund.Id).Should().BeNull();
+            (await fundService.GetByIdAsync(fund.Id)).Should().BeNull();
         }
 
         [Fact]
@@ -684,14 +684,14 @@ namespace KryskataFund.Tests.Integration
                 CreatorName = "@test", EndDate = DateTime.UtcNow.AddDays(30)
             });
 
-            var top = fundService.GetTopFunded(1).First();
+            var top = (await fundService.GetTopFundedAsync(1)).First();
             top.Title.Should().Be("Fund A");
 
             // Fund B gets a big donation
             fundB.RaisedAmount = 500;
             await fundService.UpdateAsync(fundB);
 
-            top = fundService.GetTopFunded(1).First();
+            top = (await fundService.GetTopFundedAsync(1)).First();
             top.Title.Should().Be("Fund B");
         }
 
@@ -704,11 +704,11 @@ namespace KryskataFund.Tests.Integration
             await userService.CreateAsync(new User
             {
                 Email = "unique@test.com",
-                PasswordHash = userService.HashPassword("Pass1")
+                PasswordHash = TestHelper.HashPassword("Pass1")
             });
 
-            userService.EmailExists("unique@test.com").Should().BeTrue();
-            userService.EmailExists("other@test.com").Should().BeFalse();
+            (await userService.EmailExistsAsync("unique@test.com")).Should().BeTrue();
+            (await userService.EmailExistsAsync("other@test.com")).Should().BeFalse();
         }
     }
 }
