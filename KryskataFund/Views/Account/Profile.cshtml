@@ -1,3 +1,4 @@
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "My Profile";
     var user = ViewBag.User as KryskataFund.Models.User;
@@ -512,7 +513,7 @@
                 try {
                     const response = await fetch('/Account/SaveBuddyCustomization', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                         body: `glasses=${encodeURIComponent(currentGlasses)}&hat=${encodeURIComponent(currentHat)}&mask=${encodeURIComponent(currentMask)}`
                     });
 
