@@ -1,6 +1,7 @@
 using FluentAssertions;
 using KryskataFund.Controllers;
 using KryskataFund.Models;
+using KryskataFund.ViewModels;
 using KryskataFund.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -28,8 +29,8 @@ namespace KryskataFund.Tests.Controllers
             var result = controller.Index();
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var funds = viewResult.Model.Should().BeAssignableTo<List<Fund>>().Subject;
-            funds.Should().HaveCount(3);
+            var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+            model.Funds.Should().HaveCount(3);
         }
 
         [Fact]
@@ -40,9 +41,9 @@ namespace KryskataFund.Tests.Controllers
             var result = controller.Index("Education");
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var funds = viewResult.Model.Should().BeAssignableTo<List<Fund>>().Subject;
-            funds.Should().HaveCount(1);
-            funds[0].Category.Should().Be("Education");
+            var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+            model.Funds.Should().HaveCount(1);
+            model.Funds[0].Category.Should().Be("Education");
         }
 
         [Fact]
@@ -53,8 +54,8 @@ namespace KryskataFund.Tests.Controllers
             var result = controller.Index(null);
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var funds = viewResult.Model.Should().BeAssignableTo<List<Fund>>().Subject;
-            funds.Should().HaveCount(3);
+            var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+            model.Funds.Should().HaveCount(3);
         }
 
         [Fact]
@@ -65,8 +66,8 @@ namespace KryskataFund.Tests.Controllers
             var result = controller.Index("NonExistent");
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var funds = viewResult.Model.Should().BeAssignableTo<List<Fund>>().Subject;
-            funds.Should().BeEmpty();
+            var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+            model.Funds.Should().BeEmpty();
         }
 
         [Fact]
@@ -77,10 +78,10 @@ namespace KryskataFund.Tests.Controllers
             var result = controller.Index();
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
-            var categoryCounts = (Dictionary<string, int>)controller.ViewBag.CategoryCounts;
-            categoryCounts.Should().ContainKey("Education");
-            categoryCounts.Should().ContainKey("Health");
-            categoryCounts.Should().ContainKey("Animals");
+            var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+            model.CategoryCounts.Should().ContainKey("Education");
+            model.CategoryCounts.Should().ContainKey("Health");
+            model.CategoryCounts.Should().ContainKey("Animals");
         }
 
         [Fact]
@@ -96,10 +97,11 @@ namespace KryskataFund.Tests.Controllers
             var controller = new HomeController(logger.Object, context);
             TestHelper.SetupSession(controller, userId: 2, email: "donor@test.com");
 
-            controller.Index();
+            var result = controller.Index();
 
-            var followedIds = (List<int>)controller.ViewBag.FollowedFundIds;
-            followedIds.Should().Contain(1);
+            var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+            var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+            model.FollowedFundIds.Should().Contain(1);
         }
 
         [Fact]
