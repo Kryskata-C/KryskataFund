@@ -1,3 +1,4 @@
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "Conversation";
     var messages = ViewBag.Messages as List<KryskataFund.Models.Message> ?? new List<KryskataFund.Models.Message>();
@@ -565,7 +566,7 @@
 
         fetch('/Messages/Send', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
             body: bodyParts
         })
         .then(function(r) { return r.json(); })
@@ -627,7 +628,7 @@
         if (!confirm('Delete this message?')) return;
         fetch('/Messages/Delete', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
             body: 'id=' + id
         })
         .then(function(r) { return r.json(); })

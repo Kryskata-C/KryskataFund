@@ -1,4 +1,5 @@
 @model KryskataFund.Models.Fund
+@Html.AntiForgeryToken()
 @functions {
     string GetTimeAgo(DateTime dateTime)
     {
@@ -791,7 +792,7 @@
                     try {
                         const response = await fetch('/Funds/PostUpdate', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: `fundId=${fundId}&title=${encodeURIComponent(title)}&content=${encodeURIComponent(content)}`
                         });
 
@@ -885,7 +886,7 @@
                     try {
                         const response = await fetch('/Funds/AddMilestone', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: `fundId=${fundId}&title=${encodeURIComponent(mTitle)}&targetAmount=${encodeURIComponent(mAmount)}&description=${encodeURIComponent(mDesc)}`
                         });
 
@@ -953,7 +954,7 @@
                     try {
                         const response = await fetch('/Funds/DeleteMilestone', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: `milestoneId=${msId}`
                         });
 
@@ -1045,7 +1046,7 @@
                     try {
                         var response = await fetch('/Funds/RequestExtension', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: 'fundId=' + fundId + '&extensionDays=' + days + '&reason=' + encodeURIComponent(reason)
                         });
 
@@ -1152,7 +1153,7 @@
                         if (!confirm('Delete this comment?')) return;
                         fetch('/Funds/DeleteComment', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: 'commentId=' + id
                         })
                         .then(r => r.json())
@@ -1179,7 +1180,7 @@
                     submitCommentBtn.textContent = 'Posting...';
                     fetch('/Funds/AddComment', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                         body: 'fundId=' + fundId + '&content=' + encodeURIComponent(content)
                     })
                     .then(r => r.json())
@@ -1209,7 +1210,7 @@
                 try {
                     const response = await fetch('/Funds/RefundDonation', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                         body: `donationId=${donationId}`
                     });
                     const data = await response.json();
@@ -1505,7 +1506,7 @@
                     try {
                         const response = await fetch('/Funds/AddCollaborator', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: `fundId=${fundId}&email=${encodeURIComponent(email)}`
                         });
 
@@ -1574,7 +1575,7 @@
                     try {
                         const response = await fetch('/Funds/RemoveCollaborator', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                             body: `collaboratorId=${collabId}`
                         });
 

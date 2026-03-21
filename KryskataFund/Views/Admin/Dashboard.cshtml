@@ -1,3 +1,4 @@
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "Admin Dashboard";
     var allUsers = ViewBag.AllUsers as List<KryskataFund.Models.User>;
@@ -405,7 +406,7 @@
 
             const response = await fetch('/Admin/DeleteUser', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}`
             });
             const data = await response.json();
@@ -421,7 +422,7 @@
         async function toggleAdmin(id) {
             const response = await fetch('/Admin/ToggleAdmin', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}`
             });
             const data = await response.json();
@@ -453,7 +454,7 @@
 
             const response = await fetch('/Admin/EditFund', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}&title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}&goalAmount=${goalAmount}`
             });
             const data = await response.json();
@@ -484,7 +485,7 @@
 
             const response = await fetch('/Admin/AddFundsToFund', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}&amount=${amount}`
             });
             const data = await response.json();
@@ -503,7 +504,7 @@
 
             const response = await fetch('/Admin/DeleteFund', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}`
             });
             const data = await response.json();
@@ -519,7 +520,7 @@
         async function toggleVerified(id) {
             const response = await fetch('/Admin/ToggleVerified', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}`
             });
             const data = await response.json();
@@ -557,7 +558,7 @@
 
             const response = await fetch('/Funds/RefundDonation', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `donationId=${id}`
             });
             const data = await response.json();
@@ -581,7 +582,7 @@
 
             const response = await fetch('/Admin/DeleteDonation', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: `id=${id}`
             });
             const data = await response.json();

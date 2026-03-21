@@ -1,3 +1,4 @@
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "My Donations";
     var myDonations = ViewBag.MyDonations as List<KryskataFund.Models.Donation>;
@@ -124,7 +125,7 @@
         try {
             const response = await fetch('/Account/CancelRecurringDonation', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: 'id=' + id
             });
 

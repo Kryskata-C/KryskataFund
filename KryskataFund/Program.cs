@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
 using KryskataFund.Services;
@@ -7,7 +8,10 @@ using Stripe;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
 
 // Add database context
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
