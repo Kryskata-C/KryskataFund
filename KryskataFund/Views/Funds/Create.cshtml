@@ -79,7 +79,7 @@
                     </div>
                 }
 
-                <form method="post" asp-controller="Funds" asp-action="Create" enctype="multipart/form-data">
+                <form method="post" asp-controller="Funds" asp-action="Create" enctype="multipart/form-data" aria-label="Create a fund">
                     <div class="form-grid">
                         <div class="form-field form-field--full">
                             <label class="form-label" for="Title">
@@ -149,8 +149,8 @@
                                 </div>
 
                                 <div style="flex: 1;">
-                                    <div id="dropZone" class="drop-zone" style="border: 2px dashed rgba(70, 230, 164, 0.3); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: rgba(70, 230, 164, 0.05);">
-                                        <input type="file" id="ImageFile" name="ImageFile" accept="image/*" style="display: none;" />
+                                    <div id="dropZone" class="drop-zone" role="button" tabindex="0" aria-label="Drop image here or click to upload" style="border: 2px dashed rgba(70, 230, 164, 0.3); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: rgba(70, 230, 164, 0.05);">
+                                        <input type="file" id="ImageFile" name="ImageFile" accept="image/*" aria-label="Upload cover image" style="display: none;" />
                                         <div id="dropZoneContent">
                                             <div style="font-size: 24px; margin-bottom: 8px;">📁</div>
                                             <div style="color: var(--text-muted); font-size: 13px;">Drop image here or click to upload</div>
