@@ -48,11 +48,5 @@ namespace KryskataFund.Services.Interfaces
         /// <returns>True if the email is already registered; otherwise false.</returns>
         bool EmailExists(string email);
 
-        /// <summary>
-        /// Hashes a plain-text password using SHA256.
-        /// </summary>
-        /// <param name="password">The plain-text password.</param>
-        /// <returns>The hashed password as a hexadecimal string.</returns>
-        string HashPassword(string password);
     }
 }
