@@ -1,4 +1,5 @@
 using KryskataFund.Models;
+using KryskataFund.Constants;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -6,17 +7,6 @@ namespace KryskataFund.Data
 {
     public static class DbSeeder
     {
-        private static readonly Dictionary<string, string> CategoryColors = new()
-        {
-            { "Education", "#4ade80" },
-            { "Health", "#f97316" },
-            { "Animals", "#22d3ee" },
-            { "Creative", "#a855f7" },
-            { "Dreams", "#facc15" },
-            { "Just for fun", "#ef4444" },
-            { "Technology", "#3b82f6" },
-            { "Community", "#ec4899" }
-        };
 
         public static void Seed(ApplicationDbContext context)
         {
@@ -84,7 +74,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-20),
                     EndDate = DateTime.UtcNow.AddDays(40),
-                    CategoryColor = CategoryColors["Animals"]
+                    CategoryColor = CategoryColors.Colors["Animals"]
                 },
                 new Fund
                 {
@@ -99,7 +89,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-15),
                     EndDate = DateTime.UtcNow.AddDays(45),
-                    CategoryColor = CategoryColors["Education"]
+                    CategoryColor = CategoryColors.Colors["Education"]
                 },
                 new Fund
                 {
@@ -114,7 +104,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1584515933487-779824d29309?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-25),
                     EndDate = DateTime.UtcNow.AddDays(35),
-                    CategoryColor = CategoryColors["Health"]
+                    CategoryColor = CategoryColors.Colors["Health"]
                 },
                 new Fund
                 {
@@ -129,7 +119,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-18),
                     EndDate = DateTime.UtcNow.AddDays(42),
-                    CategoryColor = CategoryColors["Creative"]
+                    CategoryColor = CategoryColors.Colors["Creative"]
                 },
                 new Fund
                 {
@@ -144,7 +134,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-22),
                     EndDate = DateTime.UtcNow.AddDays(38),
-                    CategoryColor = CategoryColors["Community"]
+                    CategoryColor = CategoryColors.Colors["Community"]
                 },
                 new Fund
                 {
@@ -159,7 +149,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1564429238961-bf8e8a5a0670?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-30),
                     EndDate = DateTime.UtcNow.AddDays(30),
-                    CategoryColor = CategoryColors["Just for fun"]
+                    CategoryColor = CategoryColors.Colors["Just for fun"]
                 },
                 new Fund
                 {
@@ -174,7 +164,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-12),
                     EndDate = DateTime.UtcNow.AddDays(48),
-                    CategoryColor = CategoryColors["Technology"]
+                    CategoryColor = CategoryColors.Colors["Technology"]
                 },
                 new Fund
                 {
@@ -189,7 +179,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-10),
                     EndDate = DateTime.UtcNow.AddDays(50),
-                    CategoryColor = CategoryColors["Dreams"]
+                    CategoryColor = CategoryColors.Colors["Dreams"]
                 },
                 new Fund
                 {
@@ -204,7 +194,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1515879218367-8466d910auj7?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-14),
                     EndDate = DateTime.UtcNow.AddDays(46),
-                    CategoryColor = CategoryColors["Education"]
+                    CategoryColor = CategoryColors.Colors["Education"]
                 },
                 new Fund
                 {
@@ -219,7 +209,7 @@ namespace KryskataFund.Data
                     ImageUrl = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&h=450&fit=crop",
                     CreatedAt = DateTime.UtcNow.AddDays(-17),
                     EndDate = DateTime.UtcNow.AddDays(43),
-                    CategoryColor = CategoryColors["Animals"]
+                    CategoryColor = CategoryColors.Colors["Animals"]
                 },
             };
 
