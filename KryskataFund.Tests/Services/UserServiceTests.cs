@@ -279,12 +279,12 @@ namespace KryskataFund.Tests.Services
         [Fact]
         public void HashPassword_ConsistentWithTestHelper()
         {
-            var (service, _) = CreateService();
-
-            var serviceHash = service.HashPassword("Password1");
+            // Both TestHelper and PasswordHasher now use BCrypt.
+            // BCrypt hashes are non-deterministic (different salt each time),
+            // so verify that PasswordHasher.VerifyPassword accepts TestHelper hashes.
             var helperHash = TestHelper.HashPassword("Password1");
 
-            serviceHash.Should().Be(helperHash);
+            KryskataFund.Services.PasswordHasher.VerifyPassword("Password1", helperHash).Should().BeTrue();
         }
 
         [Fact]
