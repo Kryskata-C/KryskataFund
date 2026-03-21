@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
 using KryskataFund.Constants;
+using KryskataFund.Filters;
 
 namespace KryskataFund.Controllers
 {
+    [RequireSignIn]
     public class MessagesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,16 +25,8 @@ namespace KryskataFund.Controllers
             return null;
         }
 
-        private bool IsSignedIn()
-        {
-            return HttpContext.Session.GetString(SessionKeys.IsSignedIn) == "true";
-        }
-
         public async Task<IActionResult> Inbox()
         {
-            if (!IsSignedIn())
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/Messages/Inbox" });
-
             var userId = GetCurrentUserId()!.Value;
 
             // Get all messages involving this user
@@ -73,9 +67,6 @@ namespace KryskataFund.Controllers
 
         public async Task<IActionResult> Conversation(int userId)
         {
-            if (!IsSignedIn())
-                return RedirectToAction("SignIn", "Account", new { returnUrl = $"/Messages/Conversation?userId={userId}" });
-
             var currentUserId = GetCurrentUserId()!.Value;
 
             // Mark all messages from this user as read
@@ -128,9 +119,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> Send(int receiverId, string content, int? sharedFundId)
         {
-            if (!IsSignedIn())
-                return Json(new { success = false, error = "Not signed in" });
-
             var currentUserId = GetCurrentUserId()!.Value;
 
             if (string.IsNullOrWhiteSpace(content))
@@ -205,9 +193,6 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public async Task<IActionResult> SearchUsers(string term)
         {
-            if (!IsSignedIn())
-                return Json(new List<object>());
-
             var currentUserId = GetCurrentUserId()!.Value;
 
             if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
@@ -226,9 +211,6 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUnreadCount()
         {
-            if (!IsSignedIn())
-                return Json(new { count = 0 });
-
             var userId = GetCurrentUserId()!.Value;
             var count = await _context.Messages
                 .CountAsync(m => m.ReceiverId == userId && !m.IsRead);
@@ -239,9 +221,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            if (!IsSignedIn())
-                return Json(new { success = false, error = "Not signed in" });
-
             var userId = GetCurrentUserId()!.Value;
             var message = await _context.Messages.FindAsync(id);
 
