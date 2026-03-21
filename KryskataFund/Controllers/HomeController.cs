@@ -1,5 +1,6 @@
 using KryskataFund.Models;
 using KryskataFund.Data;
+using KryskataFund.Constants;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -55,9 +56,9 @@ namespace KryskataFund.Controllers
 
             // Get followed fund IDs for current user
             var followedFundIds = new List<int>();
-            if (HttpContext.Session.GetString("IsSignedIn") == "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) == "true")
             {
-                var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+                var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
                 followedFundIds = _context.UserFollows
                     .Where(f => f.UserId == userId)
                     .Select(f => f.FundId)
