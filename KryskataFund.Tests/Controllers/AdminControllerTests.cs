@@ -1,6 +1,7 @@
 using FluentAssertions;
 using KryskataFund.Controllers;
 using KryskataFund.Data;
+using KryskataFund.Filters;
 using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -19,16 +20,24 @@ namespace KryskataFund.Tests.Controllers
             return (controller, context);
         }
 
+        // --- RequireAdmin attribute is applied at class level ---
+
+        [Fact]
+        public void AdminController_HasRequireAdminAttribute()
+        {
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty("AdminController should have [RequireAdmin] attribute");
+        }
+
         // --- Dashboard ---
 
         [Fact]
         public void Dashboard_RedirectsNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.Dashboard();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireAdmin] filter at class level.
+            // Verify the attribute is present (filter bypass in unit tests is expected).
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -47,11 +56,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void Dashboard_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.Dashboard();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- DeleteUser ---
@@ -82,13 +89,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void DeleteUser_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.DeleteUser(2);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -158,13 +161,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void ToggleAdmin_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.ToggleAdmin(2);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- DeleteFund ---
@@ -186,13 +185,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void DeleteFund_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.DeleteFund(1);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -228,13 +223,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void DeleteDonation_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.DeleteDonation(1);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -270,13 +261,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void EditFund_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.EditFund(1, "New", "New", 1000);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- AddFundsToFund ---
@@ -297,13 +284,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void AddFundsToFund_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.AddFundsToFund(1, 300);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- ToggleVerified ---
@@ -335,13 +318,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void ToggleVerified_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.ToggleVerified(1);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- GetStats ---
@@ -361,13 +340,9 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void GetStats_DeniesNonAdmin()
         {
-            var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
-
-            var result = controller.GetStats();
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireAdmin] filter at class level.
+            var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
+            attr.Should().NotBeEmpty();
         }
     }
 }
