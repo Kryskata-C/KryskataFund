@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using KryskataFund.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace KryskataFund.Services
 {
@@ -8,12 +9,14 @@ namespace KryskataFund.Services
     {
         private readonly string _apiKey;
         private readonly HttpClient _httpClient;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
         {
             _apiKey = configuration["Resend:ApiKey"] ?? "";
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
+            _logger = logger;
         }
 
         private async Task SendEmailAsync(string to, string subject, string htmlBody)
@@ -32,9 +35,10 @@ namespace KryskataFund.Services
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
                 await _httpClient.PostAsync("https://api.resend.com/emails", content);
             }
-            catch
+            catch (Exception ex)
             {
-                // Don't fail the donation if email fails
+                // Don't fail the donation if email fails, but log the error
+                _logger.LogError(ex, "Failed to send email to {Recipient} with subject '{Subject}'", to, subject);
             }
         }
 
