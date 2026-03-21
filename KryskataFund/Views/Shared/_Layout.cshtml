@@ -180,6 +180,62 @@
             line-height: 1;
         }
 
+        /* Message notification toast */
+        .msg-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 10000;
+            background: #181a24;
+            border: 1px solid #46e6a4;
+            border-radius: 14px;
+            padding: 16px 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(70, 230, 164, 0.18), 0 2px 8px rgba(0,0,0,0.5);
+            opacity: 0;
+            transform: translateX(120%);
+            transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            cursor: pointer;
+            max-width: 340px;
+        }
+        .msg-toast.show {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+        .msg-toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(70, 230, 164, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .msg-toast-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: #46e6a4;
+        }
+        .msg-toast-body {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .msg-toast-title {
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #f7f7ff;
+        }
+        .msg-toast-sub {
+            font-size: 0.78rem;
+            color: #6d6f8c;
+        }
+
         /* Responsive */
         @@media (max-width: 768px) {
             .nav-search-wrapper {
@@ -455,11 +511,72 @@
         })();
     </script>
 
+    <!-- Message notification toast -->
+    <div class="msg-toast" id="msgToast" onclick="window.location.href='/Messages/Inbox'">
+        <div class="msg-toast-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>
+        </div>
+        <div class="msg-toast-body">
+            <span class="msg-toast-title">New Message</span>
+            <span class="msg-toast-sub">You have a new unread message</span>
+        </div>
+    </div>
+
     <script>
-        // Poll for unread messages
+        // Poll for unread messages with notification sound & popup
         (function() {
             var messagesLink = document.querySelector('a[href*="Messages"]');
             if (!messagesLink) return;
+
+            var lastCount = -1;
+            var toast = document.getElementById('msgToast');
+            var toastTimeout = null;
+
+            // Generate notification sound using Web Audio API
+            function playNotificationSound() {
+                try {
+                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    // First tone
+                    var osc1 = ctx.createOscillator();
+                    var gain1 = ctx.createGain();
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+                    osc1.frequency.setValueAtTime(1047, ctx.currentTime + 0.08);
+                    gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    osc1.connect(gain1);
+                    gain1.connect(ctx.destination);
+                    osc1.start(ctx.currentTime);
+                    osc1.stop(ctx.currentTime + 0.25);
+
+                    // Second tone (higher, slightly delayed)
+                    var osc2 = ctx.createOscillator();
+                    var gain2 = ctx.createGain();
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1319, ctx.currentTime + 0.12);
+                    gain2.gain.setValueAtTime(0, ctx.currentTime);
+                    gain2.gain.setValueAtTime(0.12, ctx.currentTime + 0.12);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                    osc2.connect(gain2);
+                    gain2.connect(ctx.destination);
+                    osc2.start(ctx.currentTime + 0.12);
+                    osc2.stop(ctx.currentTime + 0.35);
+
+                    setTimeout(function() { ctx.close(); }, 500);
+                } catch(e) {}
+            }
+
+            function showToast(count) {
+                if (toastTimeout) clearTimeout(toastTimeout);
+                var sub = count === 1
+                    ? 'You have a new unread message'
+                    : 'You have ' + count + ' unread messages';
+                toast.querySelector('.msg-toast-sub').textContent = sub;
+                toast.classList.add('show');
+                toastTimeout = setTimeout(function() {
+                    toast.classList.remove('show');
+                }, 5000);
+            }
 
             function checkUnread() {
                 fetch('/Messages/GetUnreadCount')
@@ -473,9 +590,16 @@
                                 messagesLink.appendChild(badge);
                             }
                             badge.textContent = data.count;
+
+                            // New message arrived — notify
+                            if (lastCount >= 0 && data.count > lastCount) {
+                                playNotificationSound();
+                                showToast(data.count);
+                            }
                         } else if (badge) {
                             badge.remove();
                         }
+                        lastCount = data.count;
                     })
                     .catch(function() {});
             }
