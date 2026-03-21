@@ -1,6 +1,8 @@
 using KryskataFund.Models;
 using KryskataFund.Constants;
 using KryskataFund.Services;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace KryskataFund.Data
 {
