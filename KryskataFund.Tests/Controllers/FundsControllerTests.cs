@@ -1,6 +1,7 @@
 using FluentAssertions;
 using KryskataFund.Controllers;
 using KryskataFund.Data;
+using KryskataFund.Filters;
 using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
 using Microsoft.AspNetCore.Hosting;
@@ -77,13 +78,10 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void Create_Get_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.Create();
-
-            var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
-            redirect.ActionName.Should().Be("SignIn");
-            redirect.ControllerName.Should().Be("Account");
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(FundsController).GetMethod("Create", Type.EmptyTypes);
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty("Create should have [RequireSignIn] attribute");
         }
 
         [Fact]
