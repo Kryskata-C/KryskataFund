@@ -45,5 +45,10 @@ namespace KryskataFund.Models
         public int ProgressPercent => GoalAmount > 0
             ? (int)Math.Min(100, Math.Round(RaisedAmount / GoalAmount * 100))
             : 0;
+
+        // Navigation properties
+        public virtual User? Creator { get; set; }
+        public virtual ICollection<Donation> Donations { get; set; } = new List<Donation>();
+        public virtual ICollection<FundComment> Comments { get; set; } = new List<FundComment>();
     }
 }
