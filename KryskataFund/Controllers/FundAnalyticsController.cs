@@ -99,11 +99,20 @@ namespace KryskataFund.Controllers
 
             foreach (var donation in donations)
             {
-                sb.AppendLine($"{donation.DonorName},{donation.Amount},{donation.CreatedAt:yyyy-MM-dd}");
+                sb.AppendLine($"{EscapeCsv(donation.DonorName)},{donation.Amount},{donation.CreatedAt:yyyy-MM-dd}");
             }
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
             return File(bytes, "text/csv", $"donors-{fund.Title.Replace(" ", "-")}.csv");
+        }
+
+        private string EscapeCsv(string field)
+        {
+            if (string.IsNullOrEmpty(field)) return "\"\"";
+            // Prevent CSV injection by prefixing dangerous characters
+            if (field.StartsWith("=") || field.StartsWith("+") || field.StartsWith("-") || field.StartsWith("@") || field.StartsWith("\t") || field.StartsWith("\r"))
+                field = "'" + field;
+            return "\"" + field.Replace("\"", "\"\"") + "\"";
         }
     }
 }

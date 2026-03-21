@@ -27,6 +27,13 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Comment cannot be empty" });
             }
 
+            content = content.Trim();
+
+            if (content.Length > 1000)
+            {
+                return Json(new { success = false, message = "Comment cannot exceed 1000 characters" });
+            }
+
             var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
             var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
             var userName = "@" + userEmail.Split('@')[0];
@@ -36,7 +43,7 @@ namespace KryskataFund.Controllers
                 FundId = fundId,
                 UserId = userId,
                 UserName = userName,
-                Content = content,
+                Content = System.Net.WebUtility.HtmlEncode(content),
                 CreatedAt = DateTime.UtcNow
             };
 

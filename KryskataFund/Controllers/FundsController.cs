@@ -52,6 +52,22 @@ namespace KryskataFund.Controllers
             // Handle file upload
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
+                // Validate file extension
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var extension = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError("ImageFile", "Only image files (jpg, jpeg, png, gif, webp) are allowed.");
+                    return View(model);
+                }
+
+                // Validate file size (max 5MB)
+                if (model.ImageFile.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("ImageFile", "File size cannot exceed 5MB.");
+                    return View(model);
+                }
+
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
                 if (!Directory.Exists(uploadsFolder))
                 {

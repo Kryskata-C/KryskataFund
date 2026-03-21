@@ -23,7 +23,7 @@ namespace KryskataFund.Controllers
             }
 
             var query = q.Trim().ToLower();
-            ViewBag.Query = q;
+            ViewBag.Query = System.Net.WebUtility.HtmlEncode(q);
 
             var results = _context.Funds
                 .AsEnumerable()

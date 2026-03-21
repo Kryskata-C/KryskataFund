@@ -217,7 +217,18 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Fund not found" });
             }
 
-            fund.Title = title;
+            // Input validation
+            if (string.IsNullOrWhiteSpace(title) || title.Trim().Length > 200)
+            {
+                return Json(new { success = false, message = "Title is required and cannot exceed 200 characters" });
+            }
+
+            if (goalAmount <= 0)
+            {
+                return Json(new { success = false, message = "Goal amount must be greater than 0" });
+            }
+
+            fund.Title = title.Trim();
             fund.Description = new HtmlSanitizer().Sanitize(description);
             fund.GoalAmount = goalAmount;
             _context.SaveChanges();
@@ -232,6 +243,11 @@ namespace KryskataFund.Controllers
             if (fund == null)
             {
                 return Json(new { success = false, message = "Fund not found" });
+            }
+
+            if (amount <= 0)
+            {
+                return Json(new { success = false, message = "Amount must be greater than 0" });
             }
 
             fund.RaisedAmount += amount;

@@ -139,7 +139,7 @@ namespace KryskataFund.Controllers
                 ReceiverId = receiverId,
                 SenderName = sender.Email,
                 ReceiverName = receiver.Email,
-                Content = content.Trim(),
+                Content = System.Net.WebUtility.HtmlEncode(content.Trim()),
                 SentAt = DateTime.UtcNow,
                 IsRead = false,
                 SharedFundId = sharedFundId

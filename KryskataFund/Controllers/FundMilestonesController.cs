@@ -34,6 +34,25 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Only the fund creator can add milestones" });
             }
 
+            // Input validation
+            if (string.IsNullOrWhiteSpace(title) || title.Trim().Length > 200)
+            {
+                return Json(new { success = false, message = "Title is required and cannot exceed 200 characters" });
+            }
+
+            if (targetAmount <= 0)
+            {
+                return Json(new { success = false, message = "Target amount must be greater than 0" });
+            }
+
+            if (description != null && description.Length > 2000)
+            {
+                return Json(new { success = false, message = "Description cannot exceed 2000 characters" });
+            }
+
+            title = title.Trim();
+            description = description?.Trim();
+
             var milestone = new FundMilestone
             {
                 FundId = fundId,

@@ -41,6 +41,20 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Only the fund creator or collaborators can post updates" });
             }
 
+            // Input validation
+            if (string.IsNullOrWhiteSpace(title) || title.Trim().Length > 200)
+            {
+                return Json(new { success = false, message = "Title is required and cannot exceed 200 characters" });
+            }
+
+            if (string.IsNullOrWhiteSpace(content) || content.Trim().Length > 5000)
+            {
+                return Json(new { success = false, message = "Content is required and cannot exceed 5000 characters" });
+            }
+
+            title = title.Trim();
+            content = content.Trim();
+
             var update = new FundUpdate
             {
                 FundId = fundId,
