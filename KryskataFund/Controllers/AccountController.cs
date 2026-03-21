@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Constants;
+using KryskataFund.Filters;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -108,13 +109,9 @@ namespace KryskataFund.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [RequireSignIn]
         public IActionResult Profile()
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", new { returnUrl = "/Account/Profile" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
@@ -154,13 +151,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> SaveBuddyCustomization(string? glasses, string? hat, string? mask)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Not signed in" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
@@ -196,13 +189,9 @@ namespace KryskataFund.Controllers
             return Json(new { glasses = user.BuddyGlasses, hat = user.BuddyHat, mask = user.BuddyMask });
         }
 
+        [RequireSignIn]
         public IActionResult MyFunds()
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", new { returnUrl = "/Account/MyFunds" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var myFunds = _context.Funds
                 .Where(f => f.CreatorId == userId)
@@ -219,13 +208,9 @@ namespace KryskataFund.Controllers
             return View();
         }
 
+        [RequireSignIn]
         public IActionResult MyDonations()
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", new { returnUrl = "/Account/MyDonations" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var myDonations = _context.Donations
                 .Where(d => d.UserId == userId)
@@ -251,13 +236,9 @@ namespace KryskataFund.Controllers
             return View();
         }
 
+        [RequireSignIn]
         public IActionResult Following()
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", new { returnUrl = "/Account/Following" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var followedFundIds = _context.UserFollows
                 .Where(f => f.UserId == userId)
@@ -276,13 +257,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public IActionResult ToggleFollow(int fundId)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Not signed in" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var existingFollow = _context.UserFollows
                 .FirstOrDefault(f => f.UserId == userId && f.FundId == fundId);
@@ -309,13 +286,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> CancelRecurringDonation(int id)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Not signed in" });
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var recurring = _context.RecurringDonations
                 .FirstOrDefault(r => r.Id == id && r.UserId == userId && r.IsActive);
