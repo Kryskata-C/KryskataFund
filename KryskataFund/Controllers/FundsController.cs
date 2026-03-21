@@ -16,13 +16,15 @@ namespace KryskataFund.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
+        private readonly ILogger<FundsController> _logger;
 
-        public FundsController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration configuration, IEmailService emailService)
+        public FundsController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration configuration, IEmailService emailService, ILogger<FundsController> logger)
         {
             _context = context;
             _environment = environment;
             _configuration = configuration;
             _emailService = emailService;
+            _logger = logger;
         }
 
         private bool IsCreatorOrCollaborator(int fundCreatorId, int userId, int fundId)
