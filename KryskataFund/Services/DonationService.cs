@@ -1,6 +1,7 @@
 using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace KryskataFund.Services
 {
@@ -20,25 +21,25 @@ namespace KryskataFund.Services
             return donation;
         }
 
-        public IEnumerable<Donation> GetByFundId(int fundId)
+        public async Task<IEnumerable<Donation>> GetByFundIdAsync(int fundId)
         {
-            return _context.Donations
+            return await _context.Donations
                 .Where(d => d.FundId == fundId)
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<Donation> GetByUserId(int userId)
+        public async Task<IEnumerable<Donation>> GetByUserIdAsync(int userId)
         {
-            return _context.Donations
+            return await _context.Donations
                 .Where(d => d.UserId == userId)
-                .ToList();
+                .ToListAsync();
         }
 
-        public decimal GetTotalDonated(int userId)
+        public async Task<decimal> GetTotalDonatedAsync(int userId)
         {
-            return _context.Donations
+            return await _context.Donations
                 .Where(d => d.UserId == userId)
-                .Sum(d => d.Amount);
+                .SumAsync(d => d.Amount);
         }
 
         public async Task DeleteAsync(int id)

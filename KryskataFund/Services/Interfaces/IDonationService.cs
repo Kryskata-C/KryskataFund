@@ -20,21 +20,21 @@ namespace KryskataFund.Services.Interfaces
         /// </summary>
         /// <param name="fundId">The fund identifier.</param>
         /// <returns>A collection of donations for the specified fund.</returns>
-        IEnumerable<Donation> GetByFundId(int fundId);
+        Task<IEnumerable<Donation>> GetByFundIdAsync(int fundId);
 
         /// <summary>
         /// Retrieves all donations made by a specific user.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <returns>A collection of donations made by the specified user.</returns>
-        IEnumerable<Donation> GetByUserId(int userId);
+        Task<IEnumerable<Donation>> GetByUserIdAsync(int userId);
 
         /// <summary>
         /// Calculates the total amount donated by a specific user.
         /// </summary>
         /// <param name="userId">The user identifier.</param>
         /// <returns>The sum of all donation amounts by the user.</returns>
-        decimal GetTotalDonated(int userId);
+        Task<decimal> GetTotalDonatedAsync(int userId);
 
         /// <summary>
         /// Deletes a donation by its identifier.
