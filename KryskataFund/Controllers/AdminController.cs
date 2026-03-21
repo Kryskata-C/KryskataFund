@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using KryskataFund.Data;
 using KryskataFund.Models;
+using KryskataFund.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace KryskataFund.Controllers
@@ -16,7 +17,7 @@ namespace KryskataFund.Controllers
 
         private bool IsAdmin()
         {
-            return HttpContext.Session.GetString("IsAdmin") == "True";
+            return HttpContext.Session.GetString(SessionKeys.IsAdmin) == "True";
         }
 
         public IActionResult Dashboard()
@@ -71,7 +72,7 @@ namespace KryskataFund.Controllers
             }
 
             // Don't allow deleting yourself
-            var currentUserId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var currentUserId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (user.Id == currentUserId)
             {
                 return Json(new { success = false, message = "Cannot delete yourself" });
@@ -146,7 +147,7 @@ namespace KryskataFund.Controllers
             }
 
             // Don't allow removing your own admin
-            var currentUserId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var currentUserId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (user.Id == currentUserId)
             {
                 return Json(new { success = false, message = "Cannot modify your own admin status" });
