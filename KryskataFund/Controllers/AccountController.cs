@@ -41,6 +41,13 @@ namespace KryskataFund.Controllers
                 return View();
             }
 
+            // Auto-upgrade legacy SHA256 hash to BCrypt
+            if (!user.PasswordHash.StartsWith("$2"))
+            {
+                user.PasswordHash = PasswordHasher.HashPassword(password);
+                _context.SaveChanges();
+            }
+
             HttpContext.Session.SetString(SessionKeys.IsSignedIn, "true");
             HttpContext.Session.SetString(SessionKeys.UserEmail, email);
             HttpContext.Session.SetString(SessionKeys.UserId, user.Id.ToString());
