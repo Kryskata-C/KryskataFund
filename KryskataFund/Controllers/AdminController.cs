@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Constants;
+using KryskataFund.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace KryskataFund.Controllers
 {
+    [RequireAdmin]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -15,18 +17,8 @@ namespace KryskataFund.Controllers
             _context = context;
         }
 
-        private bool IsAdmin()
-        {
-            return HttpContext.Session.GetString(SessionKeys.IsAdmin) == "True";
-        }
-
         public IActionResult Dashboard()
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
             // Stats
             var allFunds = _context.Funds.ToList();
             var allDonationsList = _context.Donations.ToList();
@@ -60,11 +52,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult DeleteUser(int id)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var user = _context.Users.Find(id);
             if (user == null)
             {
@@ -135,11 +122,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult ToggleAdmin(int id)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var user = _context.Users.Find(id);
             if (user == null)
             {
@@ -162,11 +144,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult DeleteFund(int id)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var fund = _context.Funds.Find(id);
             if (fund == null)
             {
@@ -210,11 +187,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult DeleteDonation(int id)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var donation = _context.Donations.Find(id);
             if (donation == null)
             {
@@ -238,11 +210,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult EditFund(int id, string title, string description, decimal goalAmount)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var fund = _context.Funds.Find(id);
             if (fund == null)
             {
@@ -260,11 +227,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult AddFundsToFund(int id, decimal amount)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var fund = _context.Funds.Find(id);
             if (fund == null)
             {
@@ -280,11 +242,6 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult ToggleVerified(int id)
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false, message = "Unauthorized" });
-            }
-
             var fund = _context.Funds.Find(id);
             if (fund == null)
             {
@@ -299,21 +256,11 @@ namespace KryskataFund.Controllers
 
         public IActionResult Criteria()
         {
-            if (!IsAdmin())
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
             return View();
         }
 
         public IActionResult GetStats()
         {
-            if (!IsAdmin())
-            {
-                return Json(new { success = false });
-            }
-
             var today = DateTime.UtcNow.Date;
             var thisWeek = today.AddDays(-7);
             var thisMonth = today.AddDays(-30);
