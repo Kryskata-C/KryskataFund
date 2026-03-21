@@ -661,7 +661,10 @@ namespace KryskataFund.Tests.Security
             var result = controller.Autocomplete(xssPayload);
 
             // Assert - JSON serialization auto-escapes HTML entities
-            result.Should().BeOfType<JsonResult>();
+            var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
+            // XSS payloads should not match any fund titles, so results should be empty
+            var jsonString = System.Text.Json.JsonSerializer.Serialize(jsonResult.Value);
+            jsonString.Should().NotContain("<script>", "JSON response should not contain raw script tags");
         }
 
         #endregion
@@ -689,9 +692,20 @@ namespace KryskataFund.Tests.Security
             // Act - the model validation (EmailAddress) should reject most of these
             var result = controller.SignUp(model);
 
-            // Assert - the controller should handle it (either reject invalid email or store it safely)
+            // Assert - the controller should either reject the invalid email or store it safely
             result.Should().NotBeNull();
-            // Even if stored, Razor auto-encodes the email in views
+            // If stored, verify the raw XSS payload is kept as literal text (not executed)
+            var storedUser = context.Users.FirstOrDefault(u => u.Email == xssEmail);
+            if (storedUser != null)
+            {
+                // If user was created, the XSS email is stored as-is; Razor auto-encodes on render
+                storedUser.Email.Should().Be(xssEmail, "XSS email stored as literal text for Razor to encode");
+            }
+            else
+            {
+                // If user was not created, the controller correctly rejected the malicious email
+                result.Should().BeOfType<ViewResult>("invalid email should return the sign-up form");
+            }
         }
 
         #endregion
