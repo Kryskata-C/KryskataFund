@@ -4,7 +4,11 @@ using KryskataFund.Data;
 using KryskataFund.Filters;
 using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
 
 namespace KryskataFund.Tests.Controllers
 {
@@ -27,6 +31,75 @@ namespace KryskataFund.Tests.Controllers
         {
             var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
             attr.Should().NotBeEmpty("AdminController should have [RequireAdmin] attribute");
+        }
+
+        [Fact]
+        public void RequireAdminFilter_RedirectsNonAdminUsers()
+        {
+            var filter = new RequireAdminAttribute();
+            var httpContext = new DefaultHttpContext();
+            var session = new MockSession();
+            session.SetString("IsAdmin", "False");
+            session.SetString("IsSignedIn", "true");
+            httpContext.Session = session;
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            var context = new ActionExecutingContext(
+                actionContext,
+                new List<IFilterMetadata>(),
+                new Dictionary<string, object?>(),
+                new object());
+
+            filter.OnActionExecuting(context);
+
+            context.Result.Should().BeOfType<RedirectToActionResult>();
+            var redirect = (RedirectToActionResult)context.Result;
+            redirect.ActionName.Should().Be("Forbidden");
+            redirect.ControllerName.Should().Be("Error");
+        }
+
+        [Fact]
+        public void RequireAdminFilter_AllowsAdminUsers()
+        {
+            var filter = new RequireAdminAttribute();
+            var httpContext = new DefaultHttpContext();
+            var session = new MockSession();
+            session.SetString("IsAdmin", "True");
+            session.SetString("IsSignedIn", "true");
+            httpContext.Session = session;
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            var context = new ActionExecutingContext(
+                actionContext,
+                new List<IFilterMetadata>(),
+                new Dictionary<string, object?>(),
+                new object());
+
+            filter.OnActionExecuting(context);
+
+            context.Result.Should().BeNull("admin users should not be redirected");
+        }
+
+        [Fact]
+        public void RequireAdminFilter_RedirectsWhenNoSessionSet()
+        {
+            var filter = new RequireAdminAttribute();
+            var httpContext = new DefaultHttpContext();
+            httpContext.Session = new MockSession();
+
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            var context = new ActionExecutingContext(
+                actionContext,
+                new List<IFilterMetadata>(),
+                new Dictionary<string, object?>(),
+                new object());
+
+            filter.OnActionExecuting(context);
+
+            context.Result.Should().BeOfType<RedirectToActionResult>();
+            var redirect = (RedirectToActionResult)context.Result;
+            redirect.ActionName.Should().Be("Forbidden");
+            redirect.ControllerName.Should().Be("Error");
         }
 
         // --- Dashboard ---
