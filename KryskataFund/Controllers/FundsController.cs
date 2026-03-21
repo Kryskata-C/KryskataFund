@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
+using KryskataFund.Constants;
 using KryskataFund.Services.Interfaces;
 using Stripe;
 using System.Text;
@@ -44,7 +45,7 @@ namespace KryskataFund.Controllers
         public IActionResult Create()
         {
             // Must be signed in to create a fund
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = "/Funds/Create" });
             }
@@ -56,7 +57,7 @@ namespace KryskataFund.Controllers
         public async Task<IActionResult> Create(CreateFundViewModel model)
         {
             // Must be signed in
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = "/Funds/Create" });
             }
@@ -94,8 +95,8 @@ namespace KryskataFund.Controllers
                 imageUrl = "/uploads/" + uniqueFileName;
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
+            var userEmail = HttpContext.Session.GetString(SessionKeys.UserEmail) ?? "Anonymous";
 
             var fund = new Fund
             {
@@ -140,10 +141,10 @@ namespace KryskataFund.Controllers
                 return NotFound();
             }
 
-            ViewBag.IsSignedIn = HttpContext.Session.GetString("IsSignedIn") == "true";
+            ViewBag.IsSignedIn = HttpContext.Session.GetString(SessionKeys.IsSignedIn) == "true";
 
             // Check if current user is the creator or collaborator
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             ViewBag.IsCreator = IsCreatorOrCollaborator(fund.CreatorId, userId, id);
             ViewBag.IsOriginalCreator = fund.CreatorId == userId;
 
@@ -199,7 +200,7 @@ namespace KryskataFund.Controllers
 
         public IActionResult Donate(int id, int amount)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = $"/Funds/Donate?id={id}&amount={amount}" });
             }
@@ -219,7 +220,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCheckoutSession(int fundId, decimal amount)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
                 return Json(new { success = false, message = "Please sign in" });
 
             if (amount <= 0)
@@ -258,8 +259,8 @@ namespace KryskataFund.Controllers
                 {
                     { "fundId", fundId.ToString() },
                     { "amount", amount.ToString() },
-                    { "userId", HttpContext.Session.GetString("UserId") ?? "0" },
-                    { "userEmail", HttpContext.Session.GetString("UserEmail") ?? "" }
+                    { "userId", HttpContext.Session.GetString(SessionKeys.UserId) ?? "0" },
+                    { "userEmail", HttpContext.Session.GetString(SessionKeys.UserEmail) ?? "" }
                 }
             };
 
@@ -289,8 +290,8 @@ namespace KryskataFund.Controllers
                     if (fund != null)
                     {
                         // Try session first, fall back to Stripe metadata
-                        var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-                        var userEmail = HttpContext.Session.GetString("UserEmail") ?? "";
+                        var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
+                        var userEmail = HttpContext.Session.GetString(SessionKeys.UserEmail) ?? "";
 
                         if (userId == 0 || string.IsNullOrEmpty(userEmail))
                         {
@@ -299,15 +300,15 @@ namespace KryskataFund.Controllers
                         }
 
                         // Restore session if it was lost during Stripe redirect
-                        if (HttpContext.Session.GetString("IsSignedIn") != "true" && userId > 0)
+                        if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true" && userId > 0)
                         {
                             var user = await _context.Users.FindAsync(userId);
                             if (user != null)
                             {
-                                HttpContext.Session.SetString("IsSignedIn", "true");
-                                HttpContext.Session.SetString("UserId", user.Id.ToString());
-                                HttpContext.Session.SetString("UserEmail", user.Email);
-                                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
+                                HttpContext.Session.SetString(SessionKeys.IsSignedIn, "true");
+                                HttpContext.Session.SetString(SessionKeys.UserId, user.Id.ToString());
+                                HttpContext.Session.SetString(SessionKeys.UserEmail, user.Email);
+                                HttpContext.Session.SetString(SessionKeys.IsAdmin, user.IsAdmin.ToString());
                                 userEmail = user.Email;
                             }
                         }
@@ -385,7 +386,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> ProcessDonation(int fundId, decimal amount)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in to donate" });
             }
@@ -399,8 +400,8 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Fund not found" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
+            var userEmail = HttpContext.Session.GetString(SessionKeys.UserEmail) ?? "Anonymous";
             var donorName = "@" + userEmail.Split('@')[0];
 
             var isRelational = _context.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory";
@@ -461,7 +462,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> AddMilestone(int fundId, string title, decimal targetAmount, string? description)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -472,7 +473,7 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Fund not found" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (fund.CreatorId != userId)
             {
                 return Json(new { success = false, message = "Only the fund creator can add milestones" });
@@ -510,7 +511,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteMilestone(int milestoneId)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -522,7 +523,7 @@ namespace KryskataFund.Controllers
             }
 
             var fund = await _context.Funds.FindAsync(milestone.FundId);
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (fund == null || fund.CreatorId != userId)
             {
                 return Json(new { success = false, message = "Only the fund creator can delete milestones" });
@@ -537,7 +538,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> PostUpdate(int fundId, string title, string content)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -549,7 +550,7 @@ namespace KryskataFund.Controllers
             }
 
             // Only the creator or collaborators can post updates
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (!IsCreatorOrCollaborator(fund.CreatorId, userId, fundId))
             {
                 return Json(new { success = false, message = "Only the fund creator or collaborators can post updates" });
@@ -579,7 +580,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateRecurringDonation(int fundId, decimal amount)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in to set up a recurring donation" });
             }
@@ -593,8 +594,8 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Fund not found" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
+            var userEmail = HttpContext.Session.GetString(SessionKeys.UserEmail) ?? "Anonymous";
             var donorName = "@" + userEmail.Split('@')[0];
 
             // Check if user already has an active recurring donation for this fund
@@ -625,7 +626,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCollaborator(int fundId, string email)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -637,7 +638,7 @@ namespace KryskataFund.Controllers
             }
 
             // Only the original creator can add collaborators
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (fund.CreatorId != userId)
             {
                 return Json(new { success = false, message = "Only the fund creator can add collaborators" });
@@ -691,7 +692,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveCollaborator(int collaboratorId)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -703,7 +704,7 @@ namespace KryskataFund.Controllers
             }
 
             var fund = await _context.Funds.FindAsync(collaborator.FundId);
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (fund == null || fund.CreatorId != userId)
             {
                 return Json(new { success = false, message = "Only the fund creator can remove collaborators" });
@@ -718,7 +719,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> RequestExtension(int fundId, int extensionDays, string reason)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -730,7 +731,7 @@ namespace KryskataFund.Controllers
             }
 
             // Only the creator can request an extension
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (fund.CreatorId != userId)
             {
                 return Json(new { success = false, message = "Only the fund creator can request an extension" });
@@ -792,7 +793,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> AddComment(int fundId, string content)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -802,8 +803,8 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Comment cannot be empty" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
+            var userEmail = HttpContext.Session.GetString(SessionKeys.UserEmail) ?? "Anonymous";
             var userName = "@" + userEmail.Split('@')[0];
 
             var comment = new FundComment
@@ -834,7 +835,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteComment(int commentId)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -845,7 +846,7 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Comment not found" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var fund = await _context.Funds.FindAsync(comment.FundId);
 
             if (comment.UserId != userId && (fund == null || fund.CreatorId != userId))
@@ -862,7 +863,7 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public IActionResult GetComments(int fundId)
         {
-            var currentUserId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var currentUserId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
 
             var comments = _context.FundComments
                 .Where(c => c.FundId == fundId)
@@ -884,12 +885,12 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public IActionResult GetRecentContacts()
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new List<object>());
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
 
             var recentContacts = _context.Messages
                 .Where(m => m.SenderId == userId || m.ReceiverId == userId)
@@ -912,7 +913,7 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public async Task<IActionResult> ExportDonors(int id)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", "Account");
             }
@@ -923,7 +924,7 @@ namespace KryskataFund.Controllers
                 return NotFound();
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (!IsCreatorOrCollaborator(fund.CreatorId, userId, id))
             {
                 return Forbid();
@@ -949,7 +950,7 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> RefundDonation(int donationId)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Please sign in" });
             }
@@ -966,7 +967,7 @@ namespace KryskataFund.Controllers
                 return Json(new { success = false, message = "Fund not found" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (fund.CreatorId != userId)
             {
                 return Json(new { success = false, message = "Only the fund creator can refund donations" });
@@ -984,7 +985,7 @@ namespace KryskataFund.Controllers
         [HttpGet]
         public async Task<IActionResult> Analytics(int id)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", "Account");
             }
@@ -995,7 +996,7 @@ namespace KryskataFund.Controllers
                 return NotFound();
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             if (!IsCreatorOrCollaborator(fund.CreatorId, userId, id))
             {
                 return Forbid();
