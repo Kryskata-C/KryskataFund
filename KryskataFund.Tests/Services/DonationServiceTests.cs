@@ -106,6 +106,46 @@ namespace KryskataFund.Tests.Services
             result.Amount.Should().Be(75);
         }
 
+        [Fact]
+        public async Task CreateAsync_ZeroAmount_PersistsToDatabase()
+        {
+            // Edge case: zero-amount donation is accepted at the service layer.
+            // Validation should be enforced at the controller/UI level.
+            var (service, context) = CreateService();
+            var donation = new Donation
+            {
+                FundId = 1,
+                UserId = 1,
+                DonorName = "@test",
+                Amount = 0
+            };
+
+            var result = await service.CreateAsync(donation);
+
+            result.Amount.Should().Be(0);
+            context.Donations.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public async Task CreateAsync_NegativeAmount_PersistsToDatabase()
+        {
+            // Edge case: negative-amount donation is accepted at the service layer.
+            // Validation should be enforced at the controller/UI level.
+            var (service, context) = CreateService();
+            var donation = new Donation
+            {
+                FundId = 1,
+                UserId = 1,
+                DonorName = "@test",
+                Amount = -50
+            };
+
+            var result = await service.CreateAsync(donation);
+
+            result.Amount.Should().Be(-50);
+            context.Donations.Count().Should().Be(1);
+        }
+
         // --- GetByFundId ---
 
         [Fact]
