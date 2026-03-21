@@ -8,7 +8,7 @@ namespace KryskataFund.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
+            if (!string.Equals(context.HttpContext.Session.GetString(SessionKeys.IsSignedIn), "true", StringComparison.OrdinalIgnoreCase))
             {
                 context.Result = new RedirectToActionResult("SignIn", "Account", null);
                 return;

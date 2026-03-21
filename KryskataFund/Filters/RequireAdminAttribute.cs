@@ -8,7 +8,7 @@ namespace KryskataFund.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.HttpContext.Session.GetString(SessionKeys.IsAdmin) != "True")
+            if (!string.Equals(context.HttpContext.Session.GetString(SessionKeys.IsAdmin), "true", StringComparison.OrdinalIgnoreCase))
             {
                 context.Result = new RedirectToActionResult("Forbidden", "Error", null);
                 return;

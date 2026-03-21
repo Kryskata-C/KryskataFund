@@ -32,6 +32,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add email service
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
+// Add application services
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFundService, FundService>();
+builder.Services.AddScoped<IDonationService, DonationService>();
+
 // Add session support
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -102,7 +107,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
