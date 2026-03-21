@@ -376,10 +376,24 @@
                         }
                         lastCount = data.count;
                     })
-                    .catch(function() {});
+                    .catch(function(err) {
+                        console.error('Failed to check unread messages:', err);
+                    });
             }
             checkUnread();
-            setInterval(checkUnread, 2000);
+            var pollInterval = setInterval(checkUnread, 30000);
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    clearInterval(pollInterval);
+                    pollInterval = null;
+                } else {
+                    if (!pollInterval) {
+                        checkUnread();
+                        pollInterval = setInterval(checkUnread, 30000);
+                    }
+                }
+            });
         })();
     </script>
     <script>document.body.classList.add('ready');</script>
