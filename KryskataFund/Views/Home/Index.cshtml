@@ -1,16 +1,16 @@
-@model List<KryskataFund.Models.Fund>
+@model KryskataFund.ViewModels.HomeViewModel
 @{
     ViewData["Title"] = "KryskataFund – Home";
-    var categoryCounts = ViewBag.CategoryCounts as Dictionary<string, int> ?? new Dictionary<string, int>();
-    var totalCount = ViewBag.TotalCount ?? 0;
-    var selectedCategory = ViewBag.SelectedCategory as string;
-    var totalRaised = ViewBag.TotalRaised ?? 0m;
-    var liveCampaigns = ViewBag.LiveCampaigns ?? 0;
-    var todaysImpact = ViewBag.TodaysImpact ?? 0m;
-    var avgSupport = ViewBag.AvgSupport ?? 0m;
-    var topCategory = ViewBag.TopCategory as string ?? "None";
-    var followedFundIds = ViewBag.FollowedFundIds as List<int> ?? new List<int>();
-    var expiredFundIds = ViewBag.ExpiredFundIds as List<int> ?? new List<int>();
+    var categoryCounts = Model.CategoryCounts;
+    var totalCount = Model.TotalCount;
+    var selectedCategory = Model.SelectedCategory;
+    var totalRaised = Model.TotalRaised;
+    var liveCampaigns = Model.LiveCampaigns;
+    var todaysImpact = Model.TodaysImpact;
+    var avgSupport = Model.AvgSupport;
+    var topCategory = Model.TopCategory;
+    var followedFundIds = Model.FollowedFundIds;
+    var expiredFundIds = Model.ExpiredFundIds;
     var isSignedIn = Context.Session.GetString("IsSignedIn") == "true";
 
     // Define all possible categories
@@ -1781,7 +1781,7 @@
                         <div class="hero-meta">
                             <div class="hero-meta-block">
                                 <span class="meta-label">Total raised</span>
-                                <span class="meta-value">€@(((decimal)totalRaised).ToString("N0"))</span>
+                                <span class="meta-value">€@(totalRaised.ToString("N0"))</span>
                             </div>
                             <div class="hero-meta-block">
                                 <span class="meta-label">Live campaigns</span>
@@ -1823,12 +1823,12 @@
                 <div class="sidebar-grid">
                     <div class="sidebar-stat-card sidebar-stat-card--green">
                         <div class="sidebar-stat-label">Today's impact</div>
-                        <div class="sidebar-stat-value" id="todaysImpact">€@(((decimal)todaysImpact).ToString("N0"))</div>
+                        <div class="sidebar-stat-value" id="todaysImpact">€@(todaysImpact.ToString("N0"))</div>
                         <div class="sidebar-stat-sub">Donations made today</div>
                     </div>
                     <div class="sidebar-stat-card">
                         <div class="sidebar-stat-label">Avg. support</div>
-                        <div class="sidebar-stat-value" id="avgSupport">€@(((decimal)avgSupport).ToString("N0"))</div>
+                        <div class="sidebar-stat-value" id="avgSupport">€@(avgSupport.ToString("N0"))</div>
                         <div class="sidebar-stat-sub">Per donation</div>
                     </div>
                 </div>
@@ -1867,7 +1867,7 @@
             <div class="section-header">
                 <div class="section-title-block">
                     <h2>@(string.IsNullOrEmpty(selectedCategory) ? "All funds" : selectedCategory + " funds")</h2>
-                    <span>@(string.IsNullOrEmpty(selectedCategory) ? "Browse all campaigns" : $"Showing {Model.Count} campaigns in {selectedCategory}")</span>
+                    <span>@(string.IsNullOrEmpty(selectedCategory) ? "Browse all campaigns" : $"Showing {Model.Funds.Count} campaigns in {selectedCategory}")</span>
                 </div>
                 <div class="category-row">
                     <a asp-controller="Home" asp-action="Index" class="category-pill @(string.IsNullOrEmpty(selectedCategory) ? "category-pill--active" : "")">
@@ -1890,7 +1890,7 @@
             </div>
 
             <div class="funds-grid">
-                @if (Model.Count == 0)
+                @if (Model.Funds.Count == 0)
                 {
                     <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
                         @if (!string.IsNullOrEmpty(selectedCategory))
@@ -1912,7 +1912,7 @@
                         }
                     </div>
                 }
-                @foreach (var fund in Model)
+                @foreach (var fund in Model.Funds)
                 {
                     var statusText = fund.ProgressPercent >= 100 ? $"{fund.ProgressPercent}% funded"
                         : fund.ProgressPercent >= 80 ? "Almost there"
