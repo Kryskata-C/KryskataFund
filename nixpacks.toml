@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["dotnet-sdk_8"]
+
+[phases.build]
+cmds = ["dotnet publish KryskataFund/KryskataFund.csproj -c Release -o /app/publish"]
+
+[start]
+cmd = "dotnet /app/publish/KryskataFund.dll"
