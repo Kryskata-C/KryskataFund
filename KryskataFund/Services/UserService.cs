@@ -1,6 +1,7 @@
 using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace KryskataFund.Services
 {
@@ -13,14 +14,14 @@ namespace KryskataFund.Services
             _context = context;
         }
 
-        public User? GetById(int id)
+        public async Task<User?> GetByIdAsync(int id)
         {
-            return _context.Users.FirstOrDefault(u => u.Id == id);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
 
-        public User? GetByEmail(string email)
+        public async Task<User?> GetByEmailAsync(string email)
         {
-            return _context.Users.FirstOrDefault(u => u.Email == email);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<User> CreateAsync(User user)
@@ -46,10 +47,9 @@ namespace KryskataFund.Services
             }
         }
 
-        public bool EmailExists(string email)
+        public async Task<bool> EmailExistsAsync(string email)
         {
-            return _context.Users.Any(u => u.Email == email);
+            return await _context.Users.AnyAsync(u => u.Email == email);
         }
-
     }
 }

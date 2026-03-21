@@ -13,14 +13,14 @@ namespace KryskataFund.Services.Interfaces
         /// </summary>
         /// <param name="id">The user identifier.</param>
         /// <returns>The user if found; otherwise null.</returns>
-        User? GetById(int id);
+        Task<User?> GetByIdAsync(int id);
 
         /// <summary>
         /// Retrieves a user by their email address.
         /// </summary>
         /// <param name="email">The email address to search for.</param>
         /// <returns>The user if found; otherwise null.</returns>
-        User? GetByEmail(string email);
+        Task<User?> GetByEmailAsync(string email);
 
         /// <summary>
         /// Creates a new user and persists them to the database.
@@ -46,7 +46,6 @@ namespace KryskataFund.Services.Interfaces
         /// </summary>
         /// <param name="email">The email address to check.</param>
         /// <returns>True if the email is already registered; otherwise false.</returns>
-        bool EmailExists(string email);
-
+        Task<bool> EmailExistsAsync(string email);
     }
 }
