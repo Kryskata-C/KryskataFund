@@ -1,4 +1,5 @@
 @model KryskataFund.Models.Fund
+@Html.AntiForgeryToken()
 @functions {
     string GetTimeAgo(DateTime dateTime)
     {
