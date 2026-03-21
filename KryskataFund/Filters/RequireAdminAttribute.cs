@@ -10,7 +10,7 @@ namespace KryskataFund.Filters
         {
             if (context.HttpContext.Session.GetString(SessionKeys.IsAdmin) != "True")
             {
-                context.Result = new RedirectToActionResult("Index", "Home", null);
+                context.Result = new RedirectToActionResult("Forbidden", "Error", null);
                 return;
             }
             base.OnActionExecuting(context);
