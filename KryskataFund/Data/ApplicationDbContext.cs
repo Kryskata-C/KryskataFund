@@ -29,6 +29,10 @@ namespace KryskataFund.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<UserFollow>()
+                .HasIndex(uf => new { uf.UserId, uf.FundId })
+                .IsUnique();
         }
     }
 }
