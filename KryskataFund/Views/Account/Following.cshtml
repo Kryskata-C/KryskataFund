@@ -1,3 +1,4 @@
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "Following";
     var followedFunds = ViewBag.FollowedFunds as List<KryskataFund.Models.Fund>;
@@ -334,7 +335,7 @@
         try {
             const response = await fetch('/Account/ToggleFollow', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                 body: 'fundId=' + fundId
             });
             const data = await response.json();
