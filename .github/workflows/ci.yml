@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
@@ -11,57 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: |
-          8.0.x
-          10.0.x
+        dotnet-version: '8.0.x'
 
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --no-restore -c Release
 
-    - name: Run tests
-      run: dotnet test --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.trx"
-      continue-on-error: false
+    - name: Test
+      run: dotnet test --no-build -c Release --verbosity normal
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: '**/TestResults/*.trx'
-
-  publish:
-    needs: build-and-test
+  docker:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    needs: build-and-test
+    if: github.ref == 'refs/heads/master'
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: |
-          8.0.x
-          10.0.x
-
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Publish application
-      run: dotnet publish KryskataFund/KryskataFund.csproj --configuration Release --output ./publish
-
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-publish
-        path: ./publish
+    - name: Build Docker image
+      run: docker build -t kryskatafund .
