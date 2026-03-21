@@ -1,6 +1,7 @@
 using FluentAssertions;
 using KryskataFund.Controllers;
 using KryskataFund.Data;
+using KryskataFund.Filters;
 using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
 using Microsoft.AspNetCore.Http;
@@ -159,13 +160,20 @@ namespace KryskataFund.Tests.Controllers
         // --- Profile ---
 
         [Fact]
+        public void Profile_HasRequireSignInAttribute()
+        {
+            var method = typeof(AccountController).GetMethod("Profile");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty("Profile should have [RequireSignIn] attribute");
+        }
+
+        [Fact]
         public void Profile_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.Profile();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("Profile");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -195,11 +203,10 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void MyFunds_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.MyFunds();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("MyFunds");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -219,11 +226,10 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void MyDonations_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.MyDonations();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("MyDonations");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -244,11 +250,10 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void Following_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.Following();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("Following");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -296,13 +301,10 @@ namespace KryskataFund.Tests.Controllers
         [Fact]
         public void ToggleFollow_RequiresSignIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = controller.ToggleFollow(1);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("ToggleFollow");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- SaveBuddyCustomization ---
@@ -324,15 +326,12 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public async Task SaveBuddyCustomization_RequiresSignIn()
+        public void SaveBuddyCustomization_RequiresSignIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.SaveBuddyCustomization("round", null, null);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("SaveBuddyCustomization");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         // --- GetBuddyCustomization ---
@@ -397,15 +396,12 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public async Task CancelRecurringDonation_RequiresSignIn()
+        public void CancelRecurringDonation_RequiresSignIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.CancelRecurringDonation(1);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireSignIn] filter attribute on the method.
+            var method = typeof(AccountController).GetMethod("CancelRecurringDonation");
+            var attr = method!.GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
     }
 }
