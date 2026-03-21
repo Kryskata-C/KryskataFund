@@ -14,11 +14,13 @@ namespace KryskataFund.Models
         public string DonorName { get; set; } = "Anonymous";
 
         [Required]
+        [Range(0.01, (double)decimal.MaxValue)]
         public decimal Amount { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation property
-        public Fund? Fund { get; set; }
+        // Navigation properties
+        public virtual Fund? Fund { get; set; }
+        public virtual User? User { get; set; }
     }
 }
