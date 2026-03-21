@@ -426,8 +426,9 @@ namespace KryskataFund.Controllers
 
                 return Json(new { success = true, message = "Donation successful!" });
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed to process donation for fund {FundId}, amount {Amount}", fundId, amount);
                 if (transaction != null) await transaction.RollbackAsync();
                 return Json(new { success = false, message = "An error occurred processing your donation" });
             }
