@@ -3,8 +3,7 @@ using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Constants;
 using KryskataFund.Filters;
-using System.Security.Cryptography;
-using System.Text;
+using KryskataFund.Services;
 
 namespace KryskataFund.Controllers
 {
@@ -35,8 +34,7 @@ namespace KryskataFund.Controllers
                 return View();
             }
 
-            var passwordHash = HashPassword(password);
-            if (user.PasswordHash != passwordHash)
+            if (!PasswordHasher.VerifyPassword(password, user.PasswordHash))
             {
                 ViewData["Error"] = "Invalid email or password";
                 ViewData["ReturnUrl"] = returnUrl;
@@ -83,7 +81,7 @@ namespace KryskataFund.Controllers
             var user = new User
             {
                 Email = model.Email,
-                PasswordHash = HashPassword(model.Password),
+                PasswordHash = PasswordHasher.HashPassword(model.Password),
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -304,13 +302,6 @@ namespace KryskataFund.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Recurring donation cancelled" });
-        }
-
-        private static string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(bytes);
         }
     }
 }
