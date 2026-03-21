@@ -14,6 +14,7 @@ namespace KryskataFund.Models
         public string Title { get; set; } = string.Empty;
 
         [Required]
+        [Range(1, (double)decimal.MaxValue)]
         public decimal TargetAmount { get; set; }
 
         public string? Description { get; set; }
