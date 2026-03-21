@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/kryskatafund.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/KryskataFund.styles.css" asp-append-version="true" />
+    <style>body { opacity: 0; } body.ready { opacity: 1; transition: opacity 0.15s ease-in; }</style>
 </head>
 <body>
     <style>
@@ -607,5 +608,6 @@
             setInterval(checkUnread, 2000);
         })();
     </script>
+    <script>document.body.classList.add('ready');</script>
 </body>
 </html>
