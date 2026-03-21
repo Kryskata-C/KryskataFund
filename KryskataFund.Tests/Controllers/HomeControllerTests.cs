@@ -31,6 +31,9 @@ namespace KryskataFund.Tests.Controllers
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
             model.Funds.Should().HaveCount(3);
+            model.Funds.Should().Contain(f => f.Title == "Test Fund 1" && f.Category == "Education");
+            model.Funds.Should().Contain(f => f.Title == "Test Fund 2" && f.Category == "Health");
+            model.Funds.Should().Contain(f => f.Title == "Ended Fund" && f.Category == "Animals");
         }
 
         [Fact]
@@ -56,6 +59,7 @@ namespace KryskataFund.Tests.Controllers
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
             model.Funds.Should().HaveCount(3);
+            model.Funds.Select(f => f.Category).Should().BeEquivalentTo(new[] { "Education", "Health", "Animals" });
         }
 
         [Fact]
