@@ -5,6 +5,7 @@ using KryskataFund.Data;
 using KryskataFund.Constants;
 using KryskataFund.Filters;
 using KryskataFund.Services.Interfaces;
+using Ganss.Xss;
 using Stripe;
 using System.Text;
 
@@ -82,7 +83,7 @@ namespace KryskataFund.Controllers
             var fund = new Fund
             {
                 Title = model.Title,
-                Description = model.Description,
+                Description = new HtmlSanitizer().Sanitize(model.Description),
                 Category = model.Category,
                 GoalAmount = model.GoalAmount,
                 RaisedAmount = 0,

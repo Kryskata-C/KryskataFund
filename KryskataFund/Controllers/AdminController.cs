@@ -3,6 +3,7 @@ using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Constants;
 using KryskataFund.Filters;
+using Ganss.Xss;
 using Microsoft.EntityFrameworkCore;
 
 namespace KryskataFund.Controllers
@@ -217,7 +218,7 @@ namespace KryskataFund.Controllers
             }
 
             fund.Title = title;
-            fund.Description = description;
+            fund.Description = new HtmlSanitizer().Sanitize(description);
             fund.GoalAmount = goalAmount;
             _context.SaveChanges();
 
