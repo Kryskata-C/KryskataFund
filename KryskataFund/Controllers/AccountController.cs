@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using KryskataFund.Data;
 using KryskataFund.Models;
+using KryskataFund.Constants;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -41,10 +42,10 @@ namespace KryskataFund.Controllers
                 return View();
             }
 
-            HttpContext.Session.SetString("IsSignedIn", "true");
-            HttpContext.Session.SetString("UserEmail", email);
-            HttpContext.Session.SetString("UserId", user.Id.ToString());
-            HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
+            HttpContext.Session.SetString(SessionKeys.IsSignedIn, "true");
+            HttpContext.Session.SetString(SessionKeys.UserEmail, email);
+            HttpContext.Session.SetString(SessionKeys.UserId, user.Id.ToString());
+            HttpContext.Session.SetString(SessionKeys.IsAdmin, user.IsAdmin.ToString());
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
@@ -89,9 +90,9 @@ namespace KryskataFund.Controllers
             _context.SaveChanges();
 
             // Sign in the user
-            HttpContext.Session.SetString("IsSignedIn", "true");
-            HttpContext.Session.SetString("UserEmail", user.Email);
-            HttpContext.Session.SetString("UserId", user.Id.ToString());
+            HttpContext.Session.SetString(SessionKeys.IsSignedIn, "true");
+            HttpContext.Session.SetString(SessionKeys.UserEmail, user.Email);
+            HttpContext.Session.SetString(SessionKeys.UserId, user.Id.ToString());
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
@@ -109,12 +110,12 @@ namespace KryskataFund.Controllers
 
         public IActionResult Profile()
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", new { returnUrl = "/Account/Profile" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             if (user == null)
@@ -155,12 +156,12 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveBuddyCustomization(string? glasses, string? hat, string? mask)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Not signed in" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             if (user == null)
@@ -179,12 +180,12 @@ namespace KryskataFund.Controllers
 
         public IActionResult GetBuddyCustomization()
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { glasses = (string?)null, hat = (string?)null, mask = (string?)null });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             if (user == null)
@@ -197,12 +198,12 @@ namespace KryskataFund.Controllers
 
         public IActionResult MyFunds()
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", new { returnUrl = "/Account/MyFunds" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var myFunds = _context.Funds
                 .Where(f => f.CreatorId == userId)
                 .OrderByDescending(f => f.CreatedAt)
@@ -220,12 +221,12 @@ namespace KryskataFund.Controllers
 
         public IActionResult MyDonations()
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", new { returnUrl = "/Account/MyDonations" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var myDonations = _context.Donations
                 .Where(d => d.UserId == userId)
                 .OrderByDescending(d => d.CreatedAt)
@@ -252,12 +253,12 @@ namespace KryskataFund.Controllers
 
         public IActionResult Following()
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return RedirectToAction("SignIn", new { returnUrl = "/Account/Following" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var followedFundIds = _context.UserFollows
                 .Where(f => f.UserId == userId)
                 .Select(f => f.FundId)
@@ -277,12 +278,12 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public IActionResult ToggleFollow(int fundId)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Not signed in" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var existingFollow = _context.UserFollows
                 .FirstOrDefault(f => f.UserId == userId && f.FundId == fundId);
 
@@ -310,12 +311,12 @@ namespace KryskataFund.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelRecurringDonation(int id)
         {
-            if (HttpContext.Session.GetString("IsSignedIn") != "true")
+            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
                 return Json(new { success = false, message = "Not signed in" });
             }
 
-            var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
+            var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
             var recurring = _context.RecurringDonations
                 .FirstOrDefault(r => r.Id == id && r.UserId == userId && r.IsActive);
 
