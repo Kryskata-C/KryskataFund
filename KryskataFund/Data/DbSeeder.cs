@@ -1,7 +1,6 @@
 using KryskataFund.Models;
 using KryskataFund.Constants;
-using System.Security.Cryptography;
-using System.Text;
+using KryskataFund.Services;
 
 namespace KryskataFund.Data
 {
@@ -22,13 +21,6 @@ namespace KryskataFund.Data
             context.SaveChanges();
         }
 
-        private static string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(bytes);
-        }
-
         private static List<User> SeedUsers(ApplicationDbContext context)
         {
             if (context.Users.Any())
@@ -36,17 +28,17 @@ namespace KryskataFund.Data
 
             var users = new List<User>
             {
-                new User { Email = "admin@kryskatafund.com", PasswordHash = HashPassword("admin"), IsAdmin = true, CreatedAt = DateTime.UtcNow.AddDays(-90) },
-                new User { Email = "maria.ivanova@gmail.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-60) },
-                new User { Email = "stefan.petrov@yahoo.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-55) },
-                new User { Email = "elena.dimitrova@abv.bg", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-50) },
-                new User { Email = "ivan.kolev@gmail.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-45) },
-                new User { Email = "nikoleta.georgieva@mail.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-40) },
-                new User { Email = "dimitar.todorov@outlook.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-35) },
-                new User { Email = "viktoria.stoyanova@gmail.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-30) },
-                new User { Email = "alex.marinov@proton.me", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-25) },
-                new User { Email = "desislava.hristova@gmail.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-20) },
-                new User { Email = "georgi.angelov@yahoo.com", PasswordHash = HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-15) },
+                new User { Email = "admin@kryskatafund.com", PasswordHash = PasswordHasher.HashPassword("admin"), IsAdmin = true, CreatedAt = DateTime.UtcNow.AddDays(-90) },
+                new User { Email = "maria.ivanova@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-60) },
+                new User { Email = "stefan.petrov@yahoo.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-55) },
+                new User { Email = "elena.dimitrova@abv.bg", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-50) },
+                new User { Email = "ivan.kolev@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-45) },
+                new User { Email = "nikoleta.georgieva@mail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-40) },
+                new User { Email = "dimitar.todorov@outlook.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-35) },
+                new User { Email = "viktoria.stoyanova@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-30) },
+                new User { Email = "alex.marinov@proton.me", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-25) },
+                new User { Email = "desislava.hristova@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-20) },
+                new User { Email = "georgi.angelov@yahoo.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-15) },
             };
 
             context.Users.AddRange(users);
