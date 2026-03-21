@@ -1,4 +1,5 @@
 using KryskataFund.Models;
+using KryskataFund.ViewModels;
 using KryskataFund.Data;
 using KryskataFund.Constants;
 using Microsoft.AspNetCore.Mvc;
@@ -27,27 +28,12 @@ namespace KryskataFund.Controllers
                 .GroupBy(f => f.Category)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            ViewBag.CategoryCounts = categoryCounts;
-            ViewBag.TotalCount = allFunds.Count;
-            ViewBag.SelectedCategory = category;
-
-            // Calculate total raised and live campaigns
-            ViewBag.TotalRaised = allFunds.Sum(f => f.RaisedAmount);
-            ViewBag.LiveCampaigns = allFunds.Count(f => f.DaysLeft > 0);
-
             // Calculate today's impact (donations made today)
             var today = DateTime.UtcNow.Date;
             var todaysDonations = allDonations.Where(d => d.CreatedAt.Date == today).ToList();
-            ViewBag.TodaysImpact = todaysDonations.Sum(d => d.Amount);
-
-            // Calculate average support per donation
-            ViewBag.AvgSupport = allDonations.Count > 0
-                ? Math.Round(allDonations.Average(d => d.Amount), 0)
-                : 0;
 
             // Get top category
             var topCategory = categoryCounts.OrderByDescending(c => c.Value).FirstOrDefault();
-            ViewBag.TopCategory = topCategory.Key ?? "None";
 
             // Filter funds if category is selected
             var funds = string.IsNullOrEmpty(category)
@@ -64,16 +50,31 @@ namespace KryskataFund.Controllers
                     .Select(f => f.FundId)
                     .ToList();
             }
-            ViewBag.FollowedFundIds = followedFundIds;
 
             // Get expired fund IDs (EndDate has passed)
             var expiredFundIds = allFunds
                 .Where(f => f.EndDate < DateTime.UtcNow)
                 .Select(f => f.Id)
                 .ToList();
-            ViewBag.ExpiredFundIds = expiredFundIds;
 
-            return View(funds);
+            var viewModel = new HomeViewModel
+            {
+                Funds = funds,
+                CategoryCounts = categoryCounts,
+                TotalCount = allFunds.Count,
+                SelectedCategory = category,
+                TotalRaised = allFunds.Sum(f => f.RaisedAmount),
+                LiveCampaigns = allFunds.Count(f => f.DaysLeft > 0),
+                TodaysImpact = todaysDonations.Sum(d => d.Amount),
+                AvgSupport = allDonations.Count > 0
+                    ? Math.Round(allDonations.Average(d => d.Amount), 0)
+                    : 0,
+                TopCategory = topCategory.Key ?? "None",
+                FollowedFundIds = followedFundIds,
+                ExpiredFundIds = expiredFundIds
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult GetRecentActivity()
