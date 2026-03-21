@@ -14,30 +14,30 @@ namespace KryskataFund.Services
             _context = context;
         }
 
-        public Fund? GetById(int id)
+        public async Task<Fund?> GetByIdAsync(int id)
         {
-            return _context.Funds.FirstOrDefault(f => f.Id == id);
+            return await _context.Funds.FirstOrDefaultAsync(f => f.Id == id);
         }
 
-        public IEnumerable<Fund> GetAll()
+        public async Task<IEnumerable<Fund>> GetAllAsync()
         {
-            return _context.Funds.ToList();
+            return await _context.Funds.ToListAsync();
         }
 
-        public IEnumerable<Fund> GetByCategory(string category)
+        public async Task<IEnumerable<Fund>> GetByCategoryAsync(string category)
         {
-            return _context.Funds
+            return await _context.Funds
                 .Where(f => f.Category.ToLower() == category.ToLower())
-                .ToList();
+                .ToListAsync();
         }
 
-        public IEnumerable<Fund> Search(string query)
+        public async Task<IEnumerable<Fund>> SearchAsync(string query)
         {
             var lowerQuery = query.ToLower();
-            return _context.Funds
+            return await _context.Funds
                 .Where(f => f.Title.ToLower().Contains(lowerQuery)
                          || f.Description.ToLower().Contains(lowerQuery))
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<Fund> CreateAsync(Fund fund)
@@ -63,22 +63,22 @@ namespace KryskataFund.Services
             }
         }
 
-        public decimal GetTotalRaised()
+        public async Task<decimal> GetTotalRaisedAsync()
         {
-            return _context.Funds.Sum(f => f.RaisedAmount);
+            return await _context.Funds.SumAsync(f => f.RaisedAmount);
         }
 
-        public int GetActiveCampaignCount()
+        public async Task<int> GetActiveCampaignCountAsync()
         {
-            return _context.Funds.Count(f => f.EndDate > DateTime.UtcNow);
+            return await _context.Funds.CountAsync(f => f.EndDate > DateTime.UtcNow);
         }
 
-        public IEnumerable<Fund> GetTopFunded(int count)
+        public async Task<IEnumerable<Fund>> GetTopFundedAsync(int count)
         {
-            return _context.Funds
+            return await _context.Funds
                 .OrderByDescending(f => f.RaisedAmount)
                 .Take(count)
-                .ToList();
+                .ToListAsync();
         }
     }
 }
