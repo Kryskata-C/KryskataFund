@@ -100,11 +100,38 @@ namespace KryskataFund.Tests.Security
             var mockEnv = new Mock<IWebHostEnvironment>();
             mockEnv.Setup(e => e.WebRootPath).Returns("/tmp/wwwroot");
 
+            var controller = new FundsController(context, mockEnv.Object);
+            TestHelper.SetupSession(controller, userId: userId, email: email);
+            return controller;
+        }
+
+        private static DonationsController CreateDonationsController(ApplicationDbContext context, int? userId = null, string? email = null)
+        {
             var mockConfig = new Mock<IConfiguration>();
             mockConfig.Setup(c => c["Stripe:PublishableKey"]).Returns("pk_test_fake");
-
             var mockEmailService = new Mock<KryskataFund.Services.Interfaces.IEmailService>();
-            var controller = new FundsController(context, mockEnv.Object, mockConfig.Object, mockEmailService.Object);
+            var controller = new DonationsController(context, mockConfig.Object, mockEmailService.Object);
+            TestHelper.SetupSession(controller, userId: userId, email: email);
+            return controller;
+        }
+
+        private static FundUpdatesController CreateFundUpdatesController(ApplicationDbContext context, int? userId = null, string? email = null)
+        {
+            var controller = new FundUpdatesController(context);
+            TestHelper.SetupSession(controller, userId: userId, email: email);
+            return controller;
+        }
+
+        private static FundMilestonesController CreateFundMilestonesController(ApplicationDbContext context, int? userId = null, string? email = null)
+        {
+            var controller = new FundMilestonesController(context);
+            TestHelper.SetupSession(controller, userId: userId, email: email);
+            return controller;
+        }
+
+        private static FundCollaboratorsController CreateFundCollaboratorsController(ApplicationDbContext context, int? userId = null, string? email = null)
+        {
+            var controller = new FundCollaboratorsController(context);
             TestHelper.SetupSession(controller, userId: userId, email: email);
             return controller;
         }
@@ -425,7 +452,7 @@ namespace KryskataFund.Tests.Security
             // Decimal parsing protects against string-based injection
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateDonationsController(context, userId: 2, email: "donor@test.com");
 
             var originalRaised = context.Funds.First(f => f.Id == 1).RaisedAmount;
 
@@ -445,7 +472,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: SQL injection in the collaborator email search field
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
+            var controller = CreateFundCollaboratorsController(context, userId: 1, email: "creator@test.com");
 
             // Act - inject SQL via the email parameter
             var result = await controller.AddCollaborator(1, "' OR '1'='1' --");
@@ -678,7 +705,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: Stored XSS via fund update title
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
+            var controller = CreateFundUpdatesController(context, userId: 1, email: "creator@test.com");
 
             // Act
             var result = await controller.PostUpdate(1, xssPayload, "Normal update content");
@@ -700,7 +727,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: Stored XSS via fund update content body
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
+            var controller = CreateFundUpdatesController(context, userId: 1, email: "creator@test.com");
 
             // Act
             var result = await controller.PostUpdate(1, "Normal Title", xssPayload);
@@ -723,7 +750,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: Stored XSS via milestone title
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
+            var controller = CreateFundMilestonesController(context, userId: 1, email: "creator@test.com");
 
             // Act
             var result = await controller.AddMilestone(1, xssPayload, 500m, "Normal description");
@@ -746,7 +773,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: XSS payload as collaborator email search
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
+            var controller = CreateFundCollaboratorsController(context, userId: 1, email: "creator@test.com");
 
             // Act
             var result = await controller.AddCollaborator(1, "<script>alert(1)</script>");
@@ -983,7 +1010,7 @@ namespace KryskataFund.Tests.Security
             context.SaveChanges();
 
             // User 2 tries to delete it
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateFundMilestonesController(context, userId: 2, email: "donor@test.com");
 
             // Act
             var result = await controller.DeleteMilestone(1) as JsonResult;
@@ -1000,7 +1027,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: IDOR - User 2 tries to post an update to User 1's fund
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateFundUpdatesController(context, userId: 2, email: "donor@test.com");
 
             // Act - User 2 tries to post update to fund 1 (owned by user 1)
             var result = await controller.PostUpdate(1, "Hacked Update", "This fund is hacked!") as JsonResult;
@@ -1017,7 +1044,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: IDOR - User 2 tries to add collaborators to User 1's fund
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateFundCollaboratorsController(context, userId: 2, email: "donor@test.com");
 
             // Act
             var result = await controller.AddCollaborator(1, "admin@test.com") as JsonResult;
@@ -1034,7 +1061,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: IDOR - User 2 tries to add milestones to User 1's fund
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateFundMilestonesController(context, userId: 2, email: "donor@test.com");
 
             // Act
             var result = await controller.AddMilestone(1, "Fake Milestone", 500m, "Injected milestone") as JsonResult;
@@ -1171,7 +1198,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: Submitting a donation without authentication
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context); // No userId
+            var controller = CreateDonationsController(context); // No userId
 
             // Act
             var result = await controller.ProcessDonation(1, 100m) as JsonResult;
@@ -1288,7 +1315,7 @@ namespace KryskataFund.Tests.Security
             // This tests whether the server validates amount > 0
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateDonationsController(context, userId: 2, email: "donor@test.com");
 
             var originalAmount = context.Funds.First(f => f.Id == 1).RaisedAmount;
 
@@ -1307,7 +1334,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: Zero donation to inflate supporters count without paying
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateDonationsController(context, userId: 2, email: "donor@test.com");
 
             var originalSupporters = context.Funds.First(f => f.Id == 1).SupportersCount;
 
@@ -1325,7 +1352,7 @@ namespace KryskataFund.Tests.Security
             // Verifies the controller handles overflow gracefully via try-catch
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateDonationsController(context, userId: 2, email: "donor@test.com");
 
             // Act - decimal.MaxValue + existing amount would overflow but is caught
             var result = await controller.ProcessDonation(1, decimal.MaxValue);
@@ -1340,7 +1367,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: Very precise decimal to test rounding/precision issues
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateDonationsController(context, userId: 2, email: "donor@test.com");
 
             // Act
             var result = await controller.ProcessDonation(1, 0.0000000000000001m);
@@ -1415,7 +1442,7 @@ namespace KryskataFund.Tests.Security
             // Attack vector: DoS via extremely long update content
             var context = TestHelper.CreateDbContext();
             TestHelper.SeedTestData(context);
-            var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
+            var controller = CreateFundUpdatesController(context, userId: 1, email: "creator@test.com");
 
             var longContent = new string('X', 500000); // 500KB
 
@@ -1644,7 +1671,7 @@ namespace KryskataFund.Tests.Security
             TestHelper.SeedTestData(context);
 
             var originalRaised = context.Funds.First(f => f.Id == 1).RaisedAmount;
-            var controller = CreateFundsController(context, userId: 2, email: "donor@test.com");
+            var controller = CreateDonationsController(context, userId: 2, email: "donor@test.com");
 
             // Act - simulate multiple rapid donations
             var tasks = new List<Task>();
