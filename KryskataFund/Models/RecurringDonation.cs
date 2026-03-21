@@ -14,6 +14,7 @@ namespace KryskataFund.Models
         public string DonorName { get; set; } = "Anonymous";
 
         [Required]
+        [Range(0.01, (double)decimal.MaxValue)]
         public decimal Amount { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
