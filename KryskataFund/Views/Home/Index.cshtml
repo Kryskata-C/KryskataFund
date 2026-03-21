@@ -1,4 +1,5 @@
 @model List<KryskataFund.Models.Fund>
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "KryskataFund – Home";
     var categoryCounts = ViewBag.CategoryCounts as Dictionary<string, int> ?? new Dictionary<string, int>();
@@ -2212,7 +2213,7 @@
             try {
                 const response = await fetch('/Account/ToggleFollow', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
                     body: 'fundId=' + fundId
                 });
                 const data = await response.json();
