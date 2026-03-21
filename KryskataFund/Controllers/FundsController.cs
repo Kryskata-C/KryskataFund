@@ -733,13 +733,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> AddComment(int fundId, string content)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             if (string.IsNullOrWhiteSpace(content))
             {
                 return Json(new { success = false, message = "Comment cannot be empty" });
@@ -775,13 +771,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> DeleteComment(int commentId)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var comment = await _context.FundComments.FindAsync(commentId);
             if (comment == null)
             {
@@ -825,13 +817,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpGet]
+        [RequireSignIn]
         public IActionResult GetRecentContacts()
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new List<object>());
-            }
-
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
 
             var recentContacts = _context.Messages
@@ -853,13 +841,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpGet]
+        [RequireSignIn]
         public async Task<IActionResult> ExportDonors(int id)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", "Account");
-            }
-
             var fund = await _context.Funds.FindAsync(id);
             if (fund == null)
             {
@@ -890,13 +874,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> RefundDonation(int donationId)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var donation = await _context.Donations.FindAsync(donationId);
             if (donation == null)
             {
@@ -925,13 +905,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpGet]
+        [RequireSignIn]
         public async Task<IActionResult> Analytics(int id)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", "Account");
-            }
-
             var fund = await _context.Funds.FindAsync(id);
             if (fund == null)
             {
