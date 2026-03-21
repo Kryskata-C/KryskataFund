@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
+using KryskataFund.Constants;
 
 namespace KryskataFund.Controllers
 {
@@ -16,7 +17,7 @@ namespace KryskataFund.Controllers
 
         private int? GetCurrentUserId()
         {
-            var userIdStr = HttpContext.Session.GetString("UserId");
+            var userIdStr = HttpContext.Session.GetString(SessionKeys.UserId);
             if (int.TryParse(userIdStr, out var userId))
                 return userId;
             return null;
@@ -24,7 +25,7 @@ namespace KryskataFund.Controllers
 
         private bool IsSignedIn()
         {
-            return HttpContext.Session.GetString("IsSignedIn") == "true";
+            return HttpContext.Session.GetString(SessionKeys.IsSignedIn) == "true";
         }
 
         public async Task<IActionResult> Inbox()
