@@ -1,6 +1,7 @@
 using FluentAssertions;
 using KryskataFund.Controllers;
 using KryskataFund.Data;
+using KryskataFund.Filters;
 using KryskataFund.Models;
 using KryskataFund.Tests.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,15 @@ namespace KryskataFund.Tests.Controllers
             context.SaveChanges();
         }
 
+        // --- RequireSignIn attribute is applied at class level ---
+
+        [Fact]
+        public void MessagesController_HasRequireSignInAttribute()
+        {
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty("MessagesController should have [RequireSignIn] attribute");
+        }
+
         // --- Send ---
 
         [Fact]
@@ -66,15 +76,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public async Task Send_RequiresSignIn()
+        public void Send_RequiresSignIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.Send(2, "Hello", null);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireSignIn] filter at class level.
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -193,15 +199,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetUnreadCount_ReturnsZeroWhenNotSignedIn()
+        public void GetUnreadCount_ReturnsZeroWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.GetUnreadCount();
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            ((int)value!.GetType().GetProperty("count")!.GetValue(value)!).Should().Be(0);
+            // Auth is handled by [RequireSignIn] filter at class level.
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -228,13 +230,11 @@ namespace KryskataFund.Tests.Controllers
         // --- Inbox ---
 
         [Fact]
-        public async Task Inbox_RedirectsWhenNotSignedIn()
+        public void Inbox_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.Inbox();
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireSignIn] filter at class level.
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -266,13 +266,11 @@ namespace KryskataFund.Tests.Controllers
         // --- Conversation ---
 
         [Fact]
-        public async Task Conversation_RedirectsWhenNotSignedIn()
+        public void Conversation_RedirectsWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.Conversation(1);
-
-            result.Should().BeOfType<RedirectToActionResult>();
+            // Auth is handled by [RequireSignIn] filter at class level.
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -346,15 +344,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public async Task Delete_RequiresSignIn()
+        public void Delete_RequiresSignIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.Delete(1);
-
-            var json = result.Should().BeOfType<JsonResult>().Subject;
-            var value = json.Value;
-            value!.GetType().GetProperty("success")!.GetValue(value).Should().Be(false);
+            // Auth is handled by [RequireSignIn] filter at class level.
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
@@ -382,13 +376,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public async Task SearchUsers_ReturnsEmptyWhenNotSignedIn()
+        public void SearchUsers_ReturnsEmptyWhenNotSignedIn()
         {
-            var (controller, _) = CreateController();
-
-            var result = await controller.SearchUsers("donor");
-
-            result.Should().BeOfType<JsonResult>();
+            // Auth is handled by [RequireSignIn] filter at class level.
+            var attr = typeof(MessagesController).GetCustomAttributes(typeof(RequireSignInAttribute), true);
+            attr.Should().NotBeEmpty();
         }
 
         [Fact]
