@@ -343,16 +343,18 @@ namespace KryskataFund.Controllers
                                     await _emailService.SendDonationReceivedAsync(creator.Email, "@" + userEmail.Split('@')[0], fund.Title, amount);
                                 }
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                _logger.LogError(ex, "Failed to process donation for fund {FundId}, amount {Amount}", fundId, amount);
                                 if (transaction2 != null) await transaction2.RollbackAsync();
                             }
                         }
                     }
                 }
             }
-            catch (StripeException)
+            catch (StripeException ex)
             {
+                _logger.LogError(ex, "Stripe error during donation success callback for fund {FundId}", fundId);
                 return RedirectToAction("Details", new { id = fundId });
             }
 
