@@ -18,5 +18,9 @@ namespace KryskataFund.Models
         public string Content { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        public virtual User? User { get; set; }
+        public virtual Fund? Fund { get; set; }
     }
 }
