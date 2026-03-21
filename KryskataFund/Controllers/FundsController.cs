@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
 using KryskataFund.Constants;
+using KryskataFund.Filters;
 using KryskataFund.Services.Interfaces;
 using Stripe;
 using System.Text;
@@ -15,18 +16,6 @@ namespace KryskataFund.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-
-        private static readonly Dictionary<string, string> CategoryColors = new()
-        {
-            { "Education", "#4ade80" },
-            { "Health", "#f97316" },
-            { "Animals", "#22d3ee" },
-            { "Creative", "#a855f7" },
-            { "Dreams", "#facc15" },
-            { "Just for fun", "#ef4444" },
-            { "Technology", "#3b82f6" },
-            { "Community", "#ec4899" }
-        };
 
         public FundsController(ApplicationDbContext context, IWebHostEnvironment environment, IConfiguration configuration, IEmailService emailService)
         {
@@ -42,26 +31,16 @@ namespace KryskataFund.Controllers
             return _context.FundCollaborators.Any(c => c.FundId == fundId && c.UserId == userId);
         }
 
+        [RequireSignIn]
         public IActionResult Create()
         {
-            // Must be signed in to create a fund
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/Funds/Create" });
-            }
-
             return View(new CreateFundViewModel());
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> Create(CreateFundViewModel model)
         {
-            // Must be signed in
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/Funds/Create" });
-            }
-
             // Need either URL or file
             if (string.IsNullOrEmpty(model.ImageUrl) && model.ImageFile == null)
             {
@@ -111,7 +90,7 @@ namespace KryskataFund.Controllers
                 ImageUrl = imageUrl,
                 CreatedAt = DateTime.UtcNow,
                 EndDate = DateTime.UtcNow.AddDays(model.DurationDays),
-                CategoryColor = CategoryColors.GetValueOrDefault(model.Category, "#4ade80")
+                CategoryColor = Constants.CategoryColors.GetColor(model.Category)
             };
 
             _context.Funds.Add(fund);
@@ -198,13 +177,9 @@ namespace KryskataFund.Controllers
             return View(fund);
         }
 
+        [RequireSignIn]
         public IActionResult Donate(int id, int amount)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = $"/Funds/Donate?id={id}&amount={amount}" });
-            }
-
             var fund = _context.Funds.FirstOrDefault(f => f.Id == id);
 
             if (fund == null)
@@ -218,10 +193,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> CreateCheckoutSession(int fundId, decimal amount)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-                return Json(new { success = false, message = "Please sign in" });
 
             if (amount <= 0)
                 return Json(new { success = false, message = "Amount must be greater than zero" });
@@ -384,13 +358,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> ProcessDonation(int fundId, decimal amount)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in to donate" });
-            }
-
             if (amount <= 0)
                 return Json(new { success = false, message = "Amount must be greater than zero" });
 
@@ -460,13 +430,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> AddMilestone(int fundId, string title, decimal targetAmount, string? description)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
             {
@@ -509,13 +475,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> DeleteMilestone(int milestoneId)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var milestone = await _context.FundMilestones.FindAsync(milestoneId);
             if (milestone == null)
             {
@@ -536,13 +498,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> PostUpdate(int fundId, string title, string content)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
             {
@@ -578,13 +536,9 @@ namespace KryskataFund.Controllers
             });
         }
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> CreateRecurringDonation(int fundId, decimal amount)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in to set up a recurring donation" });
-            }
-
             if (amount <= 0)
                 return Json(new { success = false, message = "Amount must be greater than zero" });
 
@@ -624,13 +578,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> AddCollaborator(int fundId, string email)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
             {
@@ -690,13 +640,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> RemoveCollaborator(int collaboratorId)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var collaborator = await _context.FundCollaborators.FindAsync(collaboratorId);
             if (collaborator == null)
             {
@@ -717,13 +663,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
+        [RequireSignIn]
         public async Task<IActionResult> RequestExtension(int fundId, int extensionDays, string reason)
         {
-            if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
-            {
-                return Json(new { success = false, message = "Please sign in" });
-            }
-
             var fund = await _context.Funds.FindAsync(fundId);
             if (fund == null)
             {
