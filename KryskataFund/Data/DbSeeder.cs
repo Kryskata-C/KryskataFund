@@ -496,6 +496,157 @@ namespace KryskataFund.Data
                 new Donation { FundId = funds[9].Id, UserId = users[9].Id, DonorName = "@desislava.hristova", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-3) },
             });
 
+            // Fund 10: Clean Water for Rhodope Villages (raised 9400, 12 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[10].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-26) },
+                new Donation { FundId = funds[10].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-24) },
+                new Donation { FundId = funds[10].Id, UserId = users[3].Id, DonorName = "@elena.dimitrova", Amount = 1500, CreatedAt = DateTime.UtcNow.AddDays(-22) },
+                new Donation { FundId = funds[10].Id, UserId = users[5].Id, DonorName = "@nikoleta.georgieva", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-20) },
+                new Donation { FundId = funds[10].Id, UserId = users[6].Id, DonorName = "@dimitar.todorov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-18) },
+                new Donation { FundId = funds[10].Id, UserId = users[8].Id, DonorName = "@alex.marinov", Amount = 750, CreatedAt = DateTime.UtcNow.AddDays(-16) },
+                new Donation { FundId = funds[10].Id, UserId = users[9].Id, DonorName = "@desislava.hristova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-14) },
+                new Donation { FundId = funds[10].Id, UserId = users[12].Id, DonorName = "@boyan.iliev", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-12) },
+                new Donation { FundId = funds[10].Id, UserId = users[14].Id, DonorName = "@plamen.kostov", Amount = 450, CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new Donation { FundId = funds[10].Id, UserId = users[16].Id, DonorName = "@yordan.mitev", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[10].Id, UserId = users[18].Id, DonorName = "@krasimir.dzhambov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[10].Id, UserId = users[20].Id, DonorName = "@valentin.boyanov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+            });
+
+            // Fund 11: Vintage Film Photography Workshop (raised 2100, 9 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[11].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 100, CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new Donation { FundId = funds[11].Id, UserId = users[3].Id, DonorName = "@elena.dimitrova", Amount = 300, CreatedAt = DateTime.UtcNow.AddDays(-9) },
+                new Donation { FundId = funds[11].Id, UserId = users[4].Id, DonorName = "@ivan.kolev", Amount = 250, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[11].Id, UserId = users[7].Id, DonorName = "@viktoria.stoyanova", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-7) },
+                new Donation { FundId = funds[11].Id, UserId = users[10].Id, DonorName = "@georgi.angelov", Amount = 150, CreatedAt = DateTime.UtcNow.AddDays(-6) },
+                new Donation { FundId = funds[11].Id, UserId = users[13].Id, DonorName = "@radostina.pencheva", Amount = 400, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[11].Id, UserId = users[15].Id, DonorName = "@tsvetana.nikolova", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-4) },
+                new Donation { FundId = funds[11].Id, UserId = users[17].Id, DonorName = "@silvia.atanasova", Amount = 250, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+                new Donation { FundId = funds[11].Id, UserId = users[19].Id, DonorName = "@milena.stoeva", Amount = 250, CreatedAt = DateTime.UtcNow.AddDays(-2) },
+            });
+
+            // Fund 12: Wheelchair Ramps for Veliko Tarnovo (raised 4300, 8 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[12].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-17) },
+                new Donation { FundId = funds[12].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-15) },
+                new Donation { FundId = funds[12].Id, UserId = users[5].Id, DonorName = "@nikoleta.georgieva", Amount = 300, CreatedAt = DateTime.UtcNow.AddDays(-13) },
+                new Donation { FundId = funds[12].Id, UserId = users[8].Id, DonorName = "@alex.marinov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-11) },
+                new Donation { FundId = funds[12].Id, UserId = users[11].Id, DonorName = "@kristina.vasileva", Amount = 750, CreatedAt = DateTime.UtcNow.AddDays(-9) },
+                new Donation { FundId = funds[12].Id, UserId = users[14].Id, DonorName = "@plamen.kostov", Amount = 250, CreatedAt = DateTime.UtcNow.AddDays(-7) },
+                new Donation { FundId = funds[12].Id, UserId = users[17].Id, DonorName = "@silvia.atanasova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[12].Id, UserId = users[20].Id, DonorName = "@valentin.boyanov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+            });
+
+            // Fund 13: Board Game Cafe in Ruse (raised 6200, 10 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[13].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-22) },
+                new Donation { FundId = funds[13].Id, UserId = users[3].Id, DonorName = "@elena.dimitrova", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-20) },
+                new Donation { FundId = funds[13].Id, UserId = users[4].Id, DonorName = "@ivan.kolev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-18) },
+                new Donation { FundId = funds[13].Id, UserId = users[6].Id, DonorName = "@dimitar.todorov", Amount = 750, CreatedAt = DateTime.UtcNow.AddDays(-16) },
+                new Donation { FundId = funds[13].Id, UserId = users[7].Id, DonorName = "@viktoria.stoyanova", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-14) },
+                new Donation { FundId = funds[13].Id, UserId = users[10].Id, DonorName = "@georgi.angelov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-12) },
+                new Donation { FundId = funds[13].Id, UserId = users[12].Id, DonorName = "@boyan.iliev", Amount = 750, CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new Donation { FundId = funds[13].Id, UserId = users[15].Id, DonorName = "@tsvetana.nikolova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[13].Id, UserId = users[18].Id, DonorName = "@krasimir.dzhambov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[13].Id, UserId = users[19].Id, DonorName = "@milena.stoeva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+            });
+
+            // Fund 14: Cat Sanctuary Expansion (raised 7700, 11 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[14].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-24) },
+                new Donation { FundId = funds[14].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-22) },
+                new Donation { FundId = funds[14].Id, UserId = users[3].Id, DonorName = "@elena.dimitrova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-20) },
+                new Donation { FundId = funds[14].Id, UserId = users[5].Id, DonorName = "@nikoleta.georgieva", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-18) },
+                new Donation { FundId = funds[14].Id, UserId = users[7].Id, DonorName = "@viktoria.stoyanova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-16) },
+                new Donation { FundId = funds[14].Id, UserId = users[9].Id, DonorName = "@desislava.hristova", Amount = 700, CreatedAt = DateTime.UtcNow.AddDays(-14) },
+                new Donation { FundId = funds[14].Id, UserId = users[11].Id, DonorName = "@kristina.vasileva", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-12) },
+                new Donation { FundId = funds[14].Id, UserId = users[13].Id, DonorName = "@radostina.pencheva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new Donation { FundId = funds[14].Id, UserId = users[16].Id, DonorName = "@yordan.mitev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[14].Id, UserId = users[18].Id, DonorName = "@krasimir.dzhambov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[14].Id, UserId = users[20].Id, DonorName = "@valentin.boyanov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+            });
+
+            // Fund 15: Open-Source Weather Station Network (raised 3400, 7 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[15].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-11) },
+                new Donation { FundId = funds[15].Id, UserId = users[4].Id, DonorName = "@ivan.kolev", Amount = 750, CreatedAt = DateTime.UtcNow.AddDays(-9) },
+                new Donation { FundId = funds[15].Id, UserId = users[7].Id, DonorName = "@viktoria.stoyanova", Amount = 300, CreatedAt = DateTime.UtcNow.AddDays(-7) },
+                new Donation { FundId = funds[15].Id, UserId = users[10].Id, DonorName = "@georgi.angelov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[15].Id, UserId = users[12].Id, DonorName = "@boyan.iliev", Amount = 350, CreatedAt = DateTime.UtcNow.AddDays(-4) },
+                new Donation { FundId = funds[15].Id, UserId = users[17].Id, DonorName = "@silvia.atanasova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+                new Donation { FundId = funds[15].Id, UserId = users[20].Id, DonorName = "@valentin.boyanov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            });
+
+            // Fund 16: Mental Health Hotline for Students (raised 11200, 14 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[16].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-30) },
+                new Donation { FundId = funds[16].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 2000, CreatedAt = DateTime.UtcNow.AddDays(-28) },
+                new Donation { FundId = funds[16].Id, UserId = users[3].Id, DonorName = "@elena.dimitrova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-26) },
+                new Donation { FundId = funds[16].Id, UserId = users[4].Id, DonorName = "@ivan.kolev", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-24) },
+                new Donation { FundId = funds[16].Id, UserId = users[5].Id, DonorName = "@nikoleta.georgieva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-22) },
+                new Donation { FundId = funds[16].Id, UserId = users[6].Id, DonorName = "@dimitar.todorov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-20) },
+                new Donation { FundId = funds[16].Id, UserId = users[8].Id, DonorName = "@alex.marinov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-18) },
+                new Donation { FundId = funds[16].Id, UserId = users[9].Id, DonorName = "@desislava.hristova", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-16) },
+                new Donation { FundId = funds[16].Id, UserId = users[11].Id, DonorName = "@kristina.vasileva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-14) },
+                new Donation { FundId = funds[16].Id, UserId = users[13].Id, DonorName = "@radostina.pencheva", Amount = 700, CreatedAt = DateTime.UtcNow.AddDays(-12) },
+                new Donation { FundId = funds[16].Id, UserId = users[15].Id, DonorName = "@tsvetana.nikolova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new Donation { FundId = funds[16].Id, UserId = users[16].Id, DonorName = "@yordan.mitev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[16].Id, UserId = users[19].Id, DonorName = "@milena.stoeva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[16].Id, UserId = users[20].Id, DonorName = "@valentin.boyanov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+            });
+
+            // Fund 17: Giant Slip-N-Slide Festival (raised 3150, 9 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[17].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[17].Id, UserId = users[4].Id, DonorName = "@ivan.kolev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-7) },
+                new Donation { FundId = funds[17].Id, UserId = users[5].Id, DonorName = "@nikoleta.georgieva", Amount = 250, CreatedAt = DateTime.UtcNow.AddDays(-6) },
+                new Donation { FundId = funds[17].Id, UserId = users[6].Id, DonorName = "@dimitar.todorov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[17].Id, UserId = users[8].Id, DonorName = "@alex.marinov", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-4) },
+                new Donation { FundId = funds[17].Id, UserId = users[10].Id, DonorName = "@georgi.angelov", Amount = 300, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+                new Donation { FundId = funds[17].Id, UserId = users[12].Id, DonorName = "@boyan.iliev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-2) },
+                new Donation { FundId = funds[17].Id, UserId = users[14].Id, DonorName = "@plamen.kostov", Amount = 200, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+                new Donation { FundId = funds[17].Id, UserId = users[19].Id, DonorName = "@milena.stoeva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            });
+
+            // Fund 18: Bulgarian Folklore Dance Academy (raised 5625, 10 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[18].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-19) },
+                new Donation { FundId = funds[18].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 750, CreatedAt = DateTime.UtcNow.AddDays(-17) },
+                new Donation { FundId = funds[18].Id, UserId = users[3].Id, DonorName = "@elena.dimitrova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-15) },
+                new Donation { FundId = funds[18].Id, UserId = users[5].Id, DonorName = "@nikoleta.georgieva", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-13) },
+                new Donation { FundId = funds[18].Id, UserId = users[7].Id, DonorName = "@viktoria.stoyanova", Amount = 375, CreatedAt = DateTime.UtcNow.AddDays(-11) },
+                new Donation { FundId = funds[18].Id, UserId = users[9].Id, DonorName = "@desislava.hristova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-9) },
+                new Donation { FundId = funds[18].Id, UserId = users[11].Id, DonorName = "@kristina.vasileva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-7) },
+                new Donation { FundId = funds[18].Id, UserId = users[14].Id, DonorName = "@plamen.kostov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[18].Id, UserId = users[16].Id, DonorName = "@yordan.mitev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-3) },
+                new Donation { FundId = funds[18].Id, UserId = users[20].Id, DonorName = "@valentin.boyanov", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            });
+
+            // Fund 19: Electric Cargo Bike Delivery Service (raised 8800, 11 donations)
+            donations.AddRange(new[]
+            {
+                new Donation { FundId = funds[19].Id, UserId = users[1].Id, DonorName = "@maria.ivanova", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-14) },
+                new Donation { FundId = funds[19].Id, UserId = users[2].Id, DonorName = "@stefan.petrov", Amount = 1500, CreatedAt = DateTime.UtcNow.AddDays(-12) },
+                new Donation { FundId = funds[19].Id, UserId = users[4].Id, DonorName = "@ivan.kolev", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-11) },
+                new Donation { FundId = funds[19].Id, UserId = users[6].Id, DonorName = "@dimitar.todorov", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new Donation { FundId = funds[19].Id, UserId = users[8].Id, DonorName = "@alex.marinov", Amount = 800, CreatedAt = DateTime.UtcNow.AddDays(-9) },
+                new Donation { FundId = funds[19].Id, UserId = users[9].Id, DonorName = "@desislava.hristova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new Donation { FundId = funds[19].Id, UserId = users[11].Id, DonorName = "@kristina.vasileva", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-6) },
+                new Donation { FundId = funds[19].Id, UserId = users[13].Id, DonorName = "@radostina.pencheva", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new Donation { FundId = funds[19].Id, UserId = users[15].Id, DonorName = "@tsvetana.nikolova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-4) },
+                new Donation { FundId = funds[19].Id, UserId = users[17].Id, DonorName = "@silvia.atanasova", Amount = 500, CreatedAt = DateTime.UtcNow.AddDays(-2) },
+                new Donation { FundId = funds[19].Id, UserId = users[19].Id, DonorName = "@milena.stoeva", Amount = 1000, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            });
+
             context.Donations.AddRange(donations);
         }
 
