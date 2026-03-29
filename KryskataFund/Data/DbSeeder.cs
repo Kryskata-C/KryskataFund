@@ -215,6 +215,156 @@ namespace KryskataFund.Data
                     EndDate = DateTime.UtcNow.AddDays(43),
                     CategoryColor = CategoryColors.Colors["Animals"]
                 },
+                new Fund
+                {
+                    Title = "Clean Water for Rhodope Villages",
+                    Description = "Several small villages in the Rhodope Mountains rely on outdated water infrastructure. We are raising funds to install modern filtration systems and repair pipes to ensure clean drinking water for over 200 families.",
+                    Category = "Community",
+                    GoalAmount = 18000,
+                    RaisedAmount = 9400,
+                    SupportersCount = 12,
+                    CreatorId = users[11].Id,
+                    CreatorName = "@kristina.vasileva",
+                    ImageUrl = "https://images.unsplash.com/photo-1538300342682-cf57afb97285?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-28),
+                    EndDate = DateTime.UtcNow.AddDays(32),
+                    CategoryColor = CategoryColors.Colors["Community"]
+                },
+                new Fund
+                {
+                    Title = "Vintage Film Photography Workshop",
+                    Description = "I want to host a free weekend workshop teaching analog film photography to young people in Sofia. Funds cover darkroom rental, chemicals, film rolls, and printing supplies for 30 participants.",
+                    Category = "Creative",
+                    GoalAmount = 2500,
+                    RaisedAmount = 2100,
+                    SupportersCount = 9,
+                    CreatorId = users[12].Id,
+                    CreatorName = "@boyan.iliev",
+                    ImageUrl = "https://images.unsplash.com/photo-1495745966610-2a67f2297e5e?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-11),
+                    EndDate = DateTime.UtcNow.AddDays(19),
+                    CategoryColor = CategoryColors.Colors["Creative"]
+                },
+                new Fund
+                {
+                    Title = "Wheelchair Ramps for Veliko Tarnovo",
+                    Description = "The old town of Veliko Tarnovo is beautiful but inaccessible. Help us fund portable wheelchair ramps for 15 key locations including restaurants, shops, and cultural sites so everyone can enjoy the city.",
+                    Category = "Community",
+                    GoalAmount = 10000,
+                    RaisedAmount = 4300,
+                    SupportersCount = 8,
+                    CreatorId = users[13].Id,
+                    CreatorName = "@radostina.pencheva",
+                    ImageUrl = "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-19),
+                    EndDate = DateTime.UtcNow.AddDays(41),
+                    CategoryColor = CategoryColors.Colors["Community"]
+                },
+                new Fund
+                {
+                    Title = "Board Game Cafe in Ruse",
+                    Description = "My dream is to open a cozy board game cafe in downtown Ruse. A place where people can relax, meet friends, and play from a library of 500+ games. Funds go towards rent deposit, furniture, and the initial game collection.",
+                    Category = "Dreams",
+                    GoalAmount = 14000,
+                    RaisedAmount = 6200,
+                    SupportersCount = 10,
+                    CreatorId = users[14].Id,
+                    CreatorName = "@plamen.kostov",
+                    ImageUrl = "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-24),
+                    EndDate = DateTime.UtcNow.AddDays(36),
+                    CategoryColor = CategoryColors.Colors["Dreams"]
+                },
+                new Fund
+                {
+                    Title = "Cat Sanctuary Expansion Stara Zagora",
+                    Description = "Our cat sanctuary is at full capacity with 80 rescued cats. We need to expand with a new wing to house 40 more cats waiting for adoption. Funds cover construction, heating, and veterinary supplies.",
+                    Category = "Animals",
+                    GoalAmount = 11000,
+                    RaisedAmount = 7700,
+                    SupportersCount = 11,
+                    CreatorId = users[15].Id,
+                    CreatorName = "@tsvetana.nikolova",
+                    ImageUrl = "https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-26),
+                    EndDate = DateTime.UtcNow.AddDays(34),
+                    CategoryColor = CategoryColors.Colors["Animals"]
+                },
+                new Fund
+                {
+                    Title = "Open-Source Weather Station Network",
+                    Description = "We are building a network of 20 open-source weather stations across Bulgaria to provide hyperlocal weather data. All hardware designs and software will be published freely for anyone to replicate.",
+                    Category = "Technology",
+                    GoalAmount = 8500,
+                    RaisedAmount = 3400,
+                    SupportersCount = 7,
+                    CreatorId = users[16].Id,
+                    CreatorName = "@yordan.mitev",
+                    ImageUrl = "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-13),
+                    EndDate = DateTime.UtcNow.AddDays(47),
+                    CategoryColor = CategoryColors.Colors["Technology"]
+                },
+                new Fund
+                {
+                    Title = "Mental Health Hotline for Students",
+                    Description = "University students in Bulgaria lack access to affordable mental health support. We are launching a free anonymous hotline staffed by trained counselors, available evenings and weekends.",
+                    Category = "Health",
+                    GoalAmount = 16000,
+                    RaisedAmount = 11200,
+                    SupportersCount = 14,
+                    CreatorId = users[17].Id,
+                    CreatorName = "@silvia.atanasova",
+                    ImageUrl = "https://images.unsplash.com/photo-1527137342181-19aab11a8ee8?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-32),
+                    EndDate = DateTime.UtcNow.AddDays(28),
+                    CategoryColor = CategoryColors.Colors["Health"]
+                },
+                new Fund
+                {
+                    Title = "Giant Slip-N-Slide Festival Sunny Beach",
+                    Description = "Let's build the longest slip-n-slide in the Balkans right on Sunny Beach! A 200-meter water slide event with music, food trucks, and prizes. Pure summer fun for all ages!",
+                    Category = "Just for fun",
+                    GoalAmount = 4500,
+                    RaisedAmount = 3150,
+                    SupportersCount = 9,
+                    CreatorId = users[18].Id,
+                    CreatorName = "@krasimir.dzhambov",
+                    ImageUrl = "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-9),
+                    EndDate = DateTime.UtcNow.AddDays(51),
+                    CategoryColor = CategoryColors.Colors["Just for fun"]
+                },
+                new Fund
+                {
+                    Title = "Bulgarian Folklore Dance Academy",
+                    Description = "Preserve our cultural heritage by funding a free folklore dance academy for children aged 6-16. Covers costumes, venue, and professional choreographer fees for a year-long program in Blagoevgrad.",
+                    Category = "Education",
+                    GoalAmount = 7500,
+                    RaisedAmount = 5625,
+                    SupportersCount = 10,
+                    CreatorId = users[19].Id,
+                    CreatorName = "@milena.stoeva",
+                    ImageUrl = "https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-21),
+                    EndDate = DateTime.UtcNow.AddDays(39),
+                    CategoryColor = CategoryColors.Colors["Education"]
+                },
+                new Fund
+                {
+                    Title = "Electric Cargo Bike Delivery Service",
+                    Description = "Starting a zero-emission last-mile delivery service in central Sofia using electric cargo bikes. Funds go towards purchasing 5 cargo e-bikes and setting up the dispatch system.",
+                    Category = "Technology",
+                    GoalAmount = 22000,
+                    RaisedAmount = 8800,
+                    SupportersCount = 11,
+                    CreatorId = users[20].Id,
+                    CreatorName = "@valentin.boyanov",
+                    ImageUrl = "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=450&fit=crop",
+                    CreatedAt = DateTime.UtcNow.AddDays(-16),
+                    EndDate = DateTime.UtcNow.AddDays(44),
+                    CategoryColor = CategoryColors.Colors["Technology"]
+                },
             };
 
             context.Funds.AddRange(funds);
