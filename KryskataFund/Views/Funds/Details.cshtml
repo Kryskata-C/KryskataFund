@@ -414,7 +414,7 @@
                                 <button class="btn-quick-amount" data-amount="100">€100</button>
                                 <div class="btn-custom-amount">
                                     <span class="custom-amount-label">€</span>
-                                    <input type="number" class="custom-amount-input" placeholder="Custom" min="1" id="customAmount">
+                                    <input type="number" class="custom-amount-input" placeholder="Custom" min="1" step="1" id="customAmount">
                                 </div>
                             </div>
 
@@ -1977,6 +1977,8 @@
             font-weight: 700;
             color: #46e6a4;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .milestone-description {
