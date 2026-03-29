@@ -896,6 +896,149 @@ namespace KryskataFund.Data
                 },
             };
 
+                // Clean Water for Rhodope Villages - raised 9400
+                new FundMilestone
+                {
+                    FundId = funds[10].Id,
+                    Title = "First village filtration system",
+                    TargetAmount = 4500,
+                    Description = "Install a modern water filtration system in Momchilovtsi.",
+                    IsReached = true,
+                    ReachedAt = DateTime.UtcNow.AddDays(-10),
+                    CreatedAt = DateTime.UtcNow.AddDays(-28)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[10].Id,
+                    Title = "Second and third villages",
+                    TargetAmount = 12000,
+                    Description = "Expand filtration systems to two more villages.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-28)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[10].Id,
+                    Title = "Full network completion",
+                    TargetAmount = 18000,
+                    Description = "Complete all four villages and install monitoring sensors.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-28)
+                },
+
+                // Wheelchair Ramps for Veliko Tarnovo - raised 4300
+                new FundMilestone
+                {
+                    FundId = funds[12].Id,
+                    Title = "First 5 ramps installed",
+                    TargetAmount = 3500,
+                    Description = "Install ramps at the 5 most-visited locations in old town.",
+                    IsReached = true,
+                    ReachedAt = DateTime.UtcNow.AddDays(-6),
+                    CreatedAt = DateTime.UtcNow.AddDays(-19)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[12].Id,
+                    Title = "Complete all 15 locations",
+                    TargetAmount = 10000,
+                    Description = "Cover every key restaurant, shop, and cultural site.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-19)
+                },
+
+                // Cat Sanctuary Expansion - raised 7700
+                new FundMilestone
+                {
+                    FundId = funds[14].Id,
+                    Title = "Architectural plans and permits",
+                    TargetAmount = 2000,
+                    Description = "Hire architect and obtain building permits for the new wing.",
+                    IsReached = true,
+                    ReachedAt = DateTime.UtcNow.AddDays(-16),
+                    CreatedAt = DateTime.UtcNow.AddDays(-26)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[14].Id,
+                    Title = "Construction complete",
+                    TargetAmount = 8000,
+                    Description = "Build the new wing with 10 individual cat rooms and play area.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-26)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[14].Id,
+                    Title = "Fully equipped and operational",
+                    TargetAmount = 11000,
+                    Description = "Purchase heating, veterinary supplies, and cat furniture.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-26)
+                },
+
+                // Mental Health Hotline - raised 11200
+                new FundMilestone
+                {
+                    FundId = funds[16].Id,
+                    Title = "Infrastructure and training",
+                    TargetAmount = 5000,
+                    Description = "Set up phone system, train counselors, and launch pilot.",
+                    IsReached = true,
+                    ReachedAt = DateTime.UtcNow.AddDays(-15),
+                    CreatedAt = DateTime.UtcNow.AddDays(-32)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[16].Id,
+                    Title = "Expand to 10 universities",
+                    TargetAmount = 10000,
+                    Description = "Scale the service to cover all major Bulgarian universities.",
+                    IsReached = true,
+                    ReachedAt = DateTime.UtcNow.AddDays(-4),
+                    CreatedAt = DateTime.UtcNow.AddDays(-32)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[16].Id,
+                    Title = "Full year of operation",
+                    TargetAmount = 16000,
+                    Description = "Secure funding for a full year of continuous hotline service.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-32)
+                },
+
+                // Electric Cargo Bike Delivery - raised 8800
+                new FundMilestone
+                {
+                    FundId = funds[19].Id,
+                    Title = "First cargo e-bike",
+                    TargetAmount = 4500,
+                    Description = "Purchase and equip the first cargo e-bike for test deliveries.",
+                    IsReached = true,
+                    ReachedAt = DateTime.UtcNow.AddDays(-8),
+                    CreatedAt = DateTime.UtcNow.AddDays(-16)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[19].Id,
+                    Title = "Fleet of 3 bikes",
+                    TargetAmount = 13000,
+                    Description = "Expand to 3 operational bikes covering central Sofia.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-16)
+                },
+                new FundMilestone
+                {
+                    FundId = funds[19].Id,
+                    Title = "Full fleet and dispatch system",
+                    TargetAmount = 22000,
+                    Description = "All 5 bikes operational with custom dispatch software.",
+                    IsReached = false,
+                    CreatedAt = DateTime.UtcNow.AddDays(-16)
+                },
+            };
+
             context.FundMilestones.AddRange(milestones);
         }
     }
