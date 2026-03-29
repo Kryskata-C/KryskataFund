@@ -29,6 +29,11 @@ namespace KryskataFund.Controllers
                 return RedirectToAction("SignIn", "Account", new { returnUrl = $"/Funds/Donate?id={id}&amount={amount}" });
             }
 
+            if (amount < 1)
+            {
+                return BadRequest("Invalid donation amount.");
+            }
+
             var fund = _context.Funds.FirstOrDefault(f => f.Id == id);
 
             if (fund == null)
