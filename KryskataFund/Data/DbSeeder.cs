@@ -706,8 +706,6 @@ namespace KryskataFund.Data
                     Content = "Our three rescue dogs - Rex, Luna, and Balkan - have started their professional training program. They are making great progress with basic search patterns!",
                     CreatedAt = DateTime.UtcNow.AddDays(-9)
                 },
-            };
-
                 new FundUpdate
                 {
                     FundId = funds[10].Id,
@@ -894,7 +892,6 @@ namespace KryskataFund.Data
                     IsReached = false,
                     CreatedAt = DateTime.UtcNow.AddDays(-14)
                 },
-            };
 
                 // Clean Water for Rhodope Villages - raised 9400
                 new FundMilestone
