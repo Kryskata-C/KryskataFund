@@ -708,6 +708,78 @@ namespace KryskataFund.Data
                 },
             };
 
+                new FundUpdate
+                {
+                    FundId = funds[10].Id,
+                    Title = "Water testing results are in",
+                    Content = "We tested the water in all 4 target villages. Two have dangerously high levels of manganese. This makes our project even more urgent. Filtration equipment has been ordered!",
+                    CreatedAt = DateTime.UtcNow.AddDays(-15)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[10].Id,
+                    Title = "First village connected!",
+                    Content = "The village of Momchilovtsi now has a brand new filtration system installed. The locals are thrilled and celebrated with a small gathering. Three more villages to go!",
+                    CreatedAt = DateTime.UtcNow.AddDays(-5)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[11].Id,
+                    Title = "Darkroom secured",
+                    Content = "We found an amazing darkroom space in the basement of a cultural center in Sofia. The owner is giving us a discount on the weekend rental. Can't wait to get started!",
+                    CreatedAt = DateTime.UtcNow.AddDays(-6)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[13].Id,
+                    Title = "Location scouted in Ruse",
+                    Content = "Found the perfect spot on Aleksandrovska Street! The space is 120 sq meters with a cozy vibe. Lease negotiations are going well. Already collecting our first batch of games.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-14)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[13].Id,
+                    Title = "100 games collected!",
+                    Content = "Thanks to donations from board game enthusiasts across Bulgaria, we already have 100 games for the cafe library! From classics like Catan to modern gems like Wingspan.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-6)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[14].Id,
+                    Title = "Construction blueprints approved",
+                    Content = "The architect finalized the expansion plans. The new wing will have individual cat rooms, a communal play area, and a veterinary corner. Construction begins next week!",
+                    CreatedAt = DateTime.UtcNow.AddDays(-12)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[16].Id,
+                    Title = "Counselor team assembled",
+                    Content = "We have recruited 8 licensed psychologists who will volunteer their evenings. They completed training on the hotline protocol. We are so grateful for their dedication.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-18)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[16].Id,
+                    Title = "Soft launch with 3 universities",
+                    Content = "The hotline is now active for students at Sofia University, UNWE, and Technical University. In the first week we received 47 calls. The need is real and the feedback is overwhelmingly positive.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-7)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[18].Id,
+                    Title = "30 children enrolled!",
+                    Content = "Registration for the folklore dance academy filled up in just 3 days! We now have 30 eager kids aged 6-16 ready to learn traditional Bulgarian dances. First class is next Saturday.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-10)
+                },
+                new FundUpdate
+                {
+                    FundId = funds[19].Id,
+                    Title = "First e-bike arrived",
+                    Content = "Our first cargo e-bike is here! It's a Riese & Muller Packster 70 and it can carry up to 100kg of cargo. Test rides around Sofia went perfectly. Four more on order.",
+                    CreatedAt = DateTime.UtcNow.AddDays(-8)
+                },
+            };
+
             context.FundUpdates.AddRange(updates);
         }
 
