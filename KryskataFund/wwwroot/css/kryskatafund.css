@@ -1225,6 +1225,13 @@ a {
     margin-top: 4px;
     font-size: 11px;
     color: #cbd5f5;
+    overflow: hidden;
+}
+
+.fund-progress-labels span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .fund-footer {
@@ -1958,11 +1965,17 @@ a {
     color: var(--accent);
     display: block;
     letter-spacing: -0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .fund-detail-goal {
     font-size: 13px;
     color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .fund-detail-progress-bar {
@@ -2174,6 +2187,10 @@ a {
     color: var(--accent);
     letter-spacing: -0.02em;
     text-shadow: 0 0 30px rgba(70, 230, 164, 0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
 }
 
 .selected-amount-display.shake {
@@ -3049,6 +3066,9 @@ a {
     font-size: 28px;
     font-weight: 700;
     color: var(--accent);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .payment-form {
@@ -4280,6 +4300,9 @@ a {
     font-weight: 700;
     color: #46e6a4;
     min-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .donation-info {
