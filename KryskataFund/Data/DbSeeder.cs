@@ -41,6 +41,16 @@ namespace KryskataFund.Data
                 new User { Email = "alex.marinov@proton.me", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-25) },
                 new User { Email = "desislava.hristova@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-20) },
                 new User { Email = "georgi.angelov@yahoo.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-15) },
+                new User { Email = "kristina.vasileva@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-12) },
+                new User { Email = "boyan.iliev@abv.bg", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-10) },
+                new User { Email = "radostina.pencheva@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-8) },
+                new User { Email = "plamen.kostov@yahoo.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-7) },
+                new User { Email = "tsvetana.nikolova@outlook.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-6) },
+                new User { Email = "yordan.mitev@proton.me", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-5) },
+                new User { Email = "silvia.atanasova@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-4) },
+                new User { Email = "krasimir.dzhambov@abv.bg", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-3) },
+                new User { Email = "milena.stoeva@gmail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-2) },
+                new User { Email = "valentin.boyanov@mail.com", PasswordHash = PasswordHasher.HashPassword("password123"), CreatedAt = DateTime.UtcNow.AddDays(-1) },
             };
 
             context.Users.AddRange(users);
