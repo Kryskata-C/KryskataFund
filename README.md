@@ -1,8 +1,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" />
-  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" />
+  <img src="https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white" />
   <img src="https://img.shields.io/badge/Stripe-008CDD?style=for-the-badge&logo=stripe&logoColor=white" />
-  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
   <img src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" />
 </p>
 
@@ -54,12 +53,12 @@ A full-featured crowdfunding platform built with ASP.NET Core 8. Create campaign
 | Layer | Technology |
 |-------|-----------|
 | Framework | ASP.NET Core 8.0 (MVC) |
-| Database | PostgreSQL + Entity Framework Core |
+| Database | SQL Server (local) / PostgreSQL (Railway prod) + Entity Framework Core |
 | Payments | Stripe |
 | Email | Resend |
 | Auth | Session-based + BCrypt |
 | Testing | xUnit + Moq + FluentAssertions |
-| Deploy | Docker + GitHub Actions CI/CD + Railway |
+| Deploy | GitHub Actions CI/CD + Railway |
 
 ---
 
@@ -68,7 +67,7 @@ A full-featured crowdfunding platform built with ASP.NET Core 8. Create campaign
 ### Prerequisites
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [PostgreSQL](https://www.postgresql.org/download/) (or use SQLite for local dev)
+- SQL Server LocalDB — ships with Visual Studio, or install standalone via [SQL Server Express](https://www.microsoft.com/sql-server/sql-server-downloads) → "LocalDB"
 
 ### Run Locally
 
@@ -77,30 +76,24 @@ A full-featured crowdfunding platform built with ASP.NET Core 8. Create campaign
 git clone https://github.com/your-username/KryskataFund.git
 cd KryskataFund
 
-# Restore dependencies
+# Restore and run — LocalDB and the database are created automatically on first launch
 dotnet restore
-
-# Set up user secrets
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Database=kryskatafund;Username=postgres;Password=yourpassword"
-dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."
-dotnet user-secrets set "Stripe:PublishableKey" "pk_test_..."
-dotnet user-secrets set "Resend:ApiKey" "re_..."
-
-# Run the app
 dotnet run --project KryskataFund/KryskataFund.csproj
 ```
 
 The app will be available at `https://localhost:5001`.
 
-### Run with Docker
+Optional — set these secrets if you want Stripe payments and email receipts working:
 
 ```bash
-docker build -t kryskatafund .
-docker run -p 8080:8080 \
-  -e DATABASE_URL="postgresql://user:password@host:5432/kryskatafund" \
-  -e STRIPE_SECRET_KEY="sk_test_..." \
-  kryskatafund
+dotnet user-secrets set "Stripe:SecretKey" "sk_test_..." --project KryskataFund
+dotnet user-secrets set "Stripe:PublishableKey" "pk_test_..." --project KryskataFund
+dotnet user-secrets set "Resend:ApiKey" "re_..." --project KryskataFund
 ```
+
+> **Provider note:** The app defaults to SQL Server. When deployed to Railway,
+> the `DATABASE_URL` env var is set to a `postgresql://...` URL and the app
+> automatically switches to the PostgreSQL provider — no code change needed.
 
 ### Run Tests
 
@@ -118,10 +111,10 @@ KryskataFund/
 ├── Models/            # Entity models (Fund, User, Donation, Message, ...)
 ├── Services/          # Business logic layer with DI
 ├── Views/             # Razor templates organized by controller
-├── Data/              # DbContext, migrations, and seeder
+├── Data/              # DbContext and seeder (schema created via EnsureCreated)
 ├── Filters/           # Custom auth filters
 ├── wwwroot/           # Static assets (CSS, JS, images)
-├── Dockerfile         # Multi-stage production build
+├── Dockerfile         # Production image (used by Railway)
 └── .github/workflows/ # CI/CD pipeline
 KryskataFund.Tests/    # xUnit test suite
 ```
