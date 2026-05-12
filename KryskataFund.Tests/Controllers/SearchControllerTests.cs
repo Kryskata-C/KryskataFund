@@ -17,32 +17,32 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WithNullQuery_ReturnsEmptyResults()
+        public async Task Index_WithNullQuery_ReturnsEmptyResults()
         {
             var controller = CreateController();
 
-            var result = controller.Index(null);
+            var result = await controller.Index(null);
 
             result.Should().BeOfType<ViewResult>();
             ((string)controller.ViewBag.Query).Should().BeEmpty();
         }
 
         [Fact]
-        public void Index_WithEmptyQuery_ReturnsEmptyResults()
+        public async Task Index_WithEmptyQuery_ReturnsEmptyResults()
         {
             var controller = CreateController();
 
-            var result = controller.Index("  ");
+            var result = await controller.Index("  ");
 
             result.Should().BeOfType<ViewResult>();
         }
 
         [Fact]
-        public void Index_WithMatchingQuery_ReturnsResults()
+        public async Task Index_WithMatchingQuery_ReturnsResults()
         {
             var controller = CreateController();
 
-            var result = controller.Index("Test Fund 1");
+            var result = await controller.Index("Test Fund 1");
 
             result.Should().BeOfType<ViewResult>();
             var results = (List<KryskataFund.Models.Fund>)controller.ViewBag.Results;
@@ -50,11 +50,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_SearchesByCategory()
+        public async Task Index_SearchesByCategory()
         {
             var controller = CreateController();
 
-            var result = controller.Index("Education");
+            var result = await controller.Index("Education");
 
             result.Should().BeOfType<ViewResult>();
             var results = (List<KryskataFund.Models.Fund>)controller.ViewBag.Results;
@@ -62,63 +62,63 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_SearchesByCreatorName()
+        public async Task Index_SearchesByCreatorName()
         {
             var controller = CreateController();
 
-            var result = controller.Index("@creator");
+            var result = await controller.Index("@creator");
 
             var results = (List<KryskataFund.Models.Fund>)controller.ViewBag.Results;
             results.Should().HaveCount(2);
         }
 
         [Fact]
-        public void Index_NoMatch_ReturnsEmpty()
+        public async Task Index_NoMatch_ReturnsEmpty()
         {
             var controller = CreateController();
 
-            controller.Index("zzzznonexistent");
+            await controller.Index("zzzznonexistent");
 
             var results = (List<KryskataFund.Models.Fund>)controller.ViewBag.Results;
             results.Should().BeEmpty();
         }
 
         [Fact]
-        public void Autocomplete_WithShortTerm_ReturnsEmpty()
+        public async Task Autocomplete_WithShortTerm_ReturnsEmpty()
         {
             var controller = CreateController();
 
-            var result = controller.Autocomplete("a");
+            var result = await controller.Autocomplete("a");
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
         }
 
         [Fact]
-        public void Autocomplete_WithNullTerm_ReturnsEmpty()
+        public async Task Autocomplete_WithNullTerm_ReturnsEmpty()
         {
             var controller = CreateController();
 
-            var result = controller.Autocomplete(null);
+            var result = await controller.Autocomplete(null);
 
             result.Should().BeOfType<JsonResult>();
         }
 
         [Fact]
-        public void Autocomplete_WithValidTerm_ReturnsResults()
+        public async Task Autocomplete_WithValidTerm_ReturnsResults()
         {
             var controller = CreateController();
 
-            var result = controller.Autocomplete("Test");
+            var result = await controller.Autocomplete("Test");
 
             result.Should().BeOfType<JsonResult>();
         }
 
         [Fact]
-        public void Autocomplete_LimitsToFiveResults()
+        public async Task Autocomplete_LimitsToFiveResults()
         {
             var controller = CreateController();
 
-            var result = controller.Autocomplete("Fund");
+            var result = await controller.Autocomplete("Fund");
 
             result.Should().BeOfType<JsonResult>();
         }

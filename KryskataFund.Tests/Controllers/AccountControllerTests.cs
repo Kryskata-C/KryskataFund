@@ -46,11 +46,11 @@ namespace KryskataFund.Tests.Controllers
         // --- SignIn POST ---
 
         [Fact]
-        public void SignIn_Post_WithValidCredentials_SetsSession()
+        public async Task SignIn_Post_WithValidCredentials_SetsSession()
         {
             var (controller, _) = CreateController();
 
-            var result = controller.SignIn("creator@test.com", "Password1");
+            var result = await controller.SignIn("creator@test.com", "Password1");
 
             result.Should().BeOfType<RedirectToActionResult>();
             var redirect = (RedirectToActionResult)result;
@@ -62,22 +62,22 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void SignIn_Post_WithInvalidEmail_ShowsError()
+        public async Task SignIn_Post_WithInvalidEmail_ShowsError()
         {
             var (controller, _) = CreateController();
 
-            var result = controller.SignIn("wrong@test.com", "Password1");
+            var result = await controller.SignIn("wrong@test.com", "Password1");
 
             result.Should().BeOfType<ViewResult>();
             controller.ViewData["Error"].Should().Be("Invalid email or password");
         }
 
         [Fact]
-        public void SignIn_Post_WithInvalidPassword_ShowsError()
+        public async Task SignIn_Post_WithInvalidPassword_ShowsError()
         {
             var (controller, _) = CreateController();
 
-            var result = controller.SignIn("creator@test.com", "WrongPassword1");
+            var result = await controller.SignIn("creator@test.com", "WrongPassword1");
 
             result.Should().BeOfType<ViewResult>();
             controller.ViewData["Error"].Should().Be("Invalid email or password");
@@ -96,7 +96,7 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void SignUp_Post_CreatesNewUser()
+        public async Task SignUp_Post_CreatesNewUser()
         {
             var (controller, context) = CreateController();
             var model = new SignUpViewModel
@@ -106,7 +106,7 @@ namespace KryskataFund.Tests.Controllers
                 ConfirmPassword = "Password1"
             };
 
-            var result = controller.SignUp(model);
+            var result = await controller.SignUp(model);
 
             result.Should().BeOfType<RedirectToActionResult>();
             context.Users.Any(u => u.Email == "newuser@test.com").Should().BeTrue();
@@ -114,7 +114,7 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void SignUp_Post_RejectsDuplicateEmail()
+        public async Task SignUp_Post_RejectsDuplicateEmail()
         {
             var (controller, _) = CreateController();
             var model = new SignUpViewModel
@@ -124,20 +124,20 @@ namespace KryskataFund.Tests.Controllers
                 ConfirmPassword = "Password1"
             };
 
-            var result = controller.SignUp(model);
+            var result = await controller.SignUp(model);
 
             result.Should().BeOfType<ViewResult>();
             controller.ModelState.ErrorCount.Should().BeGreaterThan(0);
         }
 
         [Fact]
-        public void SignUp_Post_WithInvalidModel_ReturnsView()
+        public async Task SignUp_Post_WithInvalidModel_ReturnsView()
         {
             var (controller, _) = CreateController();
             controller.ModelState.AddModelError("Email", "Required");
             var model = new SignUpViewModel();
 
-            var result = controller.SignUp(model);
+            var result = await controller.SignUp(model);
 
             result.Should().BeOfType<ViewResult>();
         }
@@ -177,22 +177,22 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Profile_ReturnsViewWhenSignedIn()
+        public async Task Profile_ReturnsViewWhenSignedIn()
         {
             var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
 
-            var result = controller.Profile();
+            var result = await controller.Profile();
 
             result.Should().BeOfType<ViewResult>();
             ((User)controller.ViewBag.User).Email.Should().Be("creator@test.com");
         }
 
         [Fact]
-        public void Profile_CalculatesStats()
+        public async Task Profile_CalculatesStats()
         {
             var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
 
-            controller.Profile();
+            await controller.Profile();
 
             // User 1 has funds 1 and 2, total raised = 500 + 0 = 500
             ((decimal)controller.ViewBag.TotalRaised).Should().Be(500);
@@ -210,11 +210,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void MyFunds_ReturnsViewForSignedInUser()
+        public async Task MyFunds_ReturnsViewForSignedInUser()
         {
             var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
 
-            var result = controller.MyFunds();
+            var result = await controller.MyFunds();
 
             result.Should().BeOfType<ViewResult>();
             var funds = (List<Fund>)controller.ViewBag.MyFunds;
@@ -233,11 +233,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void MyDonations_ReturnsViewForSignedInUser()
+        public async Task MyDonations_ReturnsViewForSignedInUser()
         {
             var (controller, _) = CreateController(userId: 2, email: "donor@test.com");
 
-            var result = controller.MyDonations();
+            var result = await controller.MyDonations();
 
             result.Should().BeOfType<ViewResult>();
             var donations = (List<Donation>)controller.ViewBag.MyDonations;
@@ -257,11 +257,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Following_ReturnsViewForSignedInUser()
+        public async Task Following_ReturnsViewForSignedInUser()
         {
             var (controller, _) = CreateController(userId: 2, email: "donor@test.com");
 
-            var result = controller.Following();
+            var result = await controller.Following();
 
             result.Should().BeOfType<ViewResult>();
         }
@@ -269,11 +269,11 @@ namespace KryskataFund.Tests.Controllers
         // --- ToggleFollow ---
 
         [Fact]
-        public void ToggleFollow_AddsFollow()
+        public async Task ToggleFollow_AddsFollow()
         {
             var (controller, context) = CreateController(userId: 2, email: "donor@test.com");
 
-            var result = controller.ToggleFollow(1);
+            var result = await controller.ToggleFollow(1);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -283,14 +283,14 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void ToggleFollow_RemovesExistingFollow()
+        public async Task ToggleFollow_RemovesExistingFollow()
         {
             var dbName = Guid.NewGuid().ToString();
             var (controller, context) = CreateController(dbName: dbName, userId: 2, email: "donor@test.com");
             context.UserFollows.Add(new UserFollow { UserId = 2, FundId = 1, FollowedAt = DateTime.UtcNow });
             context.SaveChanges();
 
-            var result = controller.ToggleFollow(1);
+            var result = await controller.ToggleFollow(1);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -337,7 +337,7 @@ namespace KryskataFund.Tests.Controllers
         // --- GetBuddyCustomization ---
 
         [Fact]
-        public void GetBuddyCustomization_ReturnsDataForSignedInUser()
+        public async Task GetBuddyCustomization_ReturnsDataForSignedInUser()
         {
             var dbName = Guid.NewGuid().ToString();
             var (controller, context) = CreateController(dbName: dbName, userId: 1, email: "creator@test.com");
@@ -345,17 +345,17 @@ namespace KryskataFund.Tests.Controllers
             user.BuddyGlasses = "aviator";
             context.SaveChanges();
 
-            var result = controller.GetBuddyCustomization();
+            var result = await controller.GetBuddyCustomization();
 
             result.Should().BeOfType<JsonResult>();
         }
 
         [Fact]
-        public void GetBuddyCustomization_ReturnsNullsWhenNotSignedIn()
+        public async Task GetBuddyCustomization_ReturnsNullsWhenNotSignedIn()
         {
             var (controller, _) = CreateController();
 
-            var result = controller.GetBuddyCustomization();
+            var result = await controller.GetBuddyCustomization();
 
             result.Should().BeOfType<JsonResult>();
         }

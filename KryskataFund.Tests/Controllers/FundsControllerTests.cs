@@ -97,22 +97,22 @@ namespace KryskataFund.Tests.Controllers
         // --- Details ---
 
         [Fact]
-        public void Details_ReturnsViewForExistingFund()
+        public async Task Details_ReturnsViewForExistingFund()
         {
             var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
 
-            var result = controller.Details(1);
+            var result = await controller.Details(1);
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             viewResult.Model.Should().BeOfType<Fund>();
         }
 
         [Fact]
-        public void Details_ReturnsNotFoundForInvalidFund()
+        public async Task Details_ReturnsNotFoundForInvalidFund()
         {
             var (controller, _) = CreateController(userId: 1, email: "creator@test.com");
 
-            var result = controller.Details(999);
+            var result = await controller.Details(999);
 
             result.Should().BeOfType<NotFoundResult>();
         }
@@ -120,22 +120,22 @@ namespace KryskataFund.Tests.Controllers
         // --- Embed ---
 
         [Fact]
-        public void Embed_ReturnsViewForExistingFund()
+        public async Task Embed_ReturnsViewForExistingFund()
         {
             var (controller, _) = CreateController();
 
-            var result = controller.Embed(1);
+            var result = await controller.Embed(1);
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             viewResult.Model.Should().BeOfType<Fund>();
         }
 
         [Fact]
-        public void Embed_ReturnsNotFoundForInvalidFund()
+        public async Task Embed_ReturnsNotFoundForInvalidFund()
         {
             var (controller, _) = CreateController();
 
-            var result = controller.Embed(999);
+            var result = await controller.Embed(999);
 
             result.Should().BeOfType<NotFoundResult>();
         }
@@ -143,32 +143,32 @@ namespace KryskataFund.Tests.Controllers
         // --- Donate ---
 
         [Fact]
-        public void Donate_RedirectsWhenNotSignedIn()
+        public async Task Donate_RedirectsWhenNotSignedIn()
         {
             var (controller, _) = CreateDonationsController();
 
-            var result = controller.Donate(1, 50);
+            var result = await controller.Donate(1, 50);
 
             result.Should().BeOfType<RedirectToActionResult>();
         }
 
         [Fact]
-        public void Donate_ReturnsViewForSignedInUser()
+        public async Task Donate_ReturnsViewForSignedInUser()
         {
             var (controller, _) = CreateDonationsController(userId: 2, email: "donor@test.com");
 
-            var result = controller.Donate(1, 50);
+            var result = await controller.Donate(1, 50);
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             viewResult.Model.Should().BeOfType<Fund>();
         }
 
         [Fact]
-        public void Donate_ReturnsNotFoundForInvalidFund()
+        public async Task Donate_ReturnsNotFoundForInvalidFund()
         {
             var (controller, _) = CreateDonationsController(userId: 2, email: "donor@test.com");
 
-            var result = controller.Donate(999, 50);
+            var result = await controller.Donate(999, 50);
 
             result.Should().BeOfType<NotFoundResult>();
         }

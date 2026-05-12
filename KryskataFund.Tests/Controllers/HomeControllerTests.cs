@@ -22,11 +22,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_ReturnsViewResult_WithFunds()
+        public async Task Index_ReturnsViewResult_WithFunds()
         {
             var controller = CreateController();
 
-            var result = controller.Index();
+            var result = await controller.Index();
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
@@ -37,11 +37,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WithCategory_FiltersCorrectly()
+        public async Task Index_WithCategory_FiltersCorrectly()
         {
             var controller = CreateController();
 
-            var result = controller.Index("Education");
+            var result = await controller.Index("Education");
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
@@ -50,11 +50,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WithNullCategory_ReturnsAllFunds()
+        public async Task Index_WithNullCategory_ReturnsAllFunds()
         {
             var controller = CreateController();
 
-            var result = controller.Index(null);
+            var result = await controller.Index(null);
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
@@ -63,11 +63,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WithNonExistentCategory_ReturnsEmpty()
+        public async Task Index_WithNonExistentCategory_ReturnsEmpty()
         {
             var controller = CreateController();
 
-            var result = controller.Index("NonExistent");
+            var result = await controller.Index("NonExistent");
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
@@ -75,11 +75,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_SetsViewBagCategoryCounts()
+        public async Task Index_SetsViewBagCategoryCounts()
         {
             var controller = CreateController();
 
-            var result = controller.Index();
+            var result = await controller.Index();
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
@@ -89,7 +89,7 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Index_WhenSignedIn_LoadsFollowedFundIds()
+        public async Task Index_WhenSignedIn_LoadsFollowedFundIds()
         {
             var dbName = Guid.NewGuid().ToString();
             var context = TestHelper.CreateDbContext(dbName);
@@ -101,7 +101,7 @@ namespace KryskataFund.Tests.Controllers
             var controller = new HomeController(logger.Object, context);
             TestHelper.SetupSession(controller, userId: 2, email: "donor@test.com");
 
-            var result = controller.Index();
+            var result = await controller.Index();
 
             var viewResult = result.Should().BeOfType<ViewResult>().Subject;
             var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
@@ -109,21 +109,21 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Leaderboard_ReturnsViewResult()
+        public async Task Leaderboard_ReturnsViewResult()
         {
             var controller = CreateController();
 
-            var result = controller.Leaderboard();
+            var result = await controller.Leaderboard();
 
             result.Should().BeOfType<ViewResult>();
         }
 
         [Fact]
-        public void Leaderboard_SetsViewBagStats()
+        public async Task Leaderboard_SetsViewBagStats()
         {
             var controller = CreateController();
 
-            controller.Leaderboard();
+            await controller.Leaderboard();
 
             ((decimal)controller.ViewBag.TotalRaised).Should().Be(2000);
             ((int)controller.ViewBag.TotalDonations).Should().Be(2);
@@ -142,21 +142,21 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void GetRecentActivity_ReturnsJsonResult()
+        public async Task GetRecentActivity_ReturnsJsonResult()
         {
             var controller = CreateController();
 
-            var result = controller.GetRecentActivity();
+            var result = await controller.GetRecentActivity();
 
             result.Should().BeOfType<JsonResult>();
         }
 
         [Fact]
-        public void GetLiveStats_ReturnsJsonResult()
+        public async Task GetLiveStats_ReturnsJsonResult()
         {
             var controller = CreateController();
 
-            var result = controller.GetLiveStats();
+            var result = await controller.GetLiveStats();
 
             result.Should().BeOfType<JsonResult>();
         }

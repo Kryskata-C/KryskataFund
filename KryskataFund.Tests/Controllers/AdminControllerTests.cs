@@ -114,11 +114,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void Dashboard_ReturnsViewForAdmin()
+        public async Task Dashboard_ReturnsViewForAdmin()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.Dashboard();
+            var result = await controller.Dashboard();
 
             result.Should().BeOfType<ViewResult>();
             ((int)controller.ViewBag.TotalUsers).Should().Be(3);
@@ -137,11 +137,11 @@ namespace KryskataFund.Tests.Controllers
         // --- DeleteUser ---
 
         [Fact]
-        public void DeleteUser_RemovesUser()
+        public async Task DeleteUser_RemovesUser()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteUser(2);
+            var result = await controller.DeleteUser(2);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -150,11 +150,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void DeleteUser_RemovesUserDonationsAndFunds()
+        public async Task DeleteUser_RemovesUserDonationsAndFunds()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            controller.DeleteUser(1); // Creator has funds 1 and 2
+            await controller.DeleteUser(1); // Creator has funds 1 and 2
 
             context.Funds.Any(f => f.CreatorId == 1).Should().BeFalse();
         }
@@ -168,11 +168,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void DeleteUser_PreventsDeleteSelf()
+        public async Task DeleteUser_PreventsDeleteSelf()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteUser(3);
+            var result = await controller.DeleteUser(3);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -180,11 +180,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void DeleteUser_HandlesNonExistentUser()
+        public async Task DeleteUser_HandlesNonExistentUser()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteUser(999);
+            var result = await controller.DeleteUser(999);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -194,11 +194,11 @@ namespace KryskataFund.Tests.Controllers
         // --- ToggleAdmin ---
 
         [Fact]
-        public void ToggleAdmin_TogglesFlag()
+        public async Task ToggleAdmin_TogglesFlag()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.ToggleAdmin(1);
+            var result = await controller.ToggleAdmin(1);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -208,23 +208,23 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void ToggleAdmin_TogglesBack()
+        public async Task ToggleAdmin_TogglesBack()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            controller.ToggleAdmin(1); // Make admin
-            controller.ToggleAdmin(1); // Remove admin
+            await controller.ToggleAdmin(1); // Make admin
+            await controller.ToggleAdmin(1); // Remove admin
 
             var user = context.Users.Find(1)!;
             user.IsAdmin.Should().BeFalse();
         }
 
         [Fact]
-        public void ToggleAdmin_PreventsToggleSelf()
+        public async Task ToggleAdmin_PreventsToggleSelf()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.ToggleAdmin(3);
+            var result = await controller.ToggleAdmin(3);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -242,11 +242,11 @@ namespace KryskataFund.Tests.Controllers
         // --- DeleteFund ---
 
         [Fact]
-        public void DeleteFund_RemovesFundAndDonations()
+        public async Task DeleteFund_RemovesFundAndDonations()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteFund(1);
+            var result = await controller.DeleteFund(1);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -264,11 +264,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void DeleteFund_HandlesNonExistentFund()
+        public async Task DeleteFund_HandlesNonExistentFund()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteFund(999);
+            var result = await controller.DeleteFund(999);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -278,11 +278,11 @@ namespace KryskataFund.Tests.Controllers
         // --- DeleteDonation ---
 
         [Fact]
-        public void DeleteDonation_RemovesAndRefunds()
+        public async Task DeleteDonation_RemovesAndRefunds()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteDonation(1); // Donation of 100 to Fund 1
+            var result = await controller.DeleteDonation(1); // Donation of 100 to Fund 1
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -302,11 +302,11 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void DeleteDonation_HandlesNonExistentDonation()
+        public async Task DeleteDonation_HandlesNonExistentDonation()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.DeleteDonation(999);
+            var result = await controller.DeleteDonation(999);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -316,11 +316,11 @@ namespace KryskataFund.Tests.Controllers
         // --- EditFund ---
 
         [Fact]
-        public void EditFund_UpdatesFundDetails()
+        public async Task EditFund_UpdatesFundDetails()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.EditFund(1, "Updated Title", "Updated Description", 2000);
+            var result = await controller.EditFund(1, "Updated Title", "Updated Description", 2000);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -342,11 +342,11 @@ namespace KryskataFund.Tests.Controllers
         // --- AddFundsToFund ---
 
         [Fact]
-        public void AddFundsToFund_IncreasesRaisedAmount()
+        public async Task AddFundsToFund_IncreasesRaisedAmount()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.AddFundsToFund(1, 300);
+            var result = await controller.AddFundsToFund(1, 300);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -365,11 +365,11 @@ namespace KryskataFund.Tests.Controllers
         // --- ToggleVerified ---
 
         [Fact]
-        public void ToggleVerified_TogglesFlag()
+        public async Task ToggleVerified_TogglesFlag()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.ToggleVerified(1);
+            var result = await controller.ToggleVerified(1);
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
@@ -378,12 +378,12 @@ namespace KryskataFund.Tests.Controllers
         }
 
         [Fact]
-        public void ToggleVerified_TogglesBack()
+        public async Task ToggleVerified_TogglesBack()
         {
             var (controller, context) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            controller.ToggleVerified(1);
-            controller.ToggleVerified(1);
+            await controller.ToggleVerified(1);
+            await controller.ToggleVerified(1);
 
             context.Funds.Find(1)!.IsVerified.Should().BeFalse();
         }
@@ -399,11 +399,11 @@ namespace KryskataFund.Tests.Controllers
         // --- GetStats ---
 
         [Fact]
-        public void GetStats_ReturnsDataForAdmin()
+        public async Task GetStats_ReturnsDataForAdmin()
         {
             var (controller, _) = CreateController(userId: 3, email: "admin@test.com", isAdmin: true);
 
-            var result = controller.GetStats();
+            var result = await controller.GetStats();
 
             var json = result.Should().BeOfType<JsonResult>().Subject;
             var value = json.Value;
