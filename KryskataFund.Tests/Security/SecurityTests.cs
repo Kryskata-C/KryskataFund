@@ -152,7 +152,7 @@ namespace KryskataFund.Tests.Security
         #region SQL Injection - Search Controller
 
         [Fact]
-        public void Search_SqlInjection_ClassicOrPayload_DoesNotReturnAllRecords()
+        public async Task Search_SqlInjection_ClassicOrPayload_DoesNotReturnAllRecords()
         {
             // Attack vector: Classic OR-based SQL injection in search query
             // Attempts to bypass WHERE clause by making condition always true
@@ -161,7 +161,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Index("' OR '1'='1") as ViewResult;
+            var result = (await controller.Index("' OR '1'='1")) as ViewResult;
 
             // Assert - LINQ parameterization prevents injection; should return 0 results
             result.Should().NotBeNull();
@@ -172,7 +172,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void Search_SqlInjection_UnionSelect_DoesNotLeakUserData()
+        public async Task Search_SqlInjection_UnionSelect_DoesNotLeakUserData()
         {
             // Attack vector: UNION-based injection to extract data from Users table
             var context = TestHelper.CreateDbContext();
@@ -180,7 +180,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Index("' UNION SELECT Id, Email, PasswordHash FROM Users --") as ViewResult;
+            var result = (await controller.Index("' UNION SELECT Id, Email, PasswordHash FROM Users --")) as ViewResult;
 
             // Assert - should not crash and should not return user data
             result.Should().NotBeNull();
@@ -196,7 +196,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void Search_SqlInjection_DropTable_DoesNotDestroyData()
+        public async Task Search_SqlInjection_DropTable_DoesNotDestroyData()
         {
             // Attack vector: Destructive DROP TABLE injection
             var context = TestHelper.CreateDbContext();
@@ -204,7 +204,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Index("'; DROP TABLE Users; --") as ViewResult;
+            var result = (await controller.Index("'; DROP TABLE Users; --")) as ViewResult;
 
             // Assert - data should still exist after the attack attempt
             result.Should().NotBeNull();
@@ -213,7 +213,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void Search_SqlInjection_CommentBased_DoesNotBypassFilter()
+        public async Task Search_SqlInjection_CommentBased_DoesNotBypassFilter()
         {
             // Attack vector: Comment-based injection to terminate the rest of the query
             var context = TestHelper.CreateDbContext();
@@ -221,7 +221,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Index("Test' /*") as ViewResult;
+            var result = (await controller.Index("Test' /*")) as ViewResult;
 
             // Assert
             result.Should().NotBeNull();
@@ -232,7 +232,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void Search_SqlInjection_BooleanBlind_DoesNotRevealDatabaseStructure()
+        public async Task Search_SqlInjection_BooleanBlind_DoesNotRevealDatabaseStructure()
         {
             // Attack vector: Boolean-based blind SQL injection
             // Attacker sends true/false conditions to infer database structure
@@ -241,11 +241,11 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act - true condition
-            var resultTrue = controller.Index("1' AND 1=1 --") as ViewResult;
+            var resultTrue = (await controller.Index("1' AND 1=1 --")) as ViewResult;
             var resultsTrue = resultTrue!.ViewData["Results"] as List<Fund>;
 
             // Act - false condition
-            var resultFalse = controller.Index("1' AND 1=2 --") as ViewResult;
+            var resultFalse = (await controller.Index("1' AND 1=2 --")) as ViewResult;
             var resultsFalse = resultFalse!.ViewData["Results"] as List<Fund>;
 
             // Assert - both should return 0 results since the literal string doesn't match fund data
@@ -258,7 +258,7 @@ namespace KryskataFund.Tests.Security
         [InlineData("' UNION SELECT NULL --")]
         [InlineData("'; EXEC xp_cmdshell('whoami'); --")]
         [InlineData("' AND SUBSTRING(@@version,1,1)='M' --")]
-        public void Search_Autocomplete_SqlInjection_DoesNotCrashOrLeakData(string payload)
+        public async Task Search_Autocomplete_SqlInjection_DoesNotCrashOrLeakData(string payload)
         {
             // Attack vector: SQL injection via the autocomplete endpoint
             var context = TestHelper.CreateDbContext();
@@ -266,7 +266,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act - should not throw
-            var result = controller.Autocomplete(payload);
+            var result = await controller.Autocomplete(payload);
 
             // Assert
             result.Should().NotBeNull();
@@ -274,7 +274,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void Search_AllSqlPayloads_NoneReturnAllFunds()
+        public async Task Search_AllSqlPayloads_NoneReturnAllFunds()
         {
             // Attack vector: Comprehensive test of all SQL injection payloads
             var context = TestHelper.CreateDbContext();
@@ -284,7 +284,7 @@ namespace KryskataFund.Tests.Security
             foreach (var payload in SqlInjectionPayloads)
             {
                 // Act
-                var result = controller.Index(payload) as ViewResult;
+                var result = (await controller.Index(payload)) as ViewResult;
 
                 // Assert - no payload should return all 3 seeded funds
                 result.Should().NotBeNull($"Payload '{payload}' should not cause a null result");
@@ -305,7 +305,7 @@ namespace KryskataFund.Tests.Security
         [InlineData("admin'--")]
         [InlineData("' OR 1=1#")]
         [InlineData("' UNION SELECT 1,'admin@test.com','hash' --")]
-        public void SignIn_SqlInjection_InEmail_DoesNotBypassAuthentication(string maliciousEmail)
+        public async Task SignIn_SqlInjection_InEmail_DoesNotBypassAuthentication(string maliciousEmail)
         {
             // Attack vector: SQL injection in the login email field
             // Attempts to bypass authentication by injecting into the WHERE clause
@@ -314,7 +314,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateAccountController(context);
 
             // Act
-            var result = controller.SignIn(maliciousEmail, "Password1");
+            var result = await controller.SignIn(maliciousEmail, "Password1");
 
             // Assert - should not authenticate; should return view with error
             result.Should().BeOfType<ViewResult>();
@@ -325,7 +325,7 @@ namespace KryskataFund.Tests.Security
         [Theory]
         [InlineData("' OR '1'='1")]
         [InlineData("'; DROP TABLE Users; --")]
-        public void SignIn_SqlInjection_InPassword_DoesNotBypassAuthentication(string maliciousPassword)
+        public async Task SignIn_SqlInjection_InPassword_DoesNotBypassAuthentication(string maliciousPassword)
         {
             // Attack vector: SQL injection in the password field
             var context = TestHelper.CreateDbContext();
@@ -333,7 +333,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateAccountController(context);
 
             // Act
-            var result = controller.SignIn("creator@test.com", maliciousPassword);
+            var result = await controller.SignIn("creator@test.com", maliciousPassword);
 
             // Assert - password is hashed before comparison, so injection is meaningless
             result.Should().BeOfType<ViewResult>();
@@ -342,7 +342,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void SignUp_SqlInjection_InEmail_DoesNotCorruptDatabase()
+        public async Task SignUp_SqlInjection_InEmail_DoesNotCorruptDatabase()
         {
             // Attack vector: SQL injection in the sign-up email field
             var context = TestHelper.CreateDbContext();
@@ -357,7 +357,7 @@ namespace KryskataFund.Tests.Security
             };
 
             // Act
-            var result = controller.SignUp(model);
+            var result = await controller.SignUp(model);
 
             // Assert - database should be intact
             context.Users.Count().Should().BeGreaterThanOrEqualTo(3,
@@ -365,7 +365,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void SignUp_SqlInjection_InPassword_DoesNotCorruptDatabase()
+        public async Task SignUp_SqlInjection_InPassword_DoesNotCorruptDatabase()
         {
             // Attack vector: SQL injection in the password field during registration
             var context = TestHelper.CreateDbContext();
@@ -380,7 +380,7 @@ namespace KryskataFund.Tests.Security
             };
 
             // Act
-            var result = controller.SignUp(model);
+            var result = await controller.SignUp(model);
 
             // Assert - password is hashed, so injection payload becomes harmless hash input
             context.Users.Count().Should().BeGreaterThanOrEqualTo(3,
@@ -609,7 +609,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateFundsController(context, userId: 10, email: "xss@test.com");
 
             // Act - view the fund details page
-            var result = controller.Details(10) as ViewResult;
+            var result = (await controller.Details(10)) as ViewResult;
 
             // Assert
             result.Should().NotBeNull();
@@ -628,7 +628,7 @@ namespace KryskataFund.Tests.Security
         [InlineData("<img src=x onerror=alert(1)>")]
         [InlineData("<iframe src='javascript:alert(1)'>")]
         [InlineData("<input onfocus=alert(1) autofocus>")]
-        public void Search_XssInQuery_DoesNotCrashAndStoresPayloadInViewBag(string xssPayload)
+        public async Task Search_XssInQuery_DoesNotCrashAndStoresPayloadInViewBag(string xssPayload)
         {
             // Attack vector: Reflected XSS via search query parameter
             // The query is echoed back in ViewBag.Query; Razor auto-encodes it
@@ -637,7 +637,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Index(xssPayload) as ViewResult;
+            var result = (await controller.Index(xssPayload)) as ViewResult;
 
             // Assert
             result.Should().NotBeNull();
@@ -651,7 +651,7 @@ namespace KryskataFund.Tests.Security
         [Theory]
         [InlineData("<script>alert(1)</script>")]
         [InlineData("<svg/onload=alert(1)>")]
-        public void Search_Autocomplete_XssInTerm_ReturnsJsonSafely(string xssPayload)
+        public async Task Search_Autocomplete_XssInTerm_ReturnsJsonSafely(string xssPayload)
         {
             // Attack vector: XSS via autocomplete search term
             var context = TestHelper.CreateDbContext();
@@ -659,7 +659,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Autocomplete(xssPayload);
+            var result = await controller.Autocomplete(xssPayload);
 
             // Assert - JSON serialization auto-escapes HTML entities
             var jsonResult = result.Should().BeOfType<JsonResult>().Subject;
@@ -675,7 +675,7 @@ namespace KryskataFund.Tests.Security
         [Theory]
         [InlineData("<script>alert(1)</script>@evil.com")]
         [InlineData("user+<img src=x onerror=alert(1)>@evil.com")]
-        public void SignUp_XssInEmail_DoesNotExecute(string xssEmail)
+        public async Task SignUp_XssInEmail_DoesNotExecute(string xssEmail)
         {
             // Attack vector: XSS payload embedded in email during registration
             // Email is displayed in profiles, fund creator names, etc.
@@ -691,7 +691,7 @@ namespace KryskataFund.Tests.Security
             };
 
             // Act - the model validation (EmailAddress) should reject most of these
-            var result = controller.SignUp(model);
+            var result = await controller.SignUp(model);
 
             // Assert - the controller should either reject the invalid email or store it safely
             result.Should().NotBeNull();
@@ -836,7 +836,7 @@ namespace KryskataFund.Tests.Security
         #region Authorization - Admin Endpoints
 
         [Fact]
-        public void AdminDashboard_WithoutAdminSession_RedirectsToHome()
+        public async Task AdminDashboard_WithoutAdminSession_RedirectsToHome()
         {
             // Auth is now handled by [RequireAdmin] filter at class level.
             // Verify the attribute is present on AdminController.
@@ -853,7 +853,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void AdminToggleAdmin_WithoutAdminSession_ReturnsUnauthorized()
+        public async Task AdminToggleAdmin_WithoutAdminSession_ReturnsUnauthorized()
         {
             // Attack vector: Non-admin attempting to grant admin privileges
             var context = TestHelper.CreateDbContext();
@@ -861,7 +861,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateAdminController(context, userId: 1, isAdmin: false);
 
             // Act
-            var result = controller.ToggleAdmin(1) as JsonResult;
+            var result = (await controller.ToggleAdmin(1)) as JsonResult;
 
             // Assert
             var value = result!.Value;
@@ -917,7 +917,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void AdminDashboard_UnauthenticatedUser_RedirectsToHome()
+        public async Task AdminDashboard_UnauthenticatedUser_RedirectsToHome()
         {
             // Auth is now handled by [RequireAdmin] filter at class level.
             var attr = typeof(AdminController).GetCustomAttributes(typeof(RequireAdminAttribute), true);
@@ -1149,7 +1149,7 @@ namespace KryskataFund.Tests.Security
         #region Privilege Escalation
 
         [Fact]
-        public void AdminSelfDeletion_IsBlocked()
+        public async Task AdminSelfDeletion_IsBlocked()
         {
             // Attack vector: Admin tries to delete themselves to cause system instability
             var context = TestHelper.CreateDbContext();
@@ -1157,7 +1157,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateAdminController(context, userId: 3, isAdmin: true);
 
             // Act
-            var result = controller.DeleteUser(3) as JsonResult;
+            var result = (await controller.DeleteUser(3)) as JsonResult;
 
             // Assert
             var value = result!.Value;
@@ -1167,7 +1167,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void AdminSelfDemotion_IsBlocked()
+        public async Task AdminSelfDemotion_IsBlocked()
         {
             // Attack vector: Admin tries to remove their own admin status
             var context = TestHelper.CreateDbContext();
@@ -1175,7 +1175,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateAdminController(context, userId: 3, isAdmin: true);
 
             // Act
-            var result = controller.ToggleAdmin(3) as JsonResult;
+            var result = (await controller.ToggleAdmin(3)) as JsonResult;
 
             // Assert
             var value = result!.Value;
@@ -1184,7 +1184,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void SessionManipulation_SettingIsAdminToTrue_DoesNotGrantAccess()
+        public async Task SessionManipulation_SettingIsAdminToTrue_DoesNotGrantAccess()
         {
             // Attack vector: Simulating session manipulation where a regular user
             // manually sets IsAdmin to "True" in session but is not actually admin in DB
@@ -1198,7 +1198,7 @@ namespace KryskataFund.Tests.Security
             // Act - with manipulated session, admin actions will succeed at controller level
             // This demonstrates that session-based auth trusts the session value
             // In production, session integrity should be protected by server-side session storage
-            var result = controller.Dashboard();
+            var result = await controller.Dashboard();
 
             // The session check passes (IsAdmin == "True"), so this IS a potential vulnerability
             // if an attacker can forge session data. The test documents this behavior.
@@ -1309,7 +1309,7 @@ namespace KryskataFund.Tests.Security
         #region Extremely Long Strings
 
         [Fact]
-        public void Search_ExtremelyLongQuery_DoesNotCrash()
+        public async Task Search_ExtremelyLongQuery_DoesNotCrash()
         {
             // Attack vector: Buffer overflow / DoS via extremely long search string
             var context = TestHelper.CreateDbContext();
@@ -1319,14 +1319,14 @@ namespace KryskataFund.Tests.Security
             var longQuery = new string('A', 100000); // 100KB string
 
             // Act - should not throw OutOfMemoryException or crash
-            var result = controller.Index(longQuery);
+            var result = await controller.Index(longQuery);
 
             // Assert
             result.Should().NotBeNull();
         }
 
         [Fact]
-        public void Search_Autocomplete_ExtremelyLongTerm_DoesNotCrash()
+        public async Task Search_Autocomplete_ExtremelyLongTerm_DoesNotCrash()
         {
             // Attack vector: DoS via long autocomplete term
             var context = TestHelper.CreateDbContext();
@@ -1336,7 +1336,7 @@ namespace KryskataFund.Tests.Security
             var longTerm = new string('B', 50000);
 
             // Act
-            var result = controller.Autocomplete(longTerm);
+            var result = await controller.Autocomplete(longTerm);
 
             // Assert
             result.Should().NotBeNull();
@@ -1369,7 +1369,7 @@ namespace KryskataFund.Tests.Security
         [InlineData("test\r\n\r\nHTTP/1.1 200 OK\r\n")]
         [InlineData("test%00admin")]
         [InlineData("../../../../etc/passwd")]
-        public void Search_SpecialCharacters_DoesNotCrash(string payload)
+        public async Task Search_SpecialCharacters_DoesNotCrash(string payload)
         {
             // Attack vector: Null byte injection, HTTP header injection, path traversal in search
             var context = TestHelper.CreateDbContext();
@@ -1377,7 +1377,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateSearchController(context);
 
             // Act
-            var result = controller.Index(payload);
+            var result = await controller.Index(payload);
 
             // Assert
             result.Should().NotBeNull();
@@ -1546,7 +1546,7 @@ namespace KryskataFund.Tests.Security
         [InlineData("https://evil.com/phishing")]
         [InlineData("//evil.com")]
         [InlineData("javascript:alert(1)")]
-        public void SignIn_OpenRedirect_ExternalUrlBlocked(string maliciousReturnUrl)
+        public async Task SignIn_OpenRedirect_ExternalUrlBlocked(string maliciousReturnUrl)
         {
             // Attack vector: Open redirect via returnUrl parameter after sign-in
             // Could be used for phishing (redirect user to fake site after login)
@@ -1556,7 +1556,7 @@ namespace KryskataFund.Tests.Security
 
             // Mock Url.IsLocalUrl to return false for external URLs (which is the default setup)
             // Act
-            var result = controller.SignIn("creator@test.com", "Password1", maliciousReturnUrl);
+            var result = await controller.SignIn("creator@test.com", "Password1", maliciousReturnUrl);
 
             // Assert - should redirect to Home/Index, not to the external URL
             result.Should().BeOfType<RedirectToActionResult>();
@@ -1593,7 +1593,7 @@ namespace KryskataFund.Tests.Security
         }
 
         [Fact]
-        public void Search_EmptyDatabase_DoesNotCrash()
+        public async Task Search_EmptyDatabase_DoesNotCrash()
         {
             // Edge case: Searching with SQL injection payloads on empty database
             var context = TestHelper.CreateDbContext();
@@ -1602,13 +1602,13 @@ namespace KryskataFund.Tests.Security
             foreach (var payload in SqlInjectionPayloads)
             {
                 // Act - should not throw NullReferenceException on empty DB
-                var result = controller.Index(payload);
+                var result = await controller.Index(payload);
                 result.Should().NotBeNull();
             }
         }
 
         [Fact]
-        public void FundDetails_NonExistentId_ReturnsNotFound()
+        public async Task FundDetails_NonExistentId_ReturnsNotFound()
         {
             // Attack vector: Probing for non-existent fund IDs (enumeration attack)
             var context = TestHelper.CreateDbContext();
@@ -1616,14 +1616,14 @@ namespace KryskataFund.Tests.Security
             var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
 
             // Act
-            var result = controller.Details(99999);
+            var result = await controller.Details(99999);
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
         }
 
         [Fact]
-        public void FundDetails_NegativeId_ReturnsNotFound()
+        public async Task FundDetails_NegativeId_ReturnsNotFound()
         {
             // Attack vector: Negative ID to test for integer overflow or unusual behavior
             var context = TestHelper.CreateDbContext();
@@ -1631,7 +1631,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateFundsController(context, userId: 1, email: "creator@test.com");
 
             // Act
-            var result = controller.Details(-1);
+            var result = await controller.Details(-1);
 
             // Assert
             result.Should().BeOfType<NotFoundResult>();
@@ -1645,7 +1645,7 @@ namespace KryskataFund.Tests.Security
         [InlineData("' OR '1'='1")]
         [InlineData("<script>alert(1)</script>")]
         [InlineData("'; DROP TABLE Funds; --")]
-        public void HomeIndex_CategoryFilter_InjectionPayloads_DoNotReturnAllFunds(string maliciousCategory)
+        public async Task HomeIndex_CategoryFilter_InjectionPayloads_DoNotReturnAllFunds(string maliciousCategory)
         {
             // Attack vector: SQL injection / XSS via the category filter parameter
             var context = TestHelper.CreateDbContext();
@@ -1653,7 +1653,7 @@ namespace KryskataFund.Tests.Security
             var controller = CreateHomeController(context);
 
             // Act
-            var result = controller.Index(maliciousCategory) as ViewResult;
+            var result = (await controller.Index(maliciousCategory)) as ViewResult;
 
             // Assert
             result.Should().NotBeNull();
