@@ -26,6 +26,24 @@ namespace KryskataFund.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Fund>(b =>
+            {
+                b.Property(f => f.GoalAmount).HasPrecision(18, 2);
+                b.Property(f => f.RaisedAmount).HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<Donation>()
+                .Property(d => d.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<RecurringDonation>()
+                .Property(r => r.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<FundMilestone>()
+                .Property(m => m.TargetAmount)
+                .HasPrecision(18, 2);
+
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
