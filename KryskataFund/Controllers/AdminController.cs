@@ -18,30 +18,26 @@ namespace KryskataFund.Controllers
             _context = context;
         }
 
-        public IActionResult Dashboard()
+        public async Task<IActionResult> Dashboard()
         {
-            // Stats
-            var allFunds = _context.Funds.ToList();
-            var allDonationsList = _context.Donations.ToList();
+            var allFunds = await _context.Funds.ToListAsync();
+            var allDonationsList = await _context.Donations.ToListAsync();
 
-            ViewBag.TotalUsers = _context.Users.Count();
+            ViewBag.TotalUsers = await _context.Users.CountAsync();
             ViewBag.TotalFunds = allFunds.Count;
             ViewBag.TotalDonations = allDonationsList.Count;
             ViewBag.TotalRaised = allFunds.Sum(f => f.RaisedAmount);
             ViewBag.ActiveCampaigns = allFunds.Count(f => f.EndDate > DateTime.UtcNow);
             ViewBag.CompletedCampaigns = allFunds.Count(f => f.RaisedAmount >= f.GoalAmount);
 
-            // Recent activity
-            ViewBag.RecentUsers = _context.Users.OrderByDescending(u => u.CreatedAt).Take(5).ToList();
-            ViewBag.RecentFunds = _context.Funds.OrderByDescending(f => f.CreatedAt).Take(5).ToList();
-            ViewBag.RecentDonations = _context.Donations.OrderByDescending(d => d.CreatedAt).Take(5).ToList();
+            ViewBag.RecentUsers = await _context.Users.OrderByDescending(u => u.CreatedAt).Take(5).ToListAsync();
+            ViewBag.RecentFunds = await _context.Funds.OrderByDescending(f => f.CreatedAt).Take(5).ToListAsync();
+            ViewBag.RecentDonations = await _context.Donations.OrderByDescending(d => d.CreatedAt).Take(5).ToListAsync();
 
-            // All data for management
-            ViewBag.AllUsers = _context.Users.OrderByDescending(u => u.CreatedAt).ToList();
-            ViewBag.AllFunds = _context.Funds.OrderByDescending(f => f.CreatedAt).ToList();
-            ViewBag.AllDonations = _context.Donations.OrderByDescending(d => d.CreatedAt).ToList();
+            ViewBag.AllUsers = await _context.Users.OrderByDescending(u => u.CreatedAt).ToListAsync();
+            ViewBag.AllFunds = await _context.Funds.OrderByDescending(f => f.CreatedAt).ToListAsync();
+            ViewBag.AllDonations = await _context.Donations.OrderByDescending(d => d.CreatedAt).ToListAsync();
 
-            // Category breakdown
             ViewBag.CategoryStats = allFunds
                 .GroupBy(f => f.Category)
                 .Select(g => new { Category = g.Key, Count = g.Count(), Raised = g.Sum(f => f.RaisedAmount) })
@@ -51,9 +47,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
-        public IActionResult DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = _context.Users.Find(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return Json(new { success = false, message = "User not found" });
@@ -83,7 +79,7 @@ namespace KryskataFund.Controllers
             _context.UserFollows.RemoveRange(userFollows);
 
             // Delete user's funds and their donations
-            var userFunds = _context.Funds.Where(f => f.CreatorId == id).ToList();
+            var userFunds = await _context.Funds.Where(f => f.CreatorId == id).ToListAsync();
             foreach (var fund in userFunds)
             {
                 var fundDonations = _context.Donations.Where(d => d.FundId == fund.Id);
@@ -115,15 +111,15 @@ namespace KryskataFund.Controllers
             _context.Funds.RemoveRange(userFunds);
 
             _context.Users.Remove(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "User deleted successfully" });
         }
 
         [HttpPost]
-        public IActionResult ToggleAdmin(int id)
+        public async Task<IActionResult> ToggleAdmin(int id)
         {
-            var user = _context.Users.Find(id);
+            var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return Json(new { success = false, message = "User not found" });
@@ -137,15 +133,15 @@ namespace KryskataFund.Controllers
             }
 
             user.IsAdmin = !user.IsAdmin;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, isAdmin = user.IsAdmin, message = user.IsAdmin ? "User is now an admin" : "Admin rights removed" });
         }
 
         [HttpPost]
-        public IActionResult DeleteFund(int id)
+        public async Task<IActionResult> DeleteFund(int id)
         {
-            var fund = _context.Funds.Find(id);
+            var fund = await _context.Funds.FindAsync(id);
             if (fund == null)
             {
                 return Json(new { success = false, message = "Fund not found" });
@@ -180,22 +176,21 @@ namespace KryskataFund.Controllers
             _context.UserFollows.RemoveRange(fundFollows);
 
             _context.Funds.Remove(fund);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Fund deleted successfully" });
         }
 
         [HttpPost]
-        public IActionResult DeleteDonation(int id)
+        public async Task<IActionResult> DeleteDonation(int id)
         {
-            var donation = _context.Donations.Find(id);
+            var donation = await _context.Donations.FindAsync(id);
             if (donation == null)
             {
                 return Json(new { success = false, message = "Donation not found" });
             }
 
-            // Update the fund's raised amount
-            var fund = _context.Funds.Find(donation.FundId);
+            var fund = await _context.Funds.FindAsync(donation.FundId);
             if (fund != null)
             {
                 fund.RaisedAmount -= donation.Amount;
@@ -203,15 +198,15 @@ namespace KryskataFund.Controllers
             }
 
             _context.Donations.Remove(donation);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Donation refunded and deleted" });
         }
 
         [HttpPost]
-        public IActionResult EditFund(int id, string title, string description, decimal goalAmount)
+        public async Task<IActionResult> EditFund(int id, string title, string description, decimal goalAmount)
         {
-            var fund = _context.Funds.Find(id);
+            var fund = await _context.Funds.FindAsync(id);
             if (fund == null)
             {
                 return Json(new { success = false, message = "Fund not found" });
@@ -231,15 +226,15 @@ namespace KryskataFund.Controllers
             fund.Title = title.Trim();
             fund.Description = new HtmlSanitizer().Sanitize(description);
             fund.GoalAmount = goalAmount;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = "Fund updated successfully" });
         }
 
         [HttpPost]
-        public IActionResult AddFundsToFund(int id, decimal amount)
+        public async Task<IActionResult> AddFundsToFund(int id, decimal amount)
         {
-            var fund = _context.Funds.Find(id);
+            var fund = await _context.Funds.FindAsync(id);
             if (fund == null)
             {
                 return Json(new { success = false, message = "Fund not found" });
@@ -251,22 +246,22 @@ namespace KryskataFund.Controllers
             }
 
             fund.RaisedAmount += amount;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, message = $"Added ${amount} to fund", newTotal = fund.RaisedAmount });
         }
 
         [HttpPost]
-        public IActionResult ToggleVerified(int id)
+        public async Task<IActionResult> ToggleVerified(int id)
         {
-            var fund = _context.Funds.Find(id);
+            var fund = await _context.Funds.FindAsync(id);
             if (fund == null)
             {
                 return Json(new { success = false, message = "Fund not found" });
             }
 
             fund.IsVerified = !fund.IsVerified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Json(new { success = true, isVerified = fund.IsVerified, message = fund.IsVerified ? "Fund verified" : "Verification removed" });
         }
@@ -276,15 +271,15 @@ namespace KryskataFund.Controllers
             return View();
         }
 
-        public IActionResult GetStats()
+        public async Task<IActionResult> GetStats()
         {
             var today = DateTime.UtcNow.Date;
             var thisWeek = today.AddDays(-7);
             var thisMonth = today.AddDays(-30);
 
-            var allDonations = _context.Donations.ToList();
-            var allUsers = _context.Users.ToList();
-            var allFunds = _context.Funds.ToList();
+            var allDonations = await _context.Donations.ToListAsync();
+            var allUsers = await _context.Users.ToListAsync();
+            var allFunds = await _context.Funds.ToListAsync();
 
             return Json(new
             {
