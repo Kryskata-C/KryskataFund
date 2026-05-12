@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
 using KryskataFund.Models;
 using KryskataFund.Constants;
@@ -23,9 +24,9 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
-        public IActionResult SignIn(string email, string password, string? returnUrl = null)
+        public async Task<IActionResult> SignIn(string email, string password, string? returnUrl = null)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null)
             {
@@ -45,7 +46,7 @@ namespace KryskataFund.Controllers
             if (!user.PasswordHash.StartsWith("$2"))
             {
                 user.PasswordHash = PasswordHasher.HashPassword(password);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
 
             HttpContext.Session.SetString(SessionKeys.IsSignedIn, "true");
@@ -68,7 +69,7 @@ namespace KryskataFund.Controllers
         }
 
         [HttpPost]
-        public IActionResult SignUp(SignUpViewModel model, string? returnUrl = null)
+        public async Task<IActionResult> SignUp(SignUpViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -77,14 +78,12 @@ namespace KryskataFund.Controllers
                 return View(model);
             }
 
-            // Check if email already exists
-            if (_context.Users.Any(u => u.Email == model.Email))
+            if (await _context.Users.AnyAsync(u => u.Email == model.Email))
             {
                 ModelState.AddModelError("Email", "An account with this email already exists");
                 return View(model);
             }
 
-            // Create new user
             var user = new User
             {
                 Email = model.Email,
@@ -93,7 +92,7 @@ namespace KryskataFund.Controllers
             };
 
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             // Sign in the user
             HttpContext.Session.SetString(SessionKeys.IsSignedIn, "true");
@@ -115,27 +114,25 @@ namespace KryskataFund.Controllers
         }
 
         [RequireSignIn]
-        public IActionResult Profile()
+        public async Task<IActionResult> Profile()
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
                 return RedirectToAction("SignOut");
             }
 
-            // Get user's created funds
-            var createdFunds = _context.Funds
+            var createdFunds = await _context.Funds
                 .Where(f => f.CreatorId == userId)
                 .OrderByDescending(f => f.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
-            // Get user's donations
-            var donations = _context.Donations
+            var donations = await _context.Donations
                 .Where(d => d.UserId == userId)
                 .OrderByDescending(d => d.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
             // Calculate stats
             var totalRaised = createdFunds.Sum(f => f.RaisedAmount);
@@ -160,7 +157,7 @@ namespace KryskataFund.Controllers
         public async Task<IActionResult> SaveBuddyCustomization(string? glasses, string? hat, string? mask)
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
@@ -176,7 +173,7 @@ namespace KryskataFund.Controllers
             return Json(new { success = true });
         }
 
-        public IActionResult GetBuddyCustomization()
+        public async Task<IActionResult> GetBuddyCustomization()
         {
             if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) != "true")
             {
@@ -184,7 +181,7 @@ namespace KryskataFund.Controllers
             }
 
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
@@ -195,13 +192,13 @@ namespace KryskataFund.Controllers
         }
 
         [RequireSignIn]
-        public IActionResult MyFunds()
+        public async Task<IActionResult> MyFunds()
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var myFunds = _context.Funds
+            var myFunds = await _context.Funds
                 .Where(f => f.CreatorId == userId)
                 .OrderByDescending(f => f.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
             var totalRaised = myFunds.Sum(f => f.RaisedAmount);
             var totalSupporters = myFunds.Sum(f => f.SupportersCount);
@@ -214,23 +211,22 @@ namespace KryskataFund.Controllers
         }
 
         [RequireSignIn]
-        public IActionResult MyDonations()
+        public async Task<IActionResult> MyDonations()
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var myDonations = _context.Donations
+            var myDonations = await _context.Donations
                 .Where(d => d.UserId == userId)
                 .OrderByDescending(d => d.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
-            var funds = _context.Funds.ToList();
+            var funds = await _context.Funds.ToListAsync();
             var totalDonated = myDonations.Sum(d => d.Amount);
             var campaignsSupported = myDonations.Select(d => d.FundId).Distinct().Count();
 
-            // Get user's recurring donations
-            var recurringDonations = _context.RecurringDonations
+            var recurringDonations = await _context.RecurringDonations
                 .Where(r => r.UserId == userId)
                 .OrderByDescending(r => r.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
             ViewBag.MyDonations = myDonations;
             ViewBag.Funds = funds;
@@ -242,18 +238,18 @@ namespace KryskataFund.Controllers
         }
 
         [RequireSignIn]
-        public IActionResult Following()
+        public async Task<IActionResult> Following()
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var followedFundIds = _context.UserFollows
+            var followedFundIds = await _context.UserFollows
                 .Where(f => f.UserId == userId)
                 .Select(f => f.FundId)
-                .ToList();
+                .ToListAsync();
 
-            var followedFunds = _context.Funds
+            var followedFunds = await _context.Funds
                 .Where(f => followedFundIds.Contains(f.Id))
                 .OrderByDescending(f => f.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
             ViewBag.FollowedFunds = followedFunds;
             ViewBag.FollowCount = followedFunds.Count;
@@ -263,11 +259,11 @@ namespace KryskataFund.Controllers
 
         [HttpPost]
         [RequireSignIn]
-        public IActionResult ToggleFollow(int fundId)
+        public async Task<IActionResult> ToggleFollow(int fundId)
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var existingFollow = _context.UserFollows
-                .FirstOrDefault(f => f.UserId == userId && f.FundId == fundId);
+            var existingFollow = await _context.UserFollows
+                .FirstOrDefaultAsync(f => f.UserId == userId && f.FundId == fundId);
 
             bool isNowFollowing;
             if (existingFollow != null)
@@ -286,7 +282,7 @@ namespace KryskataFund.Controllers
                 isNowFollowing = true;
             }
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return Json(new { success = true, isFollowing = isNowFollowing });
         }
 
@@ -295,8 +291,8 @@ namespace KryskataFund.Controllers
         public async Task<IActionResult> CancelRecurringDonation(int id)
         {
             var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-            var recurring = _context.RecurringDonations
-                .FirstOrDefault(r => r.Id == id && r.UserId == userId && r.IsActive);
+            var recurring = await _context.RecurringDonations
+                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId && r.IsActive);
 
             if (recurring == null)
             {
