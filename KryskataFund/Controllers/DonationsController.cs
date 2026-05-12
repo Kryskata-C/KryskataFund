@@ -22,7 +22,7 @@ namespace KryskataFund.Controllers
         }
 
         [HttpGet("Donate")]
-        public IActionResult Donate(int id, int amount)
+        public async Task<IActionResult> Donate(int id, int amount)
         {
             if (HttpContext.Session.GetString("IsSignedIn") != "true")
             {
@@ -34,7 +34,7 @@ namespace KryskataFund.Controllers
                 return BadRequest("Invalid donation amount.");
             }
 
-            var fund = _context.Funds.FirstOrDefault(f => f.Id == id);
+            var fund = await _context.Funds.FirstOrDefaultAsync(f => f.Id == id);
 
             if (fund == null)
             {
@@ -143,8 +143,7 @@ namespace KryskataFund.Controllers
                             }
                         }
 
-                        // Check if donation already recorded for this session
-                        var existingDonation = _context.Donations.FirstOrDefault(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
+                        var existingDonation = await _context.Donations.FirstOrDefaultAsync(d => d.FundId == fundId && d.UserId == userId && d.Amount == amount && d.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
                         if (existingDonation == null)
                         {
                             var isRelational2 = _context.Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory";
@@ -175,9 +174,9 @@ namespace KryskataFund.Controllers
                                     fund.SupportersCount += 1;
                                 }
 
-                                var unreachedMilestones = _context.FundMilestones
+                                var unreachedMilestones = await _context.FundMilestones
                                     .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
-                                    .ToList();
+                                    .ToListAsync();
                                 foreach (var milestone in unreachedMilestones)
                                 {
                                     milestone.IsReached = true;
@@ -267,9 +266,9 @@ namespace KryskataFund.Controllers
                 }
 
                 // Auto-mark milestones
-                var unreachedMilestones = _context.FundMilestones
+                var unreachedMilestones = await _context.FundMilestones
                     .Where(m => m.FundId == fundId && !m.IsReached && m.TargetAmount <= fund.RaisedAmount)
-                    .ToList();
+                    .ToListAsync();
 
                 foreach (var milestone in unreachedMilestones)
                 {
@@ -310,9 +309,8 @@ namespace KryskataFund.Controllers
             var userEmail = HttpContext.Session.GetString("UserEmail") ?? "Anonymous";
             var donorName = "@" + userEmail.Split('@')[0];
 
-            // Check if user already has an active recurring donation for this fund
-            var existing = _context.RecurringDonations
-                .FirstOrDefault(r => r.FundId == fundId && r.UserId == userId && r.IsActive);
+            var existing = await _context.RecurringDonations
+                .FirstOrDefaultAsync(r => r.FundId == fundId && r.UserId == userId && r.IsActive);
 
             if (existing != null)
             {
