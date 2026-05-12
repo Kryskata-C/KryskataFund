@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
 using System.Text;
 
@@ -14,10 +15,10 @@ namespace KryskataFund.Controllers
             _context = context;
         }
 
-        private bool IsCreatorOrCollaborator(int fundCreatorId, int userId, int fundId)
+        private async Task<bool> IsCreatorOrCollaboratorAsync(int fundCreatorId, int userId, int fundId)
         {
             if (fundCreatorId == userId) return true;
-            return _context.FundCollaborators.Any(c => c.FundId == fundId && c.UserId == userId);
+            return await _context.FundCollaborators.AnyAsync(c => c.FundId == fundId && c.UserId == userId);
         }
 
         [HttpGet("Analytics/{id}")]
@@ -35,15 +36,15 @@ namespace KryskataFund.Controllers
             }
 
             var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            if (!IsCreatorOrCollaborator(fund.CreatorId, userId, id))
+            if (!await IsCreatorOrCollaboratorAsync(fund.CreatorId, userId, id))
             {
                 return Forbid();
             }
 
-            var donations = _context.Donations
+            var donations = await _context.Donations
                 .Where(d => d.FundId == id)
                 .OrderByDescending(d => d.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
             var dailyTotals = donations
                 .GroupBy(d => d.CreatedAt.Date)
@@ -84,15 +85,15 @@ namespace KryskataFund.Controllers
             }
 
             var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
-            if (!IsCreatorOrCollaborator(fund.CreatorId, userId, id))
+            if (!await IsCreatorOrCollaboratorAsync(fund.CreatorId, userId, id))
             {
                 return Forbid();
             }
 
-            var donations = _context.Donations
+            var donations = await _context.Donations
                 .Where(d => d.FundId == id)
                 .OrderByDescending(d => d.CreatedAt)
-                .ToList();
+                .ToListAsync();
 
             var sb = new StringBuilder();
             sb.AppendLine("Donor Name,Amount,Date");
