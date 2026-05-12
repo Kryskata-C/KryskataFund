@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using KryskataFund.Data;
 
 namespace KryskataFund.Controllers
@@ -12,8 +13,7 @@ namespace KryskataFund.Controllers
             _context = context;
         }
 
-        // GET: /Search?q=term
-        public IActionResult Index(string? q)
+        public async Task<IActionResult> Index(string? q)
         {
             if (string.IsNullOrWhiteSpace(q))
             {
@@ -25,8 +25,8 @@ namespace KryskataFund.Controllers
             var query = q.Trim().ToLower();
             ViewBag.Query = System.Net.WebUtility.HtmlEncode(q);
 
-            var results = _context.Funds
-                .AsEnumerable()
+            var allFunds = await _context.Funds.ToListAsync();
+            var results = allFunds
                 .Where(f => f.Title.ToLower().Contains(query)
                     || f.Description.ToLower().Contains(query)
                     || f.Category.ToLower().Contains(query)
@@ -38,16 +38,15 @@ namespace KryskataFund.Controllers
             return View();
         }
 
-        // GET: /Search/Autocomplete?term=abc
-        public IActionResult Autocomplete(string? term)
+        public async Task<IActionResult> Autocomplete(string? term)
         {
             if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
                 return Json(new List<object>());
 
             var query = term.Trim().ToLower();
 
-            var results = _context.Funds
-                .AsEnumerable()
+            var allFunds = await _context.Funds.ToListAsync();
+            var results = allFunds
                 .Where(f => f.Title.ToLower().Contains(query) || f.Category.ToLower().Contains(query))
                 .Take(5)
                 .Select(f => new {
