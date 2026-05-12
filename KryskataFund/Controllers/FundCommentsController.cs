@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using KryskataFund.Models;
 using KryskataFund.Data;
 
@@ -32,6 +33,12 @@ namespace KryskataFund.Controllers
             if (content.Length > 1000)
             {
                 return Json(new { success = false, message = "Comment cannot exceed 1000 characters" });
+            }
+
+            var fundExists = await _context.Funds.AnyAsync(f => f.Id == fundId);
+            if (!fundExists)
+            {
+                return Json(new { success = false, message = "Fund not found" });
             }
 
             var userId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
@@ -92,11 +99,11 @@ namespace KryskataFund.Controllers
         }
 
         [HttpGet("GetComments")]
-        public IActionResult GetComments(int fundId)
+        public async Task<IActionResult> GetComments(int fundId)
         {
             var currentUserId = int.Parse(HttpContext.Session.GetString("UserId") ?? "0");
 
-            var comments = _context.FundComments
+            var comments = await _context.FundComments
                 .Where(c => c.FundId == fundId)
                 .OrderByDescending(c => c.CreatedAt)
                 .Select(c => new
@@ -108,7 +115,7 @@ namespace KryskataFund.Controllers
                     createdAt = c.CreatedAt.ToString("MMM d, yyyy h:mm tt"),
                     isOwner = c.UserId == currentUserId
                 })
-                .ToList();
+                .ToListAsync();
 
             return Json(comments);
         }
