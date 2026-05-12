@@ -273,6 +273,55 @@
                         </div>
                     }
 
+                    <!-- Manage Team Modal (original creator only) -->
+                    @if (isOriginalCreator)
+                    {
+                        <div class="update-modal" id="teamModal">
+                            <div class="update-modal-backdrop" id="teamModalBackdrop"></div>
+                            <div class="update-modal-content">
+                                <div class="update-modal-header">
+                                    <h3>Manage Team</h3>
+                                    <button class="update-modal-close" id="closeTeamModal">&times;</button>
+                                </div>
+                                <div class="update-modal-body">
+                                    <div class="update-form-group">
+                                        <label for="collabEmail">Invite collaborator by email</label>
+                                        <div class="collab-invite-row">
+                                            <input type="email" id="collabEmail" placeholder="user@example.com" maxlength="200">
+                                            <button class="btn-update-submit" id="inviteCollab">Invite</button>
+                                        </div>
+                                    </div>
+                                    <div class="collab-current">
+                                        <label>Current collaborators</label>
+                                        <div class="collab-list" id="collabList">
+                                            @if (!collaborators.Any())
+                                            {
+                                                <div class="collab-empty" id="collabEmpty"><p>No collaborators yet</p></div>
+                                            }
+                                            else
+                                            {
+                                                @foreach (var collab in collaborators)
+                                                {
+                                                    <div class="collab-item" data-id="@collab.Id">
+                                                        <div class="collab-item-info">
+                                                            <div class="collaborator-avatar"></div>
+                                                            <span>@collab.Email</span>
+                                                            <span class="collab-role">@collab.Role</span>
+                                                        </div>
+                                                        <button class="collab-remove-btn" data-id="@collab.Id">&times;</button>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="update-modal-footer">
+                                    <button class="btn-update-cancel" id="closeTeamBtn">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
                     <!-- Post Update Modal (for creator only) -->
                     @if (isCreator)
                     {
@@ -612,54 +661,65 @@
             }
 
             // Handle quick amount button clicks
-            quickAmountBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove active class from all buttons
-                    quickAmountBtns.forEach(b => b.classList.remove('active'));
-                    customAmountInput.classList.remove('active');
-                    customAmountInput.value = '';
+            if (quickAmountBtns.length > 0) {
+                quickAmountBtns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        quickAmountBtns.forEach(b => b.classList.remove('active'));
+                        if (customAmountInput) {
+                            customAmountInput.classList.remove('active');
+                            customAmountInput.value = '';
+                        }
 
-                    // Add active class to clicked button
-                    this.classList.add('active');
+                        // Add active class to clicked button
+                        this.classList.add('active');
 
-                    const amount = parseInt(this.dataset.amount);
-                    currentAmount = amount;
-                    animateCountUp(amount);
+                        const amount = parseInt(this.dataset.amount);
+                        currentAmount = amount;
+                        animateCountUp(amount);
+                    });
                 });
-            });
+            }
 
             // Handle custom amount input
-            customAmountInput.addEventListener('input', function() {
-                quickAmountBtns.forEach(b => b.classList.remove('active'));
+            if (customAmountInput) {
+                customAmountInput.addEventListener('input', function() {
+                    quickAmountBtns.forEach(b => b.classList.remove('active'));
 
-                const amount = parseInt(this.value) || 0;
-                if (amount > 0) {
-                    this.classList.add('active');
-                    currentAmount = amount;
-                    animateCountUp(amount);
-                } else {
-                    this.classList.remove('active');
-                    selectedAmountDisplay.classList.remove('visible');
-                }
-            });
+                    const amount = parseInt(this.value) || 0;
+                    if (amount > 0) {
+                        this.classList.add('active');
+                        currentAmount = amount;
+                        animateCountUp(amount);
+                    } else {
+                        this.classList.remove('active');
+                        if (selectedAmountDisplay) selectedAmountDisplay.classList.remove('visible');
+                    }
+                });
 
-            customAmountInput.addEventListener('focus', function() {
-                quickAmountBtns.forEach(b => b.classList.remove('active'));
-            });
+                customAmountInput.addEventListener('focus', function() {
+                    quickAmountBtns.forEach(b => b.classList.remove('active'));
+                });
+            }
 
             // Handle donate button click
             const fundId = @Model.Id;
 
-            donateBtn.addEventListener('click', function() {
-                if (currentAmount > 0) {
-                    // Redirect to payment page
-                    window.location.href = '/Funds/Donate?id=' + fundId + '&amount=' + currentAmount;
-                } else {
-                    // Shake animation if no amount selected
-                    selectedAmountDisplay.classList.add('shake');
-                    setTimeout(() => selectedAmountDisplay.classList.remove('shake'), 500);
-                }
-            });
+            if (donateBtn) {
+                donateBtn.addEventListener('click', function() {
+                    if (currentAmount > 0) {
+                        // Redirect to payment page
+                        window.location.href = '/Funds/Donate?id=' + fundId + '&amount=' + currentAmount;
+                    } else {
+                        // Shake animation if no amount selected
+                        if (selectedAmountDisplay) {
+                            selectedAmountDisplay.classList.add('shake');
+                            selectedAmountDisplay.classList.add('visible');
+                            setTimeout(() => selectedAmountDisplay.classList.remove('shake'), 500);
+                        }
+                    }
+                });
+            }
 
             // Supporters expand/collapse with pagination
             const toggleBtn = document.getElementById('toggleSupportersBtn');
@@ -1200,6 +1260,139 @@
 
             loadComments();
 
+            // Team modal functionality
+            const openTeamBtn = document.getElementById('openTeamModal');
+            const closeTeamBtn = document.getElementById('closeTeamModal');
+            const closeTeamFooterBtn = document.getElementById('closeTeamBtn');
+            const teamModal = document.getElementById('teamModal');
+            const teamBackdrop = document.getElementById('teamModalBackdrop');
+            const inviteBtn = document.getElementById('inviteCollab');
+            const collabEmailInput = document.getElementById('collabEmail');
+            const collabList = document.getElementById('collabList');
+
+            function openTeamModal() {
+                if (teamModal) {
+                    teamModal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeTeamModalFn() {
+                if (teamModal) {
+                    teamModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            if (openTeamBtn) openTeamBtn.addEventListener('click', openTeamModal);
+            if (closeTeamBtn) closeTeamBtn.addEventListener('click', closeTeamModalFn);
+            if (closeTeamFooterBtn) closeTeamFooterBtn.addEventListener('click', closeTeamModalFn);
+            if (teamBackdrop) teamBackdrop.addEventListener('click', closeTeamModalFn);
+
+            if (inviteBtn) {
+                inviteBtn.addEventListener('click', async function() {
+                    const email = collabEmailInput.value.trim();
+                    if (!email) {
+                        alert('Please enter an email address');
+                        return;
+                    }
+
+                    inviteBtn.disabled = true;
+                    inviteBtn.textContent = 'Inviting...';
+
+                    try {
+                        const response = await fetch('/Funds/AddCollaborator', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                            body: `fundId=${fundId}&email=${encodeURIComponent(email)}`
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const emptyEl = document.getElementById('collabEmpty');
+                            if (emptyEl) emptyEl.style.display = 'none';
+
+                            const itemHtml = `
+                                <div class="collab-item" data-id="${data.collaborator.id}">
+                                    <div class="collab-item-info">
+                                        <div class="collaborator-avatar"></div>
+                                        <span>${data.collaborator.email}</span>
+                                        <span class="collab-role">${data.collaborator.role}</span>
+                                    </div>
+                                    <button class="collab-remove-btn" data-id="${data.collaborator.id}">×</button>
+                                </div>
+                            `;
+                            collabList.insertAdjacentHTML('beforeend', itemHtml);
+
+                            const chipsContainer = document.querySelector('.collaborators-list');
+                            const username = data.collaborator.email.split('@@')[0];
+                            if (chipsContainer) {
+                                const chipHtml = '<div class="collaborator-chip">'
+                                    + '<div class="collaborator-avatar"></div>'
+                                    + '<span>@@' + username + '</span>'
+                                    + '</div>';
+                                chipsContainer.insertAdjacentHTML('beforeend', chipHtml);
+                            } else {
+                                const creatorDiv = document.querySelector('.fund-detail-creator');
+                                if (creatorDiv) {
+                                    const sectionHtml = '<div class="fund-collaborators">'
+                                        + '<span class="collaborators-label">Team:</span>'
+                                        + '<div class="collaborators-list">'
+                                        + '<div class="collaborator-chip">'
+                                        + '<div class="collaborator-avatar"></div>'
+                                        + '<span>@@' + username + '</span>'
+                                        + '</div></div></div>';
+                                    creatorDiv.insertAdjacentHTML('afterend', sectionHtml);
+                                }
+                            }
+
+                            collabEmailInput.value = '';
+                        } else {
+                            alert(data.message || 'Failed to add collaborator');
+                        }
+                    } catch (error) {
+                        alert('An error occurred. Please try again.');
+                    }
+
+                    inviteBtn.disabled = false;
+                    inviteBtn.textContent = 'Invite';
+                });
+            }
+
+            if (collabList) {
+                collabList.addEventListener('click', async function(e) {
+                    const removeBtn = e.target.closest('.collab-remove-btn');
+                    if (!removeBtn) return;
+
+                    const collabId = removeBtn.dataset.id;
+                    if (!confirm('Remove this collaborator?')) return;
+
+                    try {
+                        const response = await fetch('/Funds/RemoveCollaborator', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
+                            body: `collaboratorId=${collabId}`
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const item = collabList.querySelector('.collab-item[data-id="' + collabId + '"]');
+                            if (item) item.remove();
+
+                            if (!collabList.querySelector('.collab-item')) {
+                                collabList.innerHTML = '<div class="collab-empty" id="collabEmpty"><p>No collaborators yet</p></div>';
+                            }
+                        } else {
+                            alert(data.message || 'Failed to remove collaborator');
+                        }
+                    } catch (error) {
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+            }
+
             // Refund donation (creator only)
             window.refundDonation = async function(donationId, btnElement) {
                 if (!confirm('Are you sure you want to refund this donation?')) return;
@@ -1461,145 +1654,6 @@
             }
         }
 
-
-            // Team modal functionality
-            const openTeamBtn = document.getElementById('openTeamModal');
-            const closeTeamBtn = document.getElementById('closeTeamModal');
-            const closeTeamFooterBtn = document.getElementById('closeTeamBtn');
-            const teamModal = document.getElementById('teamModal');
-            const teamBackdrop = document.getElementById('teamModalBackdrop');
-            const inviteBtn = document.getElementById('inviteCollab');
-            const collabEmail = document.getElementById('collabEmail');
-            const collabList = document.getElementById('collabList');
-            const collabEmpty = document.getElementById('collabEmpty');
-
-            function openTeamModal() {
-                if (teamModal) {
-                    teamModal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                }
-            }
-
-            function closeTeamModal() {
-                if (teamModal) {
-                    teamModal.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            }
-
-            if (openTeamBtn) openTeamBtn.addEventListener('click', openTeamModal);
-            if (closeTeamBtn) closeTeamBtn.addEventListener('click', closeTeamModal);
-            if (closeTeamFooterBtn) closeTeamFooterBtn.addEventListener('click', closeTeamModal);
-            if (teamBackdrop) teamBackdrop.addEventListener('click', closeTeamModal);
-
-            if (inviteBtn) {
-                inviteBtn.addEventListener('click', async function() {
-                    const email = collabEmail.value.trim();
-                    if (!email) {
-                        alert('Please enter an email address');
-                        return;
-                    }
-
-                    inviteBtn.disabled = true;
-                    inviteBtn.textContent = 'Inviting...';
-
-                    try {
-                        const response = await fetch('/Funds/AddCollaborator', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
-                            body: `fundId=${fundId}&email=${encodeURIComponent(email)}`
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            if (collabEmpty) collabEmpty.style.display = 'none';
-
-                            const itemHtml = `
-                                <div class="collab-item" data-id="${data.collaborator.id}">
-                                    <div class="collab-item-info">
-                                        <div class="collaborator-avatar"></div>
-                                        <span>${data.collaborator.email}</span>
-                                        <span class="collab-role">${data.collaborator.role}</span>
-                                    </div>
-                                    <button class="collab-remove-btn" data-id="${data.collaborator.id}">×</button>
-                                </div>
-                            `;
-                            collabList.insertAdjacentHTML('beforeend', itemHtml);
-
-                            // Add collaborator chip to the page
-                            const chipsContainer = document.querySelector('.collaborators-list');
-                            if (chipsContainer) {
-                                const chipHtml = '<div class="collaborator-chip">'
-                                    + '<div class="collaborator-avatar"></div>'
-                                    + '<span>@@' + data.collaborator.email.split('@@')[0] + '</span>'
-                                    + '</div>';
-                                chipsContainer.insertAdjacentHTML('beforeend', chipHtml);
-                            } else {
-                                // Create the collaborators section if it doesn't exist
-                                const creatorDiv = document.querySelector('.fund-detail-creator');
-                                if (creatorDiv) {
-                                    const sectionHtml = '<div class="fund-collaborators">'
-                                        + '<span class="collaborators-label">Team:</span>'
-                                        + '<div class="collaborators-list">'
-                                        + '<div class="collaborator-chip">'
-                                        + '<div class="collaborator-avatar"></div>'
-                                        + '<span>@@' + data.collaborator.email.split('@@')[0] + '</span>'
-                                        + '</div></div></div>';
-                                    creatorDiv.insertAdjacentHTML('afterend', sectionHtml);
-                                }
-                            }
-
-                            collabEmail.value = '';
-                        } else {
-                            alert(data.message || 'Failed to add collaborator');
-                        }
-                    } catch (error) {
-                        alert('An error occurred. Please try again.');
-                    }
-
-                    inviteBtn.disabled = false;
-                    inviteBtn.textContent = 'Invite';
-                });
-            }
-
-            // Remove collaborator (event delegation)
-            if (collabList) {
-                collabList.addEventListener('click', async function(e) {
-                    const removeBtn = e.target.closest('.collab-remove-btn');
-                    if (!removeBtn) return;
-
-                    const collabId = removeBtn.dataset.id;
-                    if (!confirm('Remove this collaborator?')) return;
-
-                    try {
-                        const response = await fetch('/Funds/RemoveCollaborator', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value },
-                            body: `collaboratorId=${collabId}`
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            const item = collabList.querySelector(`.collab-item[data-id="${collabId}"]`);
-                            if (item) item.remove();
-
-                            if (!collabList.querySelector('.collab-item')) {
-                                if (collabEmpty) {
-                                    collabEmpty.style.display = '';
-                                } else {
-                                    collabList.innerHTML = '<div class="collab-empty" id="collabEmpty"><p>No collaborators yet</p></div>';
-                                }
-                            }
-                        } else {
-                            alert(data.message || 'Failed to remove collaborator');
-                        }
-                    } catch (error) {
-                        alert('An error occurred. Please try again.');
-                    }
-                });
-            }
         /* Updates Section Styles */
         .updates-header {
             display: flex;
