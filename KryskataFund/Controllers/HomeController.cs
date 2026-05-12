@@ -3,6 +3,7 @@ using KryskataFund.ViewModels;
 using KryskataFund.Data;
 using KryskataFund.Constants;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
 namespace KryskataFund.Controllers
@@ -18,10 +19,10 @@ namespace KryskataFund.Controllers
             _context = context;
         }
 
-        public IActionResult Index(string? category = null)
+        public async Task<IActionResult> Index(string? category = null)
         {
-            var allFunds = _context.Funds.ToList();
-            var allDonations = _context.Donations.ToList();
+            var allFunds = await _context.Funds.ToListAsync();
+            var allDonations = await _context.Donations.ToListAsync();
 
             // Get category counts
             var categoryCounts = allFunds
@@ -45,10 +46,10 @@ namespace KryskataFund.Controllers
             if (HttpContext.Session.GetString(SessionKeys.IsSignedIn) == "true")
             {
                 var userId = int.Parse(HttpContext.Session.GetString(SessionKeys.UserId) ?? "0");
-                followedFundIds = _context.UserFollows
+                followedFundIds = await _context.UserFollows
                     .Where(f => f.UserId == userId)
                     .Select(f => f.FundId)
-                    .ToList();
+                    .ToListAsync();
             }
 
             // Get expired fund IDs (EndDate has passed)
@@ -77,19 +78,23 @@ namespace KryskataFund.Controllers
             return View(viewModel);
         }
 
-        public IActionResult GetRecentActivity()
+        public async Task<IActionResult> GetRecentActivity()
         {
             var activities = new List<object>();
 
-            // Get recent donations (last 10)
-            var recentDonations = _context.Donations
+            var recentDonations = await _context.Donations
                 .OrderByDescending(d => d.CreatedAt)
                 .Take(10)
-                .ToList();
+                .ToListAsync();
+
+            var donationFundIds = recentDonations.Select(d => d.FundId).Distinct().ToList();
+            var donationFunds = await _context.Funds
+                .Where(f => donationFundIds.Contains(f.Id))
+                .ToDictionaryAsync(f => f.Id);
 
             foreach (var donation in recentDonations)
             {
-                var fund = _context.Funds.FirstOrDefault(f => f.Id == donation.FundId);
+                donationFunds.TryGetValue(donation.FundId, out var fund);
                 activities.Add(new
                 {
                     type = "donation",
@@ -101,11 +106,10 @@ namespace KryskataFund.Controllers
                 });
             }
 
-            // Get recent funds (last 5)
-            var recentFunds = _context.Funds
+            var recentFunds = await _context.Funds
                 .OrderByDescending(f => f.CreatedAt)
                 .Take(5)
-                .ToList();
+                .ToListAsync();
 
             foreach (var fund in recentFunds)
             {
@@ -141,9 +145,9 @@ namespace KryskataFund.Controllers
             return Json(sortedActivities);
         }
 
-        public IActionResult GetLiveStats()
+        public async Task<IActionResult> GetLiveStats()
         {
-            var allDonations = _context.Donations.ToList();
+            var allDonations = await _context.Donations.ToListAsync();
             var today = DateTime.UtcNow.Date;
             var todaysDonations = allDonations.Where(d => d.CreatedAt.Date == today).ToList();
 
@@ -169,11 +173,11 @@ namespace KryskataFund.Controllers
             return View();
         }
 
-        public IActionResult Leaderboard()
+        public async Task<IActionResult> Leaderboard()
         {
-            var allFunds = _context.Funds.ToList();
-            var allDonations = _context.Donations.ToList();
-            var allUsers = _context.Users.ToList();
+            var allFunds = await _context.Funds.ToListAsync();
+            var allDonations = await _context.Donations.ToListAsync();
+            var allUsers = await _context.Users.ToListAsync();
 
             // Top funded campaigns
             var topCampaigns = allFunds
